@@ -1,0 +1,12 @@
+{
+  "references": [
+    {
+      "path": "backend"
+    },
+    {
+      "path": "frontend"
+    }
+  ],
+  "files": [],
+  "include": []
+}

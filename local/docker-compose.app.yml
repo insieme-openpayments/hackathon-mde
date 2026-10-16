@@ -1,0 +1,45 @@
+# Full stack in Docker: Postgres + backend API + frontend (nginx).
+# Usage: pnpm docker:up   (builds images on first run)
+include:
+  - docker-compose.yml
+
+services:
+  backend:
+    container_name: boutique-backend
+    build:
+      context: ..
+      dockerfile: backend/Dockerfile.prod
+    # Open Payments credentials (PAYMENT_POINTER, KEY_ID, PRIVATE_KEY) come
+    # from backend/.env.local or backend/.env (both gitignored; .env wins).
+    # Everything under `environment` overrides them for the container.
+    env_file:
+      - path: ../backend/.env.local
+        required: false
+      - path: ../backend/.env
+        required: false
+    environment:
+      PORT: 3004
+      NODE_ENV: ${BACKEND_NODE_ENV:-development}
+      FRONTEND_URL: ${FRONTEND_URL:-http://localhost:4004}
+      DATABASE_URL: postgres://boutique_backend:boutique_backend@postgres:5432/boutique_backend
+    ports:
+      - '3004:3004'
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: unless-stopped
+
+  frontend:
+    container_name: boutique-frontend
+    build:
+      context: ..
+      dockerfile: frontend/Dockerfile.prod
+    environment:
+      API_BASE_URL: ${API_BASE_URL:-http://localhost:3004}
+      THEME: ${THEME:-dark}
+      CURRENCY: ${CURRENCY:-COP}
+    ports:
+      - '4004:4004'
+    depends_on:
+      - backend
+    restart: unless-stopped

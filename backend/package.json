@@ -1,0 +1,37 @@
+{
+  "name": "@boutique/backend",
+  "scripts": {
+    "start": "sh -c 'set --; [ -f .env.local ] && set -- \"$@\" --env-file=.env.local; [ -f .env ] && set -- \"$@\" --env-file=.env; node \"$@\" dist/index.js'",
+    "build:deps": "pnpm --filter @boutique/shared build",
+    "build": "pnpm build:deps && tsc --build tsconfig.build.json && tsc-alias -p tsconfig.build.json",
+    "dev": "nodemon --watch ./src --watch ../shared/src --ext ts,json --delay 0.5 --exec \"sh -c 'set --; [ -f .env.local ] && set -- \\$@ --env-file=.env.local; [ -f .env ] && set -- \\$@ --env-file=.env; pnpm run build && node \\$@ ./dist/index.js'\"",
+    "test": "pnpm build:deps && NODE_OPTIONS='--experimental-vm-modules' jest --passWithNoTests --maxWorkers=2"
+  },
+  "dependencies": {
+    "@google-cloud/logging-winston": "^6.0.1",
+    "@interledger/open-payments": "^7.3.0",
+    "@boutique/shared": "workspace:*",
+    "awilix": "^12.0.5",
+    "axios": "^1.12.2",
+    "cors": "^2.8.5",
+    "express": "^4.21.2",
+    "helmet": "^7.2.0",
+    "knex": "^3.1.0",
+    "objection": "^3.1.5",
+    "pg": "^8.16.3",
+    "winston": "^3.18.3",
+    "zod": "^3.25.76"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.19",
+    "@types/express": "^4.17.23",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^24.13.1",
+    "jest": "^29.7.0",
+    "node-mocks-http": "^1.17.2",
+    "testcontainers": "^10.28.0",
+    "ts-jest": "^29.4.4",
+    "tsc-alias": "^1.8.16",
+    "typescript": "^5.9.3"
+  }
+}

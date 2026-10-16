@@ -1,0 +1,10 @@
+.next
+public
+generated
+dist
+pnpm-lock.yaml
+*.svg
+Dockerfile
+.gitignore
+.prettierignore
+coverage
