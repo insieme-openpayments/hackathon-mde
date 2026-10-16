@@ -1,0 +1,14 @@
+{
+  "name": "hackathon-mde",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Insieme — paga desde el exterior las facturas de tu familia en Colombia con Open Payments",
+  "scripts": {
+    "start": "node --env-file-if-exists=.env server.js",
+    "demo": "SIMULATE_OP=1 node server.js",
+    "test": "node --test test/*.test.js"
+  },
+  "engines": { "node": ">=20.6" },
+  "dependencies": { "@interledger/open-payments": "7.4.0" }
+}
