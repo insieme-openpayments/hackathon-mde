@@ -5,7 +5,6 @@ import {
   BackButton,
   ByPuntored,
   FloatingInput,
-  Logo,
   Screen,
   TitleBox
 } from '@/components/insieme'
@@ -28,7 +27,6 @@ export function Component() {
   if (!factura) {
     return (
       <Screen>
-        <Logo />
         <p className="text-sm">La factura ya no existe.</p>
         <ActionButton tone="dark" onClick={() => navigate('/facturas')}>
           Volver
@@ -48,7 +46,6 @@ export function Component() {
 
   return (
     <Screen>
-      <Logo />
       <TitleBox>Guardar facturas</TitleBox>
       <p className="text-sm text-neutral-darker">
         Selecciona la categoría o servicio:

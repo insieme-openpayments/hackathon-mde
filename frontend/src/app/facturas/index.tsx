@@ -5,7 +5,6 @@ import {
   BackButton,
   ByPuntored,
   DialogCard,
-  Logo,
   Screen,
   TitleBox
 } from '@/components/insieme'
@@ -33,7 +32,6 @@ export function Component() {
   if (delDone) {
     return (
       <Screen>
-        <Logo />
         <DialogCard
           icon="/assets/facturas/trash-lg.svg"
           text="Factura eliminada"
@@ -49,7 +47,6 @@ export function Component() {
   if (delId && items.some((i) => i.id === delId)) {
     return (
       <Screen>
-        <Logo />
         <DialogCard
           icon="/assets/facturas/trash-lg.svg"
           text={
@@ -84,7 +81,6 @@ export function Component() {
   if (items.length === 0) {
     return (
       <Screen>
-        <Logo />
         <TitleBox>Facturas guardadas</TitleBox>
         <div className="flex w-full flex-col items-center gap-2 rounded-lg bg-white p-6 text-center shadow-soft">
           <img
@@ -128,7 +124,6 @@ export function Component() {
 
   return (
     <Screen>
-      <Logo />
       <TitleBox>Facturas guardadas</TitleBox>
       <div role="tablist" className="flex w-full flex-col">
         <div className="flex w-full">

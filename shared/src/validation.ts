@@ -7,11 +7,9 @@ export const walletAddressUrlSchema = z
 
 export const REF_REGEX = /^\d{6,20}$/
 
-const refSchema = z
-  .string()
-  .regex(REF_REGEX, {
-    message: 'La referencia debe tener entre 6 y 20 dígitos'
-  })
+const refSchema = z.string().regex(REF_REGEX, {
+  message: 'La referencia debe tener entre 6 y 20 dígitos'
+})
 
 export const billLookupSchema = z.object({
   productId: z.string().uuid(),

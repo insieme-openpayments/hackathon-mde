@@ -6,7 +6,6 @@ import {
   ByPuntored,
   CategoryGrid,
   FloatingInput,
-  Logo,
   Screen,
   TitleBox
 } from '@/components/insieme'
@@ -38,7 +37,6 @@ export function Component() {
   if (view === 'categorias') {
     return (
       <Screen>
-        <Logo />
         <TitleBox>Servicios</TitleBox>
         <CategoryGrid
           categories={categories}
@@ -99,7 +97,6 @@ export function Component() {
 
   return (
     <Screen>
-      <Logo />
       <TitleBox>Guardar facturas</TitleBox>
       <p className="text-sm text-neutral-darker">
         Selecciona la categoría o servicio:

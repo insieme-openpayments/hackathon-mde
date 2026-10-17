@@ -39,7 +39,7 @@ export interface ConfirmPanelProps {
   details: OrderItemDetails
   /** Which flow renders the panel (decides where to return to). */
   source: 'servicios' | 'facturas'
-  /** Saved invoice being paid (facturas flow); `markPaid` runs on success. */
+  /** Saved invoice being paid (facturas flow); the confirmation page marks it paid once SETTLED. */
   facturaId?: string
   /** "Confirmar" is clickable. */
   enabled: boolean
@@ -224,6 +224,7 @@ export function ConfirmPanel({
             <KvRows rows={rows} />
             <FloatingInput
               label="Billetera"
+              placeholder="$ilp.interledger-test.dev/tu-billetera"
               autoComplete="off"
               inputMode="url"
               error={walletError}
@@ -247,6 +248,7 @@ export function ConfirmPanel({
           <Button
             type="submit"
             aria-label="Confirmar"
+            variant={enabled && !busy ? 'active' : 'disabled'}
             disabled={!enabled || busy}
             className={cn('flex-1')}
           >

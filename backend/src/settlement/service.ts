@@ -113,10 +113,12 @@ export class SettlementService implements ISettlementService {
           orderId: order.id,
           idempotencyKey
         })
-        for (const a of data.attempts) {
+        // Public timeline: never name the provider (it stays in attempts,
+        // visible only through GET /admin/orders).
+        for (let i = 0; i < data.attempts.length; i++) {
           await this.orderService.addEvent(
             order.id,
-            `Failover: ${a.provider} falló (${a.error})`,
+            'Red de recaudo no disponible; reintentando con otra red',
             trx
           )
         }

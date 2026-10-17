@@ -1,6 +1,12 @@
 import { type CxOptions, cx } from 'class-variance-authority'
-import { twMerge } from 'tailwind-merge'
+import { extendTailwindMerge } from 'tailwind-merge'
 import { currencyConfig } from '@/lib/constants'
+
+// Custom font sizes from tailwind.config.cjs: without this, twMerge treats
+// `text-2xs`/`text-3xs` as colours and drops them next to `text-<colour>`.
+const twMerge = extendTailwindMerge({
+  extend: { classGroups: { 'font-size': [{ text: ['2xs', '3xs'] }] } }
+})
 
 export function cn(...inputs: CxOptions) {
   return twMerge(cx(inputs))

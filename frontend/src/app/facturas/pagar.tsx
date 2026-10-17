@@ -4,7 +4,6 @@ import {
   BankBlock,
   ByPuntored,
   FloatingInput,
-  Logo,
   MoneyInput,
   Screen,
   Tip
@@ -55,7 +54,6 @@ export function Component() {
   if (!factura) {
     return (
       <Screen>
-        <Logo />
         <p className="text-sm">La factura ya no existe.</p>
         <ActionButton tone="dark" onClick={() => navigate('/facturas')}>
           Volver
@@ -81,7 +79,6 @@ export function Component() {
 
   return (
     <Screen className="pb-72">
-      <Logo />
       <div className="flex w-full items-center gap-3 rounded-lg bg-white p-3 shadow-soft">
         <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-pill bg-blue-normal">
           {category?.icon ? (

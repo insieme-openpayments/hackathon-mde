@@ -106,10 +106,11 @@ describe('Settlement Service', (): void => {
     expect(stored?.status).toBe(OrderStatus.SETTLED)
     expect(stored?.events.map((e) => e.message)).toEqual(
       expect.arrayContaining([
-        expect.stringContaining('Failover: puntored falló'),
+        'Red de recaudo no disponible; reintentando con otra red',
         'Factura pagada en Colombia'
       ])
     )
+    expect(JSON.stringify(stored?.events)).not.toContain('puntored')
   })
 
   test('marks SETTLEMENT_FAILED when every provider fails', async (): Promise<void> => {

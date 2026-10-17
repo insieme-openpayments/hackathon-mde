@@ -4,7 +4,6 @@ import {
   BackButton,
   ByPuntored,
   DialogCard,
-  Logo,
   Screen
 } from '@/components/insieme'
 
@@ -12,7 +11,6 @@ export function Component() {
   const navigate = useNavigate()
   return (
     <Screen>
-      <Logo />
       <DialogCard
         icon="/assets/facturas/check-circle.svg"
         large
