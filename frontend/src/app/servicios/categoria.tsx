@@ -45,11 +45,7 @@ export function Component() {
   return (
     <Screen>
       {category ? (
-        <CategoryCard
-          category={category}
-          onSelect={() => undefined}
-          className="pointer-events-none"
-        />
+        <CategoryCard category={category} variant="plain" />
       ) : isLoading ? (
         <Shimmer className="h-12" />
       ) : null}

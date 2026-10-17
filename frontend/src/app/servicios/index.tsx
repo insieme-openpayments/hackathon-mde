@@ -43,7 +43,7 @@ export function Component() {
           <button
             type="button"
             onClick={() => navigate('/facturas')}
-            className="flex flex-1 items-center gap-2 rounded border border-blue-normal bg-white p-2 text-left hover:shadow-soft"
+            className="flex flex-1 items-center gap-2 rounded-pill border border-blue-normal bg-white px-3 py-2 text-left hover:shadow-soft"
           >
             <img
               src="/assets/servicios/facturas-doc.svg"
@@ -58,7 +58,7 @@ export function Component() {
           <button
             type="button"
             onClick={() => navigate('/facturas/nueva')}
-            className="rounded bg-blue-normal px-3 py-3 text-2xs font-medium text-white hover:bg-blue-hover"
+            className="h-10 w-[90px] rounded-pill bg-blue-normal text-2xs font-medium text-white hover:bg-blue-hover"
           >
             + Facturas
           </button>

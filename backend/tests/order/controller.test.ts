@@ -13,6 +13,7 @@ import { IOrderService } from '@/order/service'
 import { IBillController } from '@/bill/controller'
 import { simulateBill } from '@/bill/simulate'
 import { Order } from '@/order/model'
+import { Payment } from '@/payment/model'
 
 const walletAddressUrl = 'https://ilp.example.com/alice'
 
@@ -243,6 +244,78 @@ describe('Order Controller', (): void => {
         .where({ id })
       const res = await runFinish(id, { result: 'grant_rejected' })
       expect(res.statusCode).toBe(409)
+    })
+
+    const createWithPayment = async (
+      extra: Partial<Record<string, unknown>> = {}
+    ) => {
+      const created = await run(orderController.create, {
+        walletAddressUrl,
+        products: [await item('vanti', { amount: 18000 })]
+      })
+      const id = created._getJSONData().result.orderId as string
+      await Payment.query().insert({
+        orderId: id,
+        quoteId: 'q',
+        incomingPaymentUrl: 'https://ilp.example.com/incoming/1',
+        interactUrl: 'https://wallet.example/consent',
+        continueUri: 'https://auth.example/continue',
+        continueToken: 'tok',
+        interactNonce: 'in',
+        clientNonce: 'cn',
+        walletAddress: walletAddressUrl,
+        status: 'PENDING',
+        ...extra
+      } as never)
+      return id
+    }
+
+    const rejectionEvents = (order: Order) =>
+      order.events.filter(
+        (e) => e.message === 'Pagador rechazó la autorización'
+      )
+
+    it('rejects (not fails) a payment refused long after creation', async (): Promise<void> => {
+      const id = await createWithPayment({ attempts: 10 })
+      const res = await runFinish(id, { result: 'grant_rejected' })
+      expect(res.statusCode).toBe(200)
+      const order = await Order.query().findById(id)
+      expect(order?.status).toBe('REJECTED')
+      expect(rejectionEvents(order as Order)).toHaveLength(1)
+    })
+
+    it('records a single rejection for concurrent callbacks', async (): Promise<void> => {
+      const id = await createWithPayment()
+      await Promise.all([
+        runFinish(id, { result: 'grant_rejected' }),
+        runFinish(id, { result: 'grant_rejected' })
+      ])
+      const order = await Order.query().findById(id)
+      expect(rejectionEvents(order as Order)).toHaveLength(1)
+    })
+
+    it('answers 200 to a replayed interact callback without a new event', async (): Promise<void> => {
+      const id = await createWithPayment({ authorizedAt: new Date() })
+      const before = (await Order.query().findById(id))?.events.length
+      jest.spyOn(openPayments, 'verifyHash').mockResolvedValue()
+      const res = await runFinish(id, {
+        interactRef: '11111111-1111-4111-8111-111111111111',
+        hash: 'x'
+      })
+      expect(res.statusCode).toBe(200)
+      expect((await Order.query().findById(id))?.events.length).toBe(before)
+    })
+
+    it('returns 409 for a result after authorization', async (): Promise<void> => {
+      const id = await createWithPayment({ authorizedAt: new Date() })
+      const res = await runFinish(id, { result: 'grant_rejected' })
+      expect(res.statusCode).toBe(409)
+    })
+
+    it('returns 400 for an interaction callback without hash', async (): Promise<void> => {
+      const id = await createWithPayment()
+      const res = await runFinish(id, {})
+      expect(res.statusCode).toBe(400)
     })
   })
 })

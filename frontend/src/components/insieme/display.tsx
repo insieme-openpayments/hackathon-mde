@@ -28,7 +28,8 @@ export function KvRows({ rows, className }: KvRowsProps) {
           <span
             className={cn(
               'min-w-0 flex-[1_0_0] break-words text-right font-semibold',
-              row.tone === 'success' && 'text-success'
+              row.tone === 'success' && 'text-success',
+              row.tone === 'error' && 'text-magenta'
             )}
           >
             {row.value}
@@ -285,7 +286,7 @@ export const TRACKER_STEPS = [
 type StepState = 'done' | 'active' | 'pending' | 'error'
 
 /** Per-step state derived from the order status. */
-function stepStates(status: OrderStatus): StepState[] {
+function stepStates(status: OrderStatus, authorized: boolean): StepState[] {
   const states: StepState[] = ['pending', 'pending', 'pending', 'pending']
   const fill = (done: number, rest?: StepState) => {
     for (let i = 0; i < 4; i++) {
@@ -295,7 +296,8 @@ function stepStates(status: OrderStatus): StepState[] {
   }
   switch (status) {
     case OrderStatus.PROCESSING:
-      fill(1, 'active')
+      if (authorized) fill(1, 'active')
+      else fill(0, 'active')
       break
     case OrderStatus.COMPLETED:
       fill(3, 'active')
@@ -322,7 +324,10 @@ export function StatusTracker({
   events,
   className
 }: StatusTrackerProps) {
-  const states = stepStates(status)
+  const authorized = events.some((e) =>
+    e.message.startsWith('Pagador autorizó')
+  )
+  const states = stepStates(status, authorized)
   return (
     <div className={cn('flex w-full flex-col gap-4', className)}>
       <ol className="flex flex-col">

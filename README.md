@@ -17,7 +17,7 @@ Hackathon Open Payments (Interledger Foundation) · Medellín · 16–17 oct 202
 | Catálogo de convenios y validación de referencia                                                                                    | **Real pero de prueba**: lo sirve el [integration-backend](https://github.com/insieme-openpayments/integration-backend) del equipo (dummy). Si no responde, el backend usa el catálogo y la factura locales (mismos 12 categorías y 36 convenios) |
 | Monto de la factura                                                                                                                 | **Aleatorio por consulta** ($80.000–$350.000 en el integration-backend). El backend guarda el monto consultado 30 min y cobra ese, nunca el que envía el cliente                                                                                  |
 | Liquidación con redes de recaudo (PuntoRed, Recaudo B, Bre-B)                                                                       | **Simulada** tras una interfaz común (`PaymentProvider`). No hay sandbox público; la integración real reemplaza el cuerpo de `pay()`                                                                                                              |
-| Facturas guardadas (titular, concepto y vencimiento)                                                                                | Titular y concepto **simulados** (deterministas por convenio y referencia); vencimiento del integration-backend, simulado solo en el fallback local                                                                                               |
+| Detalle de la factura consultada en Pago de servicios (titular, concepto y vencimiento)                                             | Titular y concepto **simulados** (deterministas por convenio y referencia); vencimiento del integration-backend, simulado solo en el fallback local                                                                                               |
 
 ## Correr
 
@@ -47,6 +47,8 @@ Las tres variables de Open Payments van en `backend/.env.local` (copia `backend/
 - `PAYMENT_POINTER`: URL de la billetera de recaudo, con `https://` (no el formato `$`).
 - `KEY_ID`: id de la llave en Developer Keys de esa billetera.
 - `PRIVATE_KEY`: llave privada en base64.
+
+El nombre público de la billetera de recaudo (Settings de la billetera) es el que ve el pagador en la pantalla de consentimiento; ponle «Insieme Payments».
 
 El backend no arranca sin ellas. Para generar la llave: crea una billetera en https://wallet.interledger-test.dev, abre Settings → Developer Keys y genera un par para la dirección de la billetera.
 

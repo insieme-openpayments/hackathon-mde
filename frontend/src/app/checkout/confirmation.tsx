@@ -31,7 +31,7 @@ const LINK_CLASS = 'self-center text-2xs text-blue-normal underline'
 
 function receiptRows(
   order: OrderReceipt,
-  estado: { label: string; className?: string }
+  estado: { label: string; tone?: 'success' | 'error' }
 ): KvRow[] {
   const item = order.orderItems[0]
   const details = item?.details
@@ -40,7 +40,7 @@ function receiptRows(
       label: 'Fecha y hora',
       value: formatDateTime(order.settlement?.paidAt ?? order.createdAt)
     },
-    { label: 'Estado', value: estado.label, className: estado.className },
+    { label: 'Estado', value: estado.label, tone: estado.tone },
     { label: 'Operación', value: 'Pago de servicios' },
     {
       label: 'Numero de autorización',
@@ -102,7 +102,17 @@ export function Component() {
     }
     finish(
       { result, hash, interactRef: interact_ref },
-      { onSettled: () => void refetch() }
+      {
+        onError: () => {
+          // Let a reload retry: the backend callback is idempotent.
+          try {
+            sessionStorage.removeItem(guardKey)
+          } catch {
+            // ignore
+          }
+        },
+        onSettled: () => void refetch()
+      }
     )
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status])
@@ -162,7 +172,7 @@ export function Component() {
   if (status === OrderStatus.PROCESSING || status === OrderStatus.COMPLETED) {
     return (
       <Screen>
-        <TitleBox>Procesando tu transacción</TitleBox>
+        <TitleBox variant="plain">Procesando tu transacción</TitleBox>
         <StatusTracker status={status} events={order.events} />
         {timedOut ? (
           <p className="text-center text-xs text-neutral-normal" role="status">
@@ -180,7 +190,7 @@ export function Component() {
           title="¡Transacción exitosa!"
           rows={receiptRows(order, {
             label: 'Aprobada',
-            className: 'text-success'
+            tone: 'success'
           })}
         >
           <div className="flex flex-col items-center gap-2">
@@ -233,7 +243,7 @@ export function Component() {
         }
         rows={receiptRows(order, {
           label: rejected ? 'Rechazada' : 'Fallida',
-          className: 'text-magenta'
+          tone: 'error'
         })}
       >
         <Actions>

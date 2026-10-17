@@ -21,11 +21,33 @@ export const catalogQuerySchema = z.object({
   category: z.string().min(1).optional()
 })
 
+const noControlChars = (s: string) =>
+  ![...s].some((c) => {
+    const code = c.charCodeAt(0)
+    return code < 32 || code === 127
+  })
+const CONTROL_MSG = { message: 'Caracteres no permitidos' }
+
 export const orderDetailsSchema = z.object({
   ref1: refSchema,
-  ref2: z.string().trim().max(40).optional(),
-  email: z.string().trim().email({ message: 'Correo inválido' }).optional(),
-  document: z.string().trim().max(40).optional()
+  ref2: z
+    .string()
+    .trim()
+    .max(40)
+    .refine(noControlChars, CONTROL_MSG)
+    .optional(),
+  email: z
+    .string()
+    .trim()
+    .refine(noControlChars, CONTROL_MSG)
+    .pipe(z.string().email({ message: 'Correo inválido' }))
+    .optional(),
+  document: z
+    .string()
+    .trim()
+    .max(40)
+    .refine(noControlChars, CONTROL_MSG)
+    .optional()
 })
 
 export const orderItemSchema = z.object({

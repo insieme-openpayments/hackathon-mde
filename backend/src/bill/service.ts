@@ -60,6 +60,17 @@ export class BillService implements IBillService {
           product.slug,
           ref1
         )
+        // A fixed-amount convenio always bills its fixed amount (same rule
+        // as the local simulation), whatever the upstream returned.
+        if (product.fixedAmount != null) {
+          return {
+            amount: product.fixedAmount,
+            partial: res.partial_allowed,
+            minAmount: Math.min(res.min_amount, product.fixedAmount),
+            maxAmount: product.fixedAmount,
+            dueDate: res.due_date ?? null
+          }
+        }
         return {
           amount: res.amount,
           partial: res.partial_allowed,
@@ -99,15 +110,24 @@ export class BillService implements IBillService {
     ref1: string
   ): Promise<BillLookupResult> {
     const product = await this.productService.getById(productId)
-    const bill = await this.resolveBill(product, ref1)
     const sim = simulateInvoiceDetails(product.slug, ref1)
-    const dueDate = bill.dueDate ?? sim.dueDate
+    const key = snapshotKey(product.id, ref1)
 
-    this.billSnapshotCache.set(
-      snapshotKey(product.id, ref1),
-      { ...bill, dueDate, holder: sim.holder, concept: sim.concept },
-      SNAPSHOT_TTL_MS
-    )
+    // Reuse a live snapshot so repeated lookups (other tabs, double click)
+    // never change the amount a previous screen was shown.
+    let snapshot = await this.billSnapshotCache.get(key)
+    if (!snapshot) {
+      const resolved = await this.resolveBill(product, ref1)
+      snapshot = {
+        ...resolved,
+        dueDate: resolved.dueDate ?? sim.dueDate,
+        holder: sim.holder,
+        concept: sim.concept
+      }
+      this.billSnapshotCache.set(key, snapshot, SNAPSHOT_TTL_MS)
+    }
+    const bill = snapshot
+    const dueDate = bill.dueDate
 
     return {
       productId: product.id,

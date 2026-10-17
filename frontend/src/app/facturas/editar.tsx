@@ -78,12 +78,14 @@ export function Component() {
           label="Convenio o proveedor"
           value={convName}
           disabled
+          dim
           readOnly
         />
         <FloatingInput
           label="Referencia No.1"
           value={factura.ref1}
           disabled
+          dim
           readOnly
         />
       </div>

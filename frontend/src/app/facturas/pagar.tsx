@@ -16,7 +16,7 @@ import { useFacturasStore } from '@/hooks/use-facturas-store.ts'
 import { useProfileStore } from '@/hooks/use-profile-store.ts'
 import { useZodRouteParams } from '@/hooks/use-zod-params.ts'
 import { facturaParamsSchema } from '@/app/route-schemas.ts'
-import { categoryIcon } from '@/lib/assets.ts'
+import { categoryHeadIcon } from '@/lib/assets.ts'
 import { paymentDraftStore } from '@/lib/stores/payment-draft-store.ts'
 import { money } from '@/lib/money.ts'
 import { MAX_FACTURA_AMOUNT, MIN_AMOUNT, emailSchema } from '@/lib/schemas.ts'
@@ -93,21 +93,22 @@ export function Component() {
 
   return (
     <Screen className="pb-72">
-      <div className="flex w-full items-center gap-3 rounded-lg bg-white p-3 shadow-soft">
-        <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-pill bg-blue-normal">
-          {category?.icon ? (
+      <div className="flex w-full items-center gap-2 border-b border-neutral-light-active pb-3">
+        {category?.icon ? (
+          <span className="flex h-[30px] flex-shrink-0 items-center justify-center rounded-[3px] p-[5px]">
             <img
-              src={categoryIcon(category.icon)}
+              src={categoryHeadIcon(category.icon)}
               alt=""
-              width={22}
-              height={22}
-              className="brightness-0 invert"
+              className="h-full w-auto"
             />
-          ) : null}
-        </span>
-        <div className="min-w-0">
-          <p className="text-xs text-text01">{catLabel}</p>
-          <p className="truncate text-sm font-medium text-neutral-darker">
+          </span>
+        ) : null}
+        <span className="h-[30px] w-px bg-blue-normal" aria-hidden="true" />
+        <div className="flex min-w-0 flex-1 flex-col gap-0.5">
+          <p className="text-sm font-semibold leading-[1.2] text-blue-normal">
+            {catLabel}
+          </p>
+          <p className="truncate text-xs font-medium leading-[1.1] text-neutral-darker">
             {convName}
           </p>
         </div>
@@ -117,12 +118,14 @@ export function Component() {
           label="Nombre de la factura"
           value={factura.name}
           disabled
+          dim
           readOnly
         />
         <FloatingInput
           label="Referencia de pago 1"
           value={factura.ref1}
           disabled
+          dim
           readOnly
         />
         <div className="relative w-full">

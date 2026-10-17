@@ -3,9 +3,7 @@
 **/Dockerfile.dev
 **/Dockerfile.prod
 
-# .env.local holds local development values and is committed to the repo.
-# Next.js loads it during `next build`, so if it reaches the build context it
-# overrides the build args baked into the published image (and dotenv-expand
-# mangles any value containing a `$`). Keep it out of image builds.
+# Env files hold local values and secrets: keep them out of image builds.
 **/.env
-**/.env.local
+**/.env.*
+!**/.env.example

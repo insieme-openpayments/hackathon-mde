@@ -1,7 +1,7 @@
 import { NextFunction, Request } from 'express'
 import { IOrderService } from './service'
 import { Order, type OrderEvent } from './model'
-import { Payment } from '@/payment/model'
+import { Payment, PaymentStatus } from '@/payment/model'
 import type { ProviderAttempt } from '@/settlement/providers'
 import {
   BadRequest,
@@ -89,6 +89,10 @@ export class OrderController implements IOrderController {
         if (payment) {
           await this.orderService.fail(orderId, trx)
           await this.orderService.addEvent(orderId, reason, trx)
+          // Stop the poller from chasing a payment of an abandoned order.
+          await Payment.query(trx)
+            .patch({ status: PaymentStatus.FAILED, processAt: null })
+            .where({ id: payment.id })
         } else {
           await this.orderService.delete(orderId, trx)
         }
@@ -206,7 +210,12 @@ export class OrderController implements IOrderController {
         const status = isRejected ? 200 : 400
         const message = isRejected ? 'SUCCESS' : 'FAILED'
         await this.knex.transaction(async (trx) => {
-          await this.paymentService.fail(order.payments, trx)
+          // Claim the payment so concurrent or replayed callbacks are no-ops.
+          const claimed = await Payment.query(trx)
+            .patch({ status: PaymentStatus.FAILED, processAt: null })
+            .where({ id: order.payments.id, status: PaymentStatus.PENDING })
+          if (claimed === 0) return
+          await this.paymentService.fail(order.payments, 'rejected', trx)
         })
         res.status(status).json({ success: isRejected, message })
         return

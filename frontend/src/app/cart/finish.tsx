@@ -16,19 +16,17 @@ export function Component() {
   const { mutate, data, error } = useFinishSetupMutation()
 
   useEffect(() => {
-    mutate(
-      {
-        identifier,
-        hash,
-        interactRef: interact_ref,
-        result
-      },
-      {
-        onSuccess({ result }) {
-          setToken(result)
+    // A declined or invalid grant needs no backend call: just explain and go back.
+    if (!result) {
+      mutate(
+        { identifier, hash, interactRef: interact_ref },
+        {
+          onSuccess({ result }) {
+            if (result) setToken(result)
+          }
         }
-      }
-    )
+      )
+    }
     const redirectTimer = setTimeout(
       () => navigate(paymentDraftStore.returnTo || '/servicios'),
       3000
@@ -39,13 +37,16 @@ export function Component() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  if (data) {
+  if (result || data) {
     let color: string = 'text-success'
     let text: string = '¡Pago en un clic configurado!'
 
     if (result === 'grant_rejected') {
       color = 'text-magenta'
       text = 'La configuración de pago en un clic fue cancelada.'
+    } else if (result === 'grant_invalid') {
+      color = 'text-magenta'
+      text = 'No se pudo configurar el pago en un clic.'
     }
 
     return (

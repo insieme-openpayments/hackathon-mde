@@ -10,7 +10,12 @@ import helmet from 'helmet'
 import type { Server } from 'http'
 import type { Cradle } from './container'
 import { Model } from 'objection'
-import { BadRequest, initErrorHandler, toSuccessResponse } from '@/lib'
+import {
+  BadRequest,
+  PayloadTooLarge,
+  initErrorHandler,
+  toSuccessResponse
+} from '@/lib'
 import path from 'path'
 
 export class App {
@@ -132,8 +137,12 @@ export class App {
         res: TypedResponse,
         next: NextFunction
       ) => {
-        const err =
-          e.type === 'entity.parse.failed' ? new BadRequest('Invalid JSON') : e
+        let err: Error = e
+        if (e.type === 'entity.parse.failed') {
+          err = new BadRequest('Invalid JSON')
+        } else if (e.type === 'entity.too.large') {
+          err = new PayloadTooLarge()
+        }
         initErrorHandler(logger)(err, req, res, next)
       }
     )

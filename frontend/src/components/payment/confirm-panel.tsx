@@ -120,7 +120,18 @@ export function ConfirmPanel({
       }
       mapped = true
     }
-    if (!mapped) form.setError('root', { message })
+    if (!mapped) {
+      form.setError('root', {
+        message: 'No pudimos iniciar el pago, intenta de nuevo'
+      })
+      if (message) {
+        toast({
+          variant: 'error',
+          title: 'No pudimos iniciar el pago',
+          description: message
+        })
+      }
+    }
   }
 
   const onSaved = (walletAddressUrl: string, orderId: string) => {
@@ -197,7 +208,7 @@ export function ConfirmPanel({
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="flex items-center justify-center gap-1 text-2xs text-neutral-darker"
+        className="flex items-center gap-1 self-end text-2xs text-blue-normal"
       >
         {open ? 'Ocultar detalles' : 'Ver detalles'}
         <img

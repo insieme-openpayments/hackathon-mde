@@ -18,7 +18,7 @@ import { Logger } from 'winston'
 import { createHash } from 'crypto'
 import { OneClickCache } from '@/cache/one-click'
 import { replaceHost } from '@/shared/utils'
-import { BadRequest, InternalServerError } from '@/lib'
+import { BadRequest, InternalServerError, Unauthorized } from '@/lib'
 
 interface PreparePaymentParams {
   order: Order
@@ -92,9 +92,7 @@ export interface IOpenPayments {
   getIncomingPayment(url: string): Promise<IncomingPayment>
   setupOneClick(walletAddressUrl: string, amount: number): Promise<string>
   continueGrant(params: ContinueGrantParams): Promise<TokenInfo>
-  instantBuy(
-    params: InstantBuyParams
-  ): Promise<TokenInfo & { walletAddressurl: string }>
+  instantBuy(params: InstantBuyParams): Promise<TokenInfo>
   getShopAsset(): Promise<ShopAsset>
 }
 
@@ -225,13 +223,15 @@ export class OpenPayments implements IOpenPayments {
     walletAddressUrl
   }: VerifyHashParams): Promise<void> {
     if (!interactRef) {
-      this.logger.error('Missing interactRef.')
-      throw new InternalServerError()
+      this.logger.warn('Missing interactRef.')
+      throw new BadRequest('Invalid input', {
+        interactRef: 'Missing interactRef.'
+      })
     }
 
     if (!receivedHash) {
-      this.logger.error('Missing received hash.')
-      throw new InternalServerError()
+      this.logger.warn('Missing received hash.')
+      throw new BadRequest('Invalid input', { hash: 'Missing hash.' })
     }
 
     const walletAddress = await this.opClient.walletAddress.get({
@@ -247,10 +247,8 @@ export class OpenPayments implements IOpenPayments {
     const hash = createHash('sha-256').update(data).digest('base64')
 
     if (hash !== receivedHash) {
-      this.logger.error(`Invalid hash.`)
-      this.logger.error(`Received hash: "${receivedHash}"`)
-      this.logger.error(`Calculated hash: "${hash}"`)
-      throw new InternalServerError()
+      this.logger.warn(`Invalid interaction hash.`)
+      throw new Unauthorized('Invalid interaction callback.')
     }
   }
 
@@ -318,8 +316,10 @@ export class OpenPayments implements IOpenPayments {
     interactRef
   }: ContinueGrantParams): Promise<TokenInfo> {
     if (!interactRef) {
-      this.logger.error('Missing interactRef.')
-      throw new InternalServerError()
+      this.logger.warn('Missing interactRef.')
+      throw new BadRequest('Invalid input', {
+        interactRef: 'Missing interactRef.'
+      })
     }
 
     const continuation = await this.opClient.grant
@@ -365,9 +365,7 @@ export class OpenPayments implements IOpenPayments {
     return (continuation as Grant).access_token !== undefined
   }
 
-  public async instantBuy(
-    params: InstantBuyParams
-  ): Promise<TokenInfo & { walletAddressurl: string }> {
+  public async instantBuy(params: InstantBuyParams): Promise<TokenInfo> {
     const { order, accessToken, manageUrl, walletAddressUrl } = params
 
     const customerWalletAddress = await this.getWalletAddress(walletAddressUrl)
@@ -448,8 +446,7 @@ export class OpenPayments implements IOpenPayments {
 
     return {
       accessToken: grant.access_token.value,
-      manageUrl: replaceHost(grant.access_token.manage),
-      walletAddressurl: customerWalletAddress.id
+      manageUrl: replaceHost(grant.access_token.manage)
     }
   }
 

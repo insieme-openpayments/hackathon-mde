@@ -8,9 +8,15 @@ import { IOrderService } from '@/order/service'
 import { ISettlementService } from '@/settlement/service'
 import { InternalServerError } from '@/lib'
 
+export type FailReason = 'rejected' | 'timeout'
+
 export interface IPaymentService {
   get: (id: string) => Promise<Payment>
-  fail: (payment: Payment, trx?: TransactionOrKnex) => Promise<void>
+  fail: (
+    payment: Payment,
+    reason: FailReason,
+    trx?: TransactionOrKnex
+  ) => Promise<void>
   complete: (payment: Payment, trx?: TransactionOrKnex) => Promise<void>
   processPendingPayments: () => Promise<string | undefined>
 }
@@ -66,8 +72,12 @@ export class PaymentService implements IPaymentService {
     }
   }
 
-  public async fail(payment: Payment, trx?: TransactionOrKnex): Promise<void> {
-    const rejected = payment.attempts < 5
+  public async fail(
+    payment: Payment,
+    reason: FailReason,
+    trx?: TransactionOrKnex
+  ): Promise<void> {
+    const rejected = reason === 'rejected'
     const promise = rejected
       ? this.orderService.reject(payment.orderId, trx)
       : this.orderService.fail(payment.orderId, trx)
@@ -137,7 +147,7 @@ export class PaymentService implements IPaymentService {
           payment.$query(trx).patch({ processAt: null })
         ])
       } else if (payment.attempts >= this.MAX_ATTEMPTS) {
-        await this.fail(payment, trx)
+        await this.fail(payment, 'timeout', trx)
       } else {
         await payment.$query(trx).patch({
           attempts: payment.attempts + 1,

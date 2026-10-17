@@ -92,11 +92,17 @@ export function Screen({ children, gray, className }: ScreenProps) {
   )
 }
 
-export function TitleBox({ children, className }: TitleBoxProps) {
+export function TitleBox({
+  children,
+  variant = 'box',
+  className
+}: TitleBoxProps) {
   return (
     <h1
       className={cn(
-        'w-full text-center text-lg font-normal leading-normal text-neutral-darker',
+        variant === 'box'
+          ? 'flex min-h-[46px] w-full items-center justify-center rounded-lg bg-neutral-light-active px-3 text-center text-xs font-bold text-blue-normal'
+          : 'w-full text-center text-lg font-normal leading-normal text-neutral-darker',
         className
       )}
     >

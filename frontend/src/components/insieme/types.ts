@@ -119,7 +119,7 @@ export interface KvRow {
   value: ReactNode
   className?: string
   /** success: value in green (e.g. approved status). */
-  tone?: 'success'
+  tone?: 'success' | 'error'
 }
 
 export interface KvRowsProps extends ClassNameProp {
@@ -169,6 +169,8 @@ export interface DialogCardProps extends ClassNameProp {
 
 export interface TitleBoxProps extends ClassNameProp {
   children: ReactNode
+  /** box: grey facturas title (default); plain: simple heading. */
+  variant?: 'box' | 'plain'
 }
 
 export interface ActionsProps extends ClassNameProp {
