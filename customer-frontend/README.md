@@ -6,7 +6,15 @@ Experiencia navegable del Figma **🇨🇴 Marca Blanca → "Versión para DEMOS
 ## Cómo abrirlo
 Doble clic en `index.html` (no requiere servidor ni build). Para publicarlo, sube la carpeta tal cual (Netlify drop, GitHub Pages, etc.).
 
-- En escritorio se muestra el teléfono (320×568 escalado) con un menú **Demo** debajo para saltar a cada flujo.
+Con servidor local, desde la raíz del repo:
+
+```bash
+cd customer-frontend && python3 -m http.server 8080
+```
+
+Luego abre http://localhost:8080 (inicia en `#home`; usa `#recargas`, `#pines`, `#tyc`… para saltar a cada flujo).
+
+- En escritorio se muestra el teléfono (320×568 escalado).
 - En móvil ocupa toda la pantalla.
 
 ## Flujos
