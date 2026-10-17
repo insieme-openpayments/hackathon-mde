@@ -1,6 +1,6 @@
 import type { KeyboardEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ByPuntored, Screen, Tip } from '@/components/insieme'
+import { BrandFooter, Isotipo, Screen, Tip } from '@/components/insieme'
 import { cn } from '@/lib/utils.ts'
 
 interface HomeProduct {
@@ -13,31 +13,31 @@ interface HomeProduct {
 
 const PRODUCTS: HomeProduct[] = [
   {
+    id: 'servicios',
+    label: 'Pago de servicios',
+    icon: 'cat-pago-servicios',
+    tip: 'Paga facturas de servicios públicos, salud, educación y más',
+    to: '/servicios'
+  },
+  {
     id: 'recargas',
     label: 'Recargas',
     icon: 'cat-recargas',
-    tip: 'Recarga minutos y datos<br>a cualquier operador',
+    tip: 'Recarga minutos y datos a cualquier operador',
     to: null
   },
   {
     id: 'paquetes',
     label: 'Paquetes',
     icon: 'cat-paquetes',
-    tip: 'Compra paquetes de datos,<br>minutos y apps',
+    tip: 'Compra paquetes de datos, minutos y apps',
     to: null
-  },
-  {
-    id: 'servicios',
-    label: 'Pago de servicios',
-    icon: 'cat-pago-servicios',
-    tip: 'Paga tus facturas de<br>servicios públicos y más',
-    to: '/servicios'
   },
   {
     id: 'pines',
     label: 'Pines y entretenimiento',
     icon: 'cat-pines',
-    tip: 'Compra pines de streaming,<br>juegos y licencias',
+    tip: 'Compra pines de streaming, juegos y licencias',
     to: null
   }
 ]
@@ -58,85 +58,102 @@ export function Component() {
   }
 
   return (
-    <Screen className="relative gap-6">
-      <div className="flex items-center">
-        <div className="relative h-[119px] w-[101px] flex-shrink-0 overflow-hidden">
-          <img
-            src="/assets/img/human-head.svg"
-            alt=""
-            aria-hidden="true"
-            className="absolute left-[6.82%] top-[0.01%] h-[38.31%] w-[44.86%] max-w-none"
-          />
-          <img
-            src="/assets/img/human-bottom.svg"
-            alt=""
-            aria-hidden="true"
-            className="absolute left-[8.52%] top-[50.5%] h-[49.5%] w-[91.48%] max-w-none"
-          />
-          <img
-            src="/assets/img/human-body.svg"
-            alt=""
-            aria-hidden="true"
-            className="absolute left-[0.01%] top-[20.98%] h-[47.5%] w-[85.11%] max-w-none"
-          />
+    <Screen className="gap-6">
+      <section className="relative overflow-hidden rounded-2xl bg-brand p-5 text-white shadow-medium">
+        <span
+          aria-hidden="true"
+          className="absolute -right-10 -top-10 h-40 w-40 rounded-full bg-accent/15"
+        />
+        <span
+          aria-hidden="true"
+          className="absolute -bottom-16 -left-8 h-40 w-40 rounded-full bg-white/10"
+        />
+        <div className="relative flex items-start gap-4">
+          <Isotipo size={56} className="ring-2 ring-white/30" />
+          <div className="min-w-0 flex-1">
+            <h1 className="text-xl font-bold leading-tight">
+              Paga los servicios de tu familia en Colombia
+            </h1>
+            <p className="mt-2 text-2xs leading-relaxed text-white/85">
+              Desde cualquier lugar, con tu billetera Interledger. Sin registro:
+              solo ingresa tu billetera al pagar.
+            </p>
+            <p className="mt-3 text-3xs font-medium text-accent">
+              Insieme significa “juntos”: tú &amp; tu familia, siempre unidos.
+            </p>
+          </div>
         </div>
-        <h2 className="flex-1 p-2.5 text-xl font-bold leading-[1.16] text-neutral-darker">
-          Productos disponibles
+      </section>
+
+      <div className="flex flex-col gap-3">
+        <h2 className="text-base font-bold text-neutral-darker">
+          ¿Qué quieres pagar hoy?
         </h2>
-      </div>
-
-      <div className="grid w-full grid-cols-3 gap-x-3 gap-y-2">
-        {PRODUCTS.map((p) => {
-          const active = p.to !== null
-          return (
-            <div
-              key={p.id}
-              role="button"
-              tabIndex={active ? 0 : -1}
-              aria-disabled={active ? undefined : true}
-              onClick={() => open(p)}
-              onKeyDown={(e) => onKeyDown(e, p)}
-              className={cn(
-                'relative flex h-[88px] flex-col items-center justify-center gap-0.5 rounded-lg border border-blue-light-active bg-white px-1 py-2 transition-[border-color,box-shadow]',
-                active
-                  ? 'cursor-pointer hover:border-blue-normal hover:shadow-medium focus-visible:border-blue-normal focus-visible:shadow-medium focus-visible:outline-none'
-                  : 'cursor-not-allowed opacity-50'
-              )}
-            >
-              <span className="flex h-[38px] w-full items-center justify-center">
-                <img
-                  src={`/assets/icons/${p.icon}.svg`}
-                  alt=""
-                  width={33}
-                  height={37}
-                  className="h-[36.84px] w-[33.156px]"
-                />
-              </span>
-              <span className="line-clamp-2 w-full flex-1 content-center text-center text-xs leading-[1.1] text-blue-darker [overflow-wrap:anywhere]">
-                {p.label}
-              </span>
-              <span
-                className="absolute right-1.5 top-[7px]"
-                onClick={(e) => e.stopPropagation()}
-                onKeyDown={(e) => e.stopPropagation()}
+        <div className="grid w-full grid-cols-2 gap-3">
+          {PRODUCTS.map((p) => {
+            const active = p.to !== null
+            return (
+              <div
+                key={p.id}
+                role="button"
+                tabIndex={active ? 0 : -1}
+                aria-disabled={active ? undefined : true}
+                onClick={() => open(p)}
+                onKeyDown={(e) => onKeyDown(e, p)}
+                className={cn(
+                  'relative flex min-h-[124px] flex-col items-start justify-between gap-3 rounded-2xl border bg-white p-4 transition-[border-color,box-shadow]',
+                  active
+                    ? 'cursor-pointer border-brand shadow-soft hover:shadow-medium focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2'
+                    : 'cursor-not-allowed border-neutral-light-active'
+                )}
               >
-                <Tip icon="alert">
-                  <span dangerouslySetInnerHTML={{ __html: p.tip }} />
-                </Tip>
-              </span>
-              {active ? null : (
-                <span className="absolute left-1.5 top-[7px] rounded-pill bg-blue-normal px-1.5 py-px text-3xs font-medium text-white">
-                  Pronto
-                </span>
-              )}
-            </div>
-          )
-        })}
+                <div className="flex w-full items-start justify-between gap-2">
+                  <span
+                    className={cn(
+                      'flex h-11 w-11 items-center justify-center rounded-xl',
+                      active ? 'bg-accent' : 'bg-brand-soft opacity-60'
+                    )}
+                  >
+                    <img
+                      src={`/assets/icons/${p.icon}.svg`}
+                      alt=""
+                      width={26}
+                      height={26}
+                      className="h-[26px] w-auto"
+                    />
+                  </span>
+                  <span
+                    onClick={(e) => e.stopPropagation()}
+                    onKeyDown={(e) => e.stopPropagation()}
+                  >
+                    <Tip icon="alert">{p.tip}</Tip>
+                  </span>
+                </div>
+                <div className="flex w-full flex-col gap-1">
+                  <span
+                    className={cn(
+                      'text-sm font-semibold leading-tight [overflow-wrap:anywhere]',
+                      active ? 'text-neutral-darker' : 'text-neutral-normal'
+                    )}
+                  >
+                    {p.label}
+                  </span>
+                  <span
+                    className={cn(
+                      'text-3xs font-medium',
+                      active ? 'text-brand' : 'text-neutral-normal'
+                    )}
+                  >
+                    {active ? 'Disponible' : 'Próximamente'}
+                  </span>
+                </div>
+              </div>
+            )
+          })}
+        </div>
       </div>
 
-      <div className="flex justify-center">
-        <ByPuntored />
-      </div>
+      <BrandFooter />
     </Screen>
   )
 }

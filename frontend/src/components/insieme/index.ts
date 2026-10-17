@@ -1,12 +1,13 @@
 // Insieme design-system barrel (P1 implements, contracts in ./types.ts).
-// DECISION: Receipt, Pasarela, StatusTracker and BankBlock live HERE
+// DECISION: Receipt, Pasarela, StatusTracker and SupportNote live HERE
 // (components/insieme/display.tsx), not in components/payment. Only the
 // payment-flow components that touch API/stores (ConfirmPanel,
 // OneClickSetupDialog) live in components/payment.
 export type * from './types.ts'
 export {
   Logo,
-  ByPuntored,
+  Isotipo,
+  BrandFooter,
   BackButton,
   StepTitle,
   Screen,
@@ -26,8 +27,7 @@ export {
 } from './catalog.tsx'
 export {
   KvRows,
-  ProcessedBy,
-  BankBlock,
+  SupportNote,
   Receipt,
   Pasarela,
   StatusTracker,

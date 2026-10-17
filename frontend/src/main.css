@@ -4,25 +4,41 @@
 
 @layer base {
   :root {
-    --blue-normal: 61 75 102; /* #3d4b66 */
-    --blue-hover: 55 68 92; /* #37445c */
-    --blue-btn: 52 64 97; /* #344061 */
-    --blue-darker: 21 26 36; /* #151a24 */
-    --blue-light-hover: 226 228 232; /* #e2e4e8 */
-    --blue-light-active: 195 199 208; /* #c3c7d0 */
-    --neutral-darker: 53 58 61; /* #353a3d */
-    --neutral-normal: 150 165 175; /* #96a5af */
-    --neutral-light-active: 222 227 230; /* #dee3e6 */
-    --text-01: 51 51 51; /* #333 */
-    --lime: 230 255 0; /* #e6ff00 */
-    --lime-hover: 217 240 0; /* #d9f000 */
-    --lime-text: 26 32 48; /* #1a2030 */
-    --magenta: 227 18 126; /* #e3127e */
+    /* Identidad Insieme: morado #7A1FA2, amarillo #FFC20E, aliados #137766.
+       El ampersand (&) es el signo de unir: el migrante y su familia,
+       Interledger y los servicios locales, el exterior y Colombia. */
+    --brand: 122 31 162; /* #7a1fa2 */
+    --brand-hover: 104 24 140; /* #68188c */
+    --brand-dark: 74 15 102; /* #4a0f66 */
+    --brand-darker: 42 10 58; /* #2a0a3a */
+    --brand-soft: 243 232 249; /* #f3e8f9 */
+    --brand-soft-active: 225 200 240; /* #e1c8f0 */
+    --accent: 255 194 14; /* #ffc20e */
+    --accent-hover: 240 180 0; /* #f0b400 */
+    --accent-text: 42 10 58; /* #2a0a3a */
+    --allies: 19 119 102; /* #137766 (aliados: Interledger, Open Payments) */
+    --allies-soft: 230 243 240; /* #e6f3f0 */
+
+    /* Tokens heredados del prototipo, remapeados a la marca. */
+    --blue-normal: var(--brand);
+    --blue-hover: var(--brand-hover);
+    --blue-btn: var(--brand-dark);
+    --blue-darker: var(--brand-darker);
+    --blue-light-hover: var(--brand-soft);
+    --blue-light-active: var(--brand-soft-active);
+    --neutral-darker: 46 42 50; /* #2e2a32 */
+    --neutral-normal: 120 112 128; /* #787080 */
+    --neutral-light-active: 226 222 232; /* #e2dee8 */
+    --text-01: 61 56 66; /* #3d3842 */
+    --lime: var(--accent);
+    --lime-hover: var(--accent-hover);
+    --lime-text: var(--accent-text);
+    --magenta: 217 45 32; /* #d92d20 (error) */
     --success: 18 161 80; /* #12a150 */
     --success-dark: 14 123 62;
-    --sheet-bg: 245 245 245; /* #f5f5f5 */
-    --page-bg: 233 235 239; /* #e9ebef */
-    --panel-bg: 239 242 243; /* #eff2f3 */
+    --sheet-bg: 248 246 250; /* #f8f6fa */
+    --page-bg: 240 236 244; /* #f0ecf4 */
+    --panel-bg: 244 241 247; /* #f4f1f7 */
   }
 
   html,
@@ -33,6 +49,7 @@
 
   body {
     @apply bg-page font-sans text-neutral-darker antialiased;
+    -webkit-tap-highlight-color: transparent;
   }
 
   button {

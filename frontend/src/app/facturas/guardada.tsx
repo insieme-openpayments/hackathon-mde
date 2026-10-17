@@ -2,10 +2,11 @@ import { useNavigate } from 'react-router-dom'
 import {
   Actions,
   BackButton,
-  ByPuntored,
+  BrandFooter,
   DialogCard,
   Screen
 } from '@/components/insieme'
+import { ActionButton } from './components/buttons.tsx'
 
 export function Component() {
   const navigate = useNavigate()
@@ -24,8 +25,15 @@ export function Component() {
       />
       <Actions>
         <BackButton onClick={() => navigate('/facturas', { replace: true })} />
+        <ActionButton
+          tone="active"
+          grow
+          onClick={() => navigate('/facturas', { replace: true })}
+        >
+          Ver mis facturas
+        </ActionButton>
       </Actions>
-      <ByPuntored />
+      <BrandFooter />
     </Screen>
   )
 }

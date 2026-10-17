@@ -73,8 +73,9 @@ export const OneClickSetupDialog = ({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Pago en un clic</DialogTitle>
-          <DialogDescription className="sr-only">
-            Autoriza un monto máximo en tu billetera para pagar sin redirección.
+          <DialogDescription className="text-sm leading-snug text-neutral-normal">
+            Autoriza una sola vez un monto máximo en tu billetera y paga tus
+            próximas facturas sin salir de Insieme.
           </DialogDescription>
           <Form
             form={form}

@@ -39,18 +39,18 @@ Packages: **P1** design-system, **P2** data-stores, **P3** servicios+home,
 ## Design system (`components/insieme`, barrel `index.ts`; prop types in `types.ts`)
 
 All implemented as stubs in `layout.tsx`, `tip.tsx`, `inputs.tsx`, `catalog.tsx`,
-`display.tsx`. **Decision:** `BankBlock`, `Receipt`, `Pasarela`, `StatusTracker`
+`display.tsx`. **Decision:** `SupportNote`, `Receipt`, `Pasarela`, `StatusTracker`
 live in `components/insieme/display.tsx` (NOT `components/payment`).
 P1 restyles all of them to match the prototype (keep prop types); P5 may refine
 `StatusTracker` / `Receipt` behaviour (steps derived from `status` / `events`).
 
-`Logo`, `ByPuntored`, `BackButton{onClick,label?}`, `StepTitle{n,text,tip?}`,
+`Logo`, `BrandFooter`, `BackButton{onClick,label?}`, `StepTitle{n,text,tip?}`,
 `Tip{children,defaultOpen?,autoCloseMs?,icon?}`, `FloatingInput` (forwardRef, RHF
 `register` compatible, `label`, `error`, `trailing`), `MoneyInput{value:number|null,onChange,label,error?}`,
 `SearchInput{value,onChange,placeholder?}`, `CategoryGrid{categories,onSelect(id)}` /
 `CategoryCard`, `CompanyList{products,onSelect(product),empty?}` / `CompanyRow` /
 `CompanyLogo{name,logo}`, `SortSelect{value:'asc'|'desc',onChange}`, `KvRows{rows: KvRow[]}`
-(`KvRow {label, value: ReactNode, className?}`), `ProcessedBy`, `BankBlock` ("Interledger Payments" text),
+(`KvRow {label, value: ReactNode, className?}`), `SupportNote` (correo y WhatsApp de soporte),
 `Receipt{title,tone?,subtitle?,rows,children?}`, `Pasarela{icon?,message?}`,
 `StatusTracker{status,events}` (+ `TRACKER_STEPS`), `DialogCard{icon?,text,large?,children}`,
 `TitleBox`, `Actions`, `Screen{gray?}`.

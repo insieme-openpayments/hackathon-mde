@@ -52,12 +52,12 @@ export function Component() {
     return (
       <div
         className={cn(
-          'mt-36 flex min-h-full w-full flex-col items-center gap-y-5',
+          'flex w-full flex-1 flex-col items-center justify-center gap-4 px-2 py-16 text-center',
           color
         )}
       >
-        <h1 className={`${color} text-lg font-semibold`}>{text}</h1>
-        <p className="font-semibold">Volviendo a tu pago…</p>
+        <h1 className={`${color} text-xl font-bold leading-tight`}>{text}</h1>
+        <p className="text-sm text-neutral-normal">Volviendo a tu pago…</p>
       </div>
     )
   }

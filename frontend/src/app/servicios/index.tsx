@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  ByPuntored,
+  BrandFooter,
   CategoryGrid,
   CompanyList,
   Screen,
@@ -32,41 +32,48 @@ export function Component() {
 
   return (
     <Screen>
-      <div className="flex w-full flex-col gap-1 rounded-lg bg-sheet p-3">
-        <p className="w-full text-xs font-semibold leading-[1.1] text-blue-darker">
-          Ponte al día con tus pagos pendientes, de manera rápida y segura
+      <div className="flex flex-col gap-1">
+        <h1 className="text-xl font-bold leading-tight text-neutral-darker">
+          Pago de servicios
+        </h1>
+        <p className="text-sm leading-snug text-neutral-normal">
+          Ponte al día con tus pagos pendientes de manera rápida y segura.
         </p>
-        <p className="w-full text-2xs text-blue-darker">
-          Visualiza y guarda tus facturas para próximos pagos
-        </p>
-        <div className="mt-1 flex w-full items-start gap-1">
-          <button
-            type="button"
+      </div>
+
+      <div className="flex w-full flex-col gap-3 rounded-2xl bg-brand-soft p-4">
+        <div className="flex flex-col gap-0.5">
+          <p className="text-sm font-semibold text-neutral-darker">
+            Facturas guardadas
+          </p>
+          <p className="text-2xs leading-snug text-neutral-normal">
+            Guarda tus facturas frecuentes y págalas en segundos.
+          </p>
+        </div>
+        <div className="flex w-full flex-wrap gap-2">
+          <Button
+            aria-label="Ver mis facturas guardadas"
+            variant="outline"
+            size="sm"
+            className="min-w-0 flex-1"
             onClick={() => navigate('/facturas')}
-            className="flex flex-1 items-center gap-2 rounded-pill border border-blue-normal bg-white px-3 py-2 text-left hover:shadow-soft"
           >
-            <img
-              src="/assets/servicios/facturas-doc.svg"
-              alt=""
-              width={16}
-              height={20}
-            />
-            <span className="text-2xs text-blue-normal">
-              Facturas guardadas
-            </span>
-          </button>
-          <button
-            type="button"
+            Ver mis facturas
+          </Button>
+          <Button
+            aria-label="Guardar una factura"
+            variant="dark"
+            size="sm"
+            className="min-w-0 flex-1"
             onClick={() => navigate('/facturas/nueva')}
-            className="h-10 w-[90px] rounded-pill bg-blue-normal text-2xs font-medium text-white hover:bg-blue-hover"
           >
-            + Facturas
-          </button>
+            + Guardar factura
+          </Button>
         </div>
       </div>
 
-      <p className="w-full text-xs leading-[1.1] text-neutral-darker">
-        Busca por empresa o selecciona la categoría del pago a realizar
+      <p className="w-full text-sm leading-snug text-neutral-darker">
+        Busca la empresa o elige la categoría del pago.
       </p>
 
       <div className="relative z-[5] w-full">
@@ -76,15 +83,12 @@ export function Component() {
           placeholder="Busca por empresa o convenio"
         />
         {results ? (
-          <div
-            role="listbox"
-            className="absolute inset-x-0 top-full z-10 mt-1 max-h-[260px] overflow-y-auto rounded-lg bg-white shadow-medium"
-          >
+          <div className="absolute inset-x-0 top-full z-10 mt-2 max-h-[280px] overflow-y-auto rounded-xl shadow-medium">
             <CompanyList
               products={results}
               onSelect={(p) => navigate(`/servicios/pagar/${p.id}`)}
               empty={
-                <p className="p-3 text-xs text-neutral-darker">
+                <p className="p-4 text-sm text-neutral-normal">
                   No encontramos empresas o convenios con ese nombre
                 </p>
               }
@@ -94,13 +98,13 @@ export function Component() {
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-2 gap-2">
+        <div className="grid grid-cols-2 gap-2.5">
           {Array.from({ length: 12 }, (_, i) => (
-            <Shimmer key={i} className="h-12" />
+            <Shimmer key={i} className="h-14 rounded-xl" />
           ))}
         </div>
       ) : isError ? (
-        <p className="text-xs text-magenta">
+        <p className="text-sm text-magenta">
           No pudimos cargar las categorías, intenta de nuevo
         </p>
       ) : (
@@ -112,14 +116,14 @@ export function Component() {
 
       <div className="mt-2 flex w-full flex-col items-center gap-4">
         <Button
-          aria-label="Volver"
-          variant="dark"
+          aria-label="Volver al inicio"
+          variant="outline"
           className="w-full"
           onClick={() => navigate('/')}
         >
           Volver
         </Button>
-        <ByPuntored />
+        <BrandFooter />
       </div>
     </Screen>
   )

@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
-  ByPuntored,
+  BrandFooter,
   CategoryCard,
   CategoryGrid,
   CompanyList,
@@ -47,32 +47,27 @@ export function Component() {
       {category ? (
         <CategoryCard category={category} variant="plain" />
       ) : isLoading ? (
-        <Shimmer className="h-12" />
+        <Shimmer className="h-14 rounded-xl" />
       ) : null}
 
-      <div className="flex w-full flex-col gap-3">
-        <p className="w-full text-center text-2xs text-neutral-darker">
-          Selecciona o filtra la opción de empresa por el pago
+      <div className="flex w-full items-center justify-between gap-3">
+        <p className="min-w-0 text-sm leading-snug text-neutral-darker">
+          Elige la empresa a la que vas a pagar
         </p>
-        <div className="flex w-full items-start justify-center gap-4">
-          <span className="whitespace-nowrap pt-1 text-2xs text-[#444a4f]">
-            Ordenar por:
-          </span>
-          <SortSelect value={sort} onChange={setSort} />
-        </div>
+        <SortSelect value={sort} onChange={setSort} />
       </div>
 
-      <div className="w-full">
+      <div className="flex w-full flex-col gap-2">
         <SearchInput
           value={query}
           onChange={setQuery}
-          placeholder="Busca por empresa o convenio"
+          placeholder="Filtra por nombre"
         />
-        <div className="mt-1 max-h-[260px] overflow-y-auto rounded-lg bg-white shadow-medium">
+        <div className="max-h-[320px] overflow-y-auto rounded-xl">
           {isLoading ? (
-            <div className="flex flex-col gap-2 p-2">
+            <div className="flex flex-col gap-2">
               {Array.from({ length: 4 }, (_, i) => (
-                <Shimmer key={i} className="h-10" />
+                <Shimmer key={i} className="h-12 rounded-xl" />
               ))}
             </div>
           ) : (
@@ -80,7 +75,7 @@ export function Component() {
               products={list}
               onSelect={(p) => navigate(`/servicios/pagar/${p.id}`)}
               empty={
-                <p className="p-3 text-xs text-neutral-darker">
+                <p className="p-4 text-sm text-neutral-normal">
                   No encontramos empresas o convenios con ese nombre
                 </p>
               }
@@ -90,23 +85,40 @@ export function Component() {
       </div>
 
       {isError ? (
-        <p className="text-xs text-magenta">
+        <p className="text-sm text-magenta">
           No pudimos cargar las empresas, intenta de nuevo
         </p>
       ) : (
-        <CategoryGrid categories={categories ?? []} onSelect={pick} />
+        <details className="group w-full">
+          <summary className="flex cursor-pointer list-none items-center justify-between rounded-xl border border-neutral-light-active bg-white px-4 py-3 text-sm font-medium text-brand [&::-webkit-details-marker]:hidden">
+            Cambiar de categoría
+            <img
+              src="/assets/icons/chevron-down.svg"
+              alt=""
+              width={16}
+              height={16}
+              className="h-4 w-4 transition-transform group-open:rotate-180"
+            />
+          </summary>
+          <CategoryGrid
+            className="mt-2"
+            categories={categories ?? []}
+            selectedId={categoryId}
+            onSelect={pick}
+          />
+        </details>
       )}
 
       <div className="mt-2 flex w-full flex-col items-center gap-4">
         <Button
           aria-label="Volver"
-          variant="dark"
+          variant="outline"
           className="w-full"
           onClick={() => navigate(-1)}
         >
           Volver
         </Button>
-        <ByPuntored />
+        <BrandFooter />
       </div>
     </Screen>
   )

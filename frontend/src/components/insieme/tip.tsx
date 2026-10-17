@@ -1,5 +1,5 @@
-// Tooltip (Figma 190:15880): "!" icon that opens a small bubble.
-// Radix Popover, controlled, auto-closes after 3.5 s.
+// Tooltip: "!" icon that opens a small bubble. Radix Popover, controlled,
+// auto-closes after 3.5 s.
 import { useEffect, useState } from 'react'
 import {
   Popover,
@@ -31,10 +31,10 @@ export function Tip({
           type="button"
           aria-label="Más información"
           className={cn(
-            'inline-flex shrink-0 items-center justify-center bg-transparent p-0',
+            'inline-flex shrink-0 items-center justify-center rounded-full bg-transparent p-0 text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand',
             icon === 'alert'
-              ? 'h-[18px] w-[18px]'
-              : 'h-[14px] w-[14px] rounded-full border border-blue-normal bg-white p-px',
+              ? 'h-5 w-5'
+              : 'h-4 w-4 border border-brand bg-white',
             className
           )}
         >
@@ -42,9 +42,9 @@ export function Tip({
             <img
               src="/assets/icons/alert-circle.svg"
               alt=""
-              width={18}
-              height={18}
-              className="h-[18px] w-[18px] max-w-none"
+              width={20}
+              height={20}
+              className="h-5 w-5 max-w-none"
             />
           ) : (
             <img
@@ -59,12 +59,9 @@ export function Tip({
       </PopoverTrigger>
       <PopoverContent
         role="tooltip"
-        sideOffset={3}
+        sideOffset={4}
         className={cn(
-          'w-auto max-w-[240px] text-blue-darker shadow-none',
-          icon === 'alert'
-            ? 'rounded-md border-0 bg-panel p-2.5 text-[10px] leading-[1.1]'
-            : 'rounded border border-blue-normal bg-white px-2 py-1 text-[8px] leading-[9px]'
+          'w-auto max-w-[260px] rounded-xl border border-brand-soft-active bg-white px-3 py-2 text-2xs leading-snug text-neutral-darker shadow-medium'
         )}
       >
         {children}

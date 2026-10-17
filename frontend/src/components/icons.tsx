@@ -1,32 +1,5 @@
 import { SVGProps } from 'react'
 
-/** Placeholder brand mark. The design-system package (P1) restyles it. */
-export const Logo = (props: SVGProps<SVGSVGElement>) => {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 100 30"
-      width="100"
-      height="30"
-      role="img"
-      aria-label="Insieme Payments"
-      {...props}
-    >
-      <rect width="100" height="30" rx="5" fill="#3d4b66" />
-      <text
-        x="50"
-        y="19"
-        textAnchor="middle"
-        fontSize="10"
-        fontWeight="600"
-        fill="#fff"
-      >
-        Insieme Payments
-      </text>
-    </svg>
-  )
-}
-
 export const OpenPaymentsMark = (props: SVGProps<SVGSVGElement>) => {
   return (
     <svg

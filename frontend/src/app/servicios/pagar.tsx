@@ -4,8 +4,7 @@ import { useSnapshot } from 'valtio'
 import {
   Actions,
   BackButton,
-  BankBlock,
-  ByPuntored,
+  BrandFooter,
   FloatingInput,
   MoneyInput,
   Screen,
@@ -142,7 +141,7 @@ export function Component() {
   if (catalogError && !data) {
     return (
       <Screen>
-        <p className="text-sm text-neutral-darker">
+        <p className="text-base text-neutral-darker">
           No pudimos cargar el catálogo, intenta de nuevo
         </p>
         <Button
@@ -159,7 +158,7 @@ export function Component() {
   if (!product) {
     return (
       <Screen>
-        <p className="text-sm text-neutral-darker">
+        <p className="text-base text-neutral-darker">
           No encontramos la empresa seleccionada
         </p>
         <Button
@@ -193,30 +192,31 @@ export function Component() {
   ]
 
   return (
-    <Screen className={step2 ? 'pb-72' : undefined}>
-      <div className="flex w-full items-center gap-2">
+    <Screen>
+      <div className="flex w-full items-center gap-3 rounded-2xl bg-brand-soft p-3">
         {category?.icon ? (
-          <span className="flex h-[30px] flex-shrink-0 items-center justify-center rounded-[3px] p-[5px]">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white">
             <img
               src={categoryIcon(category.icon)}
               alt=""
-              className="h-full w-auto"
+              className="h-6 w-auto"
             />
           </span>
         ) : null}
-        <span className="h-[30px] w-px bg-blue-normal" aria-hidden="true" />
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <p className="text-sm font-semibold leading-[1.2] text-blue-normal">
+          <p className="text-2xs font-semibold uppercase tracking-wide text-brand">
             {categoryLabel}
           </p>
-          <p className="text-xs font-medium leading-[1.1] text-neutral-darker">
+          <h1 className="text-base font-bold leading-tight text-neutral-darker [overflow-wrap:anywhere]">
             {product.name}
-          </p>
+          </h1>
         </div>
       </div>
 
-      <p className="w-full text-xs leading-[1.1] text-neutral-darker">
-        Ingresa los siguientes datos
+      <p className="w-full text-sm leading-snug text-neutral-darker">
+        {step2
+          ? 'Revisa los datos de tu factura'
+          : 'Ingresa la referencia que aparece en tu factura'}
       </p>
 
       <form onSubmit={onSubmit} className="flex w-full flex-col gap-4">
@@ -231,7 +231,6 @@ export function Component() {
           value={ref1}
           readOnly={step2}
           error={refError || undefined}
-          className={step2 ? 'opacity-60' : undefined}
           onChange={(e) => {
             setRef1(digits(e.target.value).slice(0, REF_MAX))
             setRefError('')
@@ -240,22 +239,22 @@ export function Component() {
 
         {step2 ? (
           <>
-            <dl className="flex w-full flex-col gap-1 rounded-lg bg-sheet p-3 text-xs">
-              <div className="flex justify-between gap-2">
-                <dt className="text-neutral-darker">Titular</dt>
-                <dd className="text-right font-medium text-black">
+            <dl className="flex w-full flex-col gap-2 rounded-2xl border border-brand-soft-active bg-white p-4 text-sm">
+              <div className="flex justify-between gap-3">
+                <dt className="shrink-0 text-neutral-normal">Titular</dt>
+                <dd className="min-w-0 text-right font-semibold text-neutral-darker [overflow-wrap:anywhere]">
                   {bill.holder}
                 </dd>
               </div>
-              <div className="flex justify-between gap-2">
-                <dt className="text-neutral-darker">Concepto</dt>
-                <dd className="text-right font-medium text-black">
+              <div className="flex justify-between gap-3">
+                <dt className="shrink-0 text-neutral-normal">Concepto</dt>
+                <dd className="min-w-0 text-right font-semibold text-neutral-darker [overflow-wrap:anywhere]">
                   {bill.concept}
                 </dd>
               </div>
-              <div className="flex justify-between gap-2">
-                <dt className="text-neutral-darker">Vence</dt>
-                <dd className="text-right font-medium text-black">
+              <div className="flex justify-between gap-3">
+                <dt className="shrink-0 text-neutral-normal">Vence</dt>
+                <dd className="min-w-0 text-right font-semibold text-neutral-darker">
                   {formatDue(bill.dueDate)}
                 </dd>
               </div>
@@ -273,13 +272,9 @@ export function Component() {
                 }
               />
               {partial ? (
-                <div className="absolute right-3 top-3">
+                <div className="absolute right-3.5 top-3.5">
                   <Tip defaultOpen icon="alert">
-                    <span>
-                      Tu factura permite
-                      <br />
-                      pagos parciales
-                    </span>
+                    Tu factura permite pagos parciales: puedes cambiar el valor.
                   </Tip>
                 </div>
               ) : null}
@@ -289,7 +284,6 @@ export function Component() {
 
         {step2 ? null : (
           <>
-            <BankBlock />
             <Actions>
               <BackButton onClick={() => navigate(-1)} />
               <Button
@@ -302,16 +296,14 @@ export function Component() {
                 {loading ? 'Consultando…' : 'Consultar'}
               </Button>
             </Actions>
+            <BrandFooter />
           </>
         )}
       </form>
 
       {step2 ? (
         <>
-          <BankBlock />
-          <div className="flex justify-center">
-            <ByPuntored />
-          </div>
+          <BrandFooter />
           <ConfirmPanel
             rows={rows}
             amount={amount ?? 0}

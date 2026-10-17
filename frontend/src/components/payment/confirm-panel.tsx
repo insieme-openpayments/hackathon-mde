@@ -22,7 +22,6 @@ import { setProfile } from '@/lib/stores/profile-store.ts'
 import { resetToken } from '@/lib/stores/token-store.ts'
 import { setPaymentDraft } from '@/lib/stores/payment-draft-store.ts'
 import { confirmWalletSchema } from '@/lib/schemas.ts'
-import { cn } from '@/lib/utils.ts'
 import type {
   OrderItemDetails,
   OrderItemInput,
@@ -203,12 +202,15 @@ export function ConfirmPanel({
   const walletError = form.formState.errors.walletAddressUrl?.message
 
   return (
-    <section className="fixed inset-x-0 bottom-0 z-20 mx-auto flex w-full max-w-[420px] animate-sheet-up flex-col gap-3 bg-sheet p-4 shadow-sheet">
+    <section
+      aria-label="Confirmar pago"
+      className="sticky bottom-0 z-20 -mx-4 -mb-8 mt-auto flex animate-sheet-up flex-col gap-3 rounded-t-3xl border-t border-brand-soft-active bg-white px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 shadow-sheet sm:-mx-6 sm:rounded-b-3xl sm:px-6"
+    >
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
-        className="flex items-center gap-1 self-end text-2xs text-blue-normal"
+        className="flex items-center gap-1 self-end rounded-md text-2xs font-medium text-brand focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
       >
         {open ? 'Ocultar detalles' : 'Ver detalles'}
         <img
@@ -236,10 +238,14 @@ export function ConfirmPanel({
       >
         {open ? (
           <>
-            <h3 className="text-sm font-medium">Confirma la transacción</h3>
-            <KvRows rows={rows} />
+            <h3 className="text-base font-bold text-neutral-darker">
+              Confirma la transacción
+            </h3>
+            <div className="max-h-[36vh] overflow-y-auto rounded-2xl bg-sheet p-3">
+              <KvRows rows={rows} />
+            </div>
             <FloatingInput
-              label="Billetera"
+              label="Tu billetera"
               placeholder="$ilp.interledger-test.dev/tu-billetera"
               autoComplete="off"
               inputMode="url"
@@ -247,13 +253,13 @@ export function ConfirmPanel({
               {...form.register('walletAddressUrl')}
             />
             {hasMatchingToken ? (
-              <p className="text-2xs text-success">
+              <p className="text-2xs leading-snug text-allies">
                 Pago en un clic activo para esta billetera: se pagará sin
-                redirección
+                redirección.
               </p>
             ) : null}
             {rootError ? (
-              <p className="text-2xs text-magenta" role="alert">
+              <p className="text-2xs leading-snug text-magenta" role="alert">
                 {rootError}
               </p>
             ) : null}
@@ -267,9 +273,9 @@ export function ConfirmPanel({
             variant={enabled && !busy ? 'active' : 'disabled'}
             aria-disabled={!enabled || busy}
             disabled={busy}
-            className={cn('flex-1')}
+            className="min-w-0 flex-1"
           >
-            Confirmar
+            {busy ? 'Procesando…' : open ? 'Confirmar y pagar' : 'Confirmar'}
           </Button>
         </Actions>
       </form>
@@ -280,7 +286,7 @@ export function ConfirmPanel({
           trigger={
             <button
               type="button"
-              className="self-center text-2xs text-blue-normal underline"
+              className="self-center rounded-md text-2xs font-medium text-brand underline underline-offset-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand"
             >
               Configurar pago en un clic
             </button>

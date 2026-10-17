@@ -5,6 +5,23 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        brand: {
+          'DEFAULT': 'rgb(var(--brand) / <alpha-value>)',
+          'hover': 'rgb(var(--brand-hover) / <alpha-value>)',
+          'dark': 'rgb(var(--brand-dark) / <alpha-value>)',
+          'darker': 'rgb(var(--brand-darker) / <alpha-value>)',
+          'soft': 'rgb(var(--brand-soft) / <alpha-value>)',
+          'soft-active': 'rgb(var(--brand-soft-active) / <alpha-value>)'
+        },
+        accent: {
+          DEFAULT: 'rgb(var(--accent) / <alpha-value>)',
+          hover: 'rgb(var(--accent-hover) / <alpha-value>)',
+          text: 'rgb(var(--accent-text) / <alpha-value>)'
+        },
+        allies: {
+          DEFAULT: 'rgb(var(--allies) / <alpha-value>)',
+          soft: 'rgb(var(--allies-soft) / <alpha-value>)'
+        },
         blue: {
           'normal': 'rgb(var(--blue-normal) / <alpha-value>)',
           'hover': 'rgb(var(--blue-hover) / <alpha-value>)',
@@ -35,26 +52,29 @@ module.exports = {
       },
       fontFamily: {
         sans: [
-          'Roboto',
+          'Figtree',
           'system-ui',
           '-apple-system',
           'Segoe UI',
           'sans-serif'
         ],
-        btn: ['Figtree', 'Roboto', 'sans-serif']
+        btn: ['Figtree', 'system-ui', 'sans-serif']
       },
       fontSize: {
-        '3xs': ['8px', '1.1'],
-        '2xs': ['10px', '1.1']
+        '3xs': ['11px', '1.2'],
+        '2xs': ['12px', '1.25']
       },
       boxShadow: {
-        soft: '0 3px 3px rgba(2, 37, 62, 0.08)',
-        medium: '0 8px 10px rgba(2, 37, 62, 0.1)',
-        card: '0 20px 50px rgba(21, 26, 36, 0.18)',
-        sheet: '0 -3px 3px rgba(61, 75, 102, 0.05)'
+        soft: '0 2px 6px rgba(42, 10, 58, 0.08)',
+        medium: '0 8px 20px rgba(42, 10, 58, 0.12)',
+        card: '0 20px 50px rgba(42, 10, 58, 0.16)',
+        sheet: '0 -6px 20px rgba(42, 10, 58, 0.12)'
       },
       borderRadius: {
         pill: '100px'
+      },
+      maxWidth: {
+        app: '480px'
       },
       keyframes: {
         'screen-in': {

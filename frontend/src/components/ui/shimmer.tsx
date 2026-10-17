@@ -7,7 +7,7 @@ export const Shimmer = ({
 }: HTMLAttributes<HTMLDivElement>) => {
   return (
     <div
-      className={cn('animate-pulse rounded-md bg-black/10', className)}
+      className={cn('animate-pulse rounded-md bg-brand-soft', className)}
       {...props}
     />
   )

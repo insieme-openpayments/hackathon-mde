@@ -75,3 +75,26 @@ sed -i '' 's/boutique_backend/insieme_backend/g' backend/.env.local
 Los dos workflows de `prompts/workflows/` se lanzaron desde esta misma sesión; sus scripts
 contienen literalmente los prompts de cada subagente (Sonnet, Haiku, Opus y Fable). El
 resultado de cada ronda se revisó en la sesión principal antes de hacer commit y push.
+
+## 12. Identidad visual y limpieza de textos (17 oct 2026)
+
+> Acabo de incluir isotipo-insieme.png y logo-insieme.webp para que lo analices y regeneres la UI
+> con el look n feel apropiado. Requiero que la UI sea responsive, la UX fluida e intuitiva, con
+> textos claros, elimina los textos que mencionan Davivienda, linea telefonica diferente a la 333...
+> y la sección que tiene "Transacción procesada por" "Entidad financiera responsable"
+> "Corresponsal de". Verifica que los textos largos se rendericen correctamente y en caso de
+> existir logotipos que se presenten en proporciones adecuadas.
+
+Manual de identidad enviado a continuación por el equipo (resumen literal):
+
+> Logo horizontal de Insieme: ampersand y palabra insieme en amarillo sobre morado. Para portadas,
+> encabezados, la diapositiva de cierre y cualquier lugar donde la marca deba leerse completa.
+> Isotipo &: para espacios pequeños: los nodos de Insieme en los diagramas, el ícono de la app, el
+> avatar en redes y el favicon.
+> Concepto: Insieme significa "juntos" en italiano. El ampersand (&) es el signo de unir: el
+> migrante y su familia, Interledger y Servicios locales, el exterior y Colombia.
+> Color: Morado #7A1FA2, Amarillo #FFC20E, Aliados #137766.
+
+Los archivos de marca (`frontend/public/brand/`) los aportó el equipo; Claude Code los recortó y
+redimensionó (favicon, apple-touch-icon, logo del encabezado) y recortó el espacio en blanco de
+los logos de convenios en `backend/images/convenios/`.

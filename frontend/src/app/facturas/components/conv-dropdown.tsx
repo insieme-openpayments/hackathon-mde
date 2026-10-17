@@ -35,7 +35,7 @@ export function ConvDropdown({
             setQuery('')
             setOpen(false)
           }}
-          className="flex items-center gap-1 self-end text-2xs text-blue-normal"
+          className="flex items-center gap-1 self-end text-2xs font-medium text-brand"
         >
           <span>Borrar selección</span>
           <img
@@ -75,7 +75,7 @@ export function ConvDropdown({
       {open ? (
         <div
           role="listbox"
-          className="absolute inset-x-0 top-full z-20 mt-1 flex max-h-56 flex-col overflow-y-auto rounded bg-white shadow-medium no-scrollbar"
+          className="no-scrollbar absolute inset-x-0 top-full z-20 mt-1 flex max-h-56 flex-col overflow-y-auto rounded-xl border border-neutral-light-active bg-white shadow-medium"
         >
           {!hasCategory ? (
             <button
@@ -84,7 +84,7 @@ export function ConvDropdown({
                 setOpen(false)
                 onNeedCategory()
               }}
-              className="p-3 text-left text-sm text-blue-normal"
+              className="p-3 text-left text-sm font-medium text-brand"
             >
               Primero selecciona la categoría o servicio ›
             </button>
@@ -100,13 +100,13 @@ export function ConvDropdown({
                   setQuery('')
                   setOpen(false)
                 }}
-                className="p-3 text-left text-sm hover:bg-panel"
+                className="border-b border-neutral-light-active p-3 text-left text-sm text-neutral-darker last:border-b-0 hover:bg-brand-soft"
               >
                 {p.name}
               </button>
             ))
           ) : (
-            <p className="p-3 text-sm text-text01">
+            <p className="p-3 text-sm text-neutral-normal">
               No encontramos convenios con ese nombre
             </p>
           )}

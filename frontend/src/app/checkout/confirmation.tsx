@@ -2,11 +2,12 @@ import { useEffect, useRef, useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import {
   Actions,
-  BankBlock,
+  BrandFooter,
   Pasarela,
   Receipt,
   Screen,
   StatusTracker,
+  SupportNote,
   TitleBox,
   type KvRow
 } from '@/components/insieme'
@@ -27,7 +28,8 @@ import { getFactura, markPaid } from '@/lib/stores/facturas-store.ts'
 import { checkoutConfirmationSearchParamsSchema } from '../route-schemas.ts'
 
 const TIMEOUT_MS = 90_000
-const LINK_CLASS = 'self-center text-2xs text-blue-normal underline'
+const LINK_CLASS =
+  'self-center text-sm font-medium text-brand underline underline-offset-2'
 
 function receiptRows(
   order: OrderReceipt,
@@ -43,7 +45,7 @@ function receiptRows(
     { label: 'Estado', value: estado.label, tone: estado.tone },
     { label: 'Operación', value: 'Pago de servicios' },
     {
-      label: 'Numero de autorización',
+      label: 'Número de autorización',
       value: order.settlement?.authCode ?? '—'
     },
     { label: 'ID transacción', value: order.id },
@@ -172,20 +174,25 @@ export function Component() {
   if (status === OrderStatus.PROCESSING || status === OrderStatus.COMPLETED) {
     return (
       <Screen>
-        <TitleBox variant="plain">Procesando tu transacción</TitleBox>
+        <TitleBox variant="plain">Procesando tu pago</TitleBox>
+        <p className="text-center text-sm text-neutral-normal">
+          Esto puede tardar unos segundos. No cierres esta pantalla.
+        </p>
         <StatusTracker status={status} events={order.events} />
         {timedOut ? (
-          <p className="text-center text-xs text-neutral-normal" role="status">
-            La confirmación está tardando; revisa el historial más tarde.
+          <p className="text-center text-sm text-neutral-normal" role="status">
+            La confirmación está tardando más de lo normal. Puedes volver más
+            tarde con este mismo enlace.
           </p>
         ) : null}
+        <BrandFooter />
       </Screen>
     )
   }
 
   if (status === OrderStatus.SETTLED) {
     return (
-      <Screen gray>
+      <Screen>
         <Receipt
           title="¡Transacción exitosa!"
           rows={receiptRows(order, {
@@ -193,15 +200,8 @@ export function Component() {
             tone: 'success'
           })}
         >
-          <div className="flex flex-col items-center gap-2">
-            <BankBlock className="items-center text-center" />
-            <p className="text-center text-2xs">
-              Línea de atención personalizada Davivienda en Bogotá: 3487881
-              <br />
-              Resto del Pais: 01 8000 960 505
-            </p>
-          </div>
-          <div className="flex flex-col gap-2">
+          <SupportNote />
+          <div className="flex flex-col gap-3">
             {isFacturas ? (
               <Link to="/facturas" className={LINK_CLASS}>
                 Ver mis facturas
@@ -209,6 +209,7 @@ export function Component() {
             ) : null}
             {homeLink}
           </div>
+          <BrandFooter />
         </Receipt>
       </Screen>
     )
@@ -216,13 +217,15 @@ export function Component() {
 
   if (status === OrderStatus.SETTLEMENT_FAILED) {
     return (
-      <Screen gray>
+      <Screen>
         <Receipt
           title="No pudimos pagar la factura. Tu dinero queda registrado para reintento/reembolso."
           tone="warning"
           rows={receiptRows(order, { label: 'Pago recibido' })}
         >
+          <SupportNote />
           {homeLink}
+          <BrandFooter />
         </Receipt>
       </Screen>
     )
@@ -230,13 +233,13 @@ export function Component() {
 
   const rejected = status === OrderStatus.REJECTED
   return (
-    <Screen gray>
+    <Screen>
       <Receipt
         title={rejected ? 'Transacción rechazada' : 'Transacción fallida'}
         tone="error"
         subtitle={
           rejected ? undefined : (
-            <p className="text-center text-xs">
+            <p className="text-center text-sm">
               Verifica tus fondos e inténtalo de nuevo.
             </p>
           )
@@ -257,6 +260,8 @@ export function Component() {
           </Button>
         </Actions>
         {homeLink}
+        <SupportNote />
+        <BrandFooter />
       </Receipt>
     </Screen>
   )

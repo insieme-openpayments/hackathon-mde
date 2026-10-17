@@ -4,13 +4,13 @@ import { cn } from '@/lib/utils.ts'
 type Tone = 'active' | 'disabled' | 'secondary' | 'dark' | 'yes' | 'no' | 'blue'
 
 const tones: Record<Tone, string> = {
-  active: 'bg-lime text-lime-text hover:bg-lime-hover',
+  active: 'bg-accent text-accent-text shadow-soft hover:bg-accent-hover',
   disabled: 'cursor-not-allowed bg-neutral-light-active text-neutral-normal',
-  secondary: 'border border-blue-normal bg-white text-blue-normal',
-  dark: 'bg-blue-normal text-white hover:bg-blue-hover',
-  blue: 'bg-blue-hover text-white hover:bg-blue-normal',
-  yes: 'bg-blue-normal text-white hover:bg-blue-hover',
-  no: 'border border-blue-normal bg-white text-blue-normal'
+  secondary: 'border border-brand bg-white text-brand hover:bg-brand-soft',
+  dark: 'bg-brand text-white hover:bg-brand-hover',
+  blue: 'bg-brand text-white hover:bg-brand-hover',
+  yes: 'bg-brand text-white hover:bg-brand-hover',
+  no: 'border border-brand bg-white text-brand hover:bg-brand-soft'
 }
 
 interface ActionButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
@@ -18,7 +18,7 @@ interface ActionButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
   grow?: boolean
 }
 
-/** Local prototype-style button (keeps P4 independent of ui/button variants). */
+/** Pill button used across the Facturas screens. */
 export function ActionButton({
   tone,
   grow,
@@ -32,9 +32,9 @@ export function ActionButton({
       disabled={disabled}
       aria-disabled={tone === 'disabled' || undefined}
       className={cn(
-        'flex h-10 items-center justify-center rounded-pill px-6 font-btn text-sm font-medium transition-colors',
+        'flex h-11 items-center justify-center rounded-pill px-6 font-btn text-sm font-semibold transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2',
         tones[tone],
-        grow && 'flex-1',
+        grow && 'min-w-0 flex-1',
         className
       )}
       {...props}

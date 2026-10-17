@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import {
   Actions,
   BackButton,
-  ByPuntored,
+  BrandFooter,
   FloatingInput,
   Screen,
   TitleBox
@@ -27,7 +27,9 @@ export function Component() {
   if (!factura) {
     return (
       <Screen>
-        <p className="text-sm">La factura ya no existe.</p>
+        <p className="text-base text-neutral-darker">
+          La factura ya no existe.
+        </p>
         <ActionButton tone="dark" onClick={() => navigate('/facturas')}>
           Volver
         </ActionButton>
@@ -46,9 +48,9 @@ export function Component() {
 
   return (
     <Screen>
-      <TitleBox>Guardar facturas</TitleBox>
-      <p className="text-sm text-neutral-darker">
-        Selecciona la categoría o servicio:
+      <TitleBox>Editar factura</TitleBox>
+      <p className="text-sm leading-snug text-neutral-darker">
+        Solo puedes cambiar el nombre de la factura.
       </p>
       <CategorySelector
         category={
@@ -104,7 +106,7 @@ export function Component() {
           Guardar
         </ActionButton>
       </Actions>
-      <ByPuntored />
+      <BrandFooter />
     </Screen>
   )
 }

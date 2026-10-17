@@ -1,4 +1,4 @@
-// Form inputs (Input-v2 with floating label, money, search).
+// Form inputs (floating label, money, search).
 import { forwardRef, useId } from 'react'
 import { get, useFormContext } from 'react-hook-form'
 import { cn } from '@/lib/utils.ts'
@@ -18,9 +18,9 @@ function useContextError(name: string | undefined): string | undefined {
 }
 
 /**
- * Floating-label input (prototype `.sv-input`, 40px high, label sits on the
- * top border). Works with react-hook-form: `<FloatingInput {...register('x')} />`;
- * the error is read from the form context unless `error` is passed.
+ * Floating-label input (48px high, label sits on the top border). Works with
+ * react-hook-form: `<FloatingInput {...register('x')} />`; the error is read
+ * from the form context unless `error` is passed.
  */
 export const FloatingInput = forwardRef<HTMLInputElement, FloatingInputProps>(
   (
@@ -47,13 +47,14 @@ export const FloatingInput = forwardRef<HTMLInputElement, FloatingInputProps>(
     return (
       <div className={cn('flex w-full flex-col gap-1', className)}>
         <div
-          className={cn('relative h-10 w-full shrink-0', dim && 'opacity-50')}
+          className={cn('relative h-12 w-full shrink-0', dim && 'opacity-60')}
         >
           <label
             htmlFor={inputId}
             className={cn(
-              'flex h-full w-full cursor-text items-center gap-2.5 rounded-md border bg-white p-2.5 transition-colors focus-within:border-blue-normal',
-              message ? 'border-magenta' : 'border-blue-light-active'
+              'flex h-full w-full cursor-text items-center gap-2.5 rounded-xl border bg-white px-3.5 transition-colors focus-within:border-brand focus-within:ring-1 focus-within:ring-brand',
+              message ? 'border-magenta' : 'border-neutral-light-active',
+              (readOnly || props.disabled) && 'bg-sheet'
             )}
           >
             {leading}
@@ -65,14 +66,20 @@ export const FloatingInput = forwardRef<HTMLInputElement, FloatingInputProps>(
               aria-invalid={message ? true : undefined}
               aria-describedby={message ? errorId : undefined}
               className={cn(
-                'm-0 min-w-0 flex-[1_0_0] truncate border-0 bg-transparent p-0 text-xs leading-[1.1] text-neutral-darker placeholder:text-[#5a6369] placeholder:opacity-100 outline-none ring-0 focus:ring-0',
+                'm-0 min-w-0 flex-[1_0_0] truncate border-0 bg-transparent p-0 text-sm leading-tight text-neutral-darker outline-none ring-0 placeholder:text-neutral-normal placeholder:opacity-100 focus:ring-0 disabled:cursor-default disabled:text-neutral-darker',
                 readOnly && 'cursor-default'
               )}
               {...props}
             />
             {trailing}
           </label>
-          <span className="pointer-events-none absolute -top-2.5 left-[19px] flex h-4 items-center whitespace-nowrap bg-white px-0.5 text-xs font-medium leading-[1.1] text-blue-darker">
+          <span
+            className={cn(
+              'pointer-events-none absolute -top-2 left-3 flex h-4 items-center whitespace-nowrap rounded px-1 text-2xs font-semibold leading-none',
+              message ? 'text-magenta' : 'text-brand',
+              readOnly || props.disabled ? 'bg-sheet' : 'bg-white'
+            )}
+          >
             {label}
           </span>
         </div>
@@ -80,7 +87,7 @@ export const FloatingInput = forwardRef<HTMLInputElement, FloatingInputProps>(
           <p
             id={errorId}
             role="alert"
-            className="text-[10px] leading-[1.1] text-magenta"
+            className="px-1 text-2xs leading-snug text-magenta"
           >
             {message}
           </p>
@@ -128,7 +135,7 @@ export const MoneyInput = forwardRef<HTMLInputElement, MoneyInputProps>(
       readOnly={readOnly}
       dim={dim}
       trailing={trailing}
-      className={className}
+      className={cn('[&_input]:text-base [&_input]:font-semibold', className)}
       inputMode="numeric"
       autoComplete="off"
       placeholder={placeholder}
@@ -145,7 +152,7 @@ export const MoneyInput = forwardRef<HTMLInputElement, MoneyInputProps>(
 )
 MoneyInput.displayName = 'MoneyInput'
 
-/** Pill search field (prototype `.sv-search`). */
+/** Pill search field. */
 export function SearchInput({
   value,
   onChange,
@@ -155,7 +162,7 @@ export function SearchInput({
   return (
     <label
       className={cn(
-        'flex h-10 w-full cursor-text items-center gap-[15px] rounded-pill border border-neutral-light-active bg-white px-4 py-2.5 focus-within:border-blue-light-active',
+        'flex h-12 w-full cursor-text items-center gap-3 rounded-pill border border-neutral-light-active bg-white px-4 transition-colors focus-within:border-brand focus-within:ring-1 focus-within:ring-brand',
         className
       )}
     >
@@ -173,7 +180,7 @@ export function SearchInput({
         placeholder={placeholder}
         aria-label={placeholder}
         autoComplete="off"
-        className="m-0 min-w-0 flex-[1_0_0] appearance-none border-0 bg-transparent p-0 text-xs font-medium text-blue-darker opacity-70 outline-none ring-0 placeholder:text-neutral-normal placeholder:opacity-100 focus:ring-0 [&::-webkit-search-cancel-button]:appearance-none"
+        className="m-0 min-w-0 flex-[1_0_0] appearance-none border-0 bg-transparent p-0 text-sm font-medium text-neutral-darker outline-none ring-0 placeholder:text-neutral-normal placeholder:opacity-100 focus:ring-0 [&::-webkit-search-cancel-button]:appearance-none"
       />
     </label>
   )

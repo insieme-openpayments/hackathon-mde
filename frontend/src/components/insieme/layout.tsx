@@ -1,10 +1,9 @@
-// Layout primitives. Mirror of `App.ui` in customer-frontend/js/core.js.
+// Layout primitives of the Insieme design system.
 import { cn } from '@/lib/utils.ts'
-import { Logo as LogoMark } from '@/components/icons.tsx'
 import type {
   ActionsProps,
   BackButtonProps,
-  ByPuntoredProps,
+  BrandFooterProps,
   DialogCardProps,
   LogoProps,
   ScreenProps,
@@ -13,26 +12,53 @@ import type {
 } from './types.ts'
 import { Tip } from './tip.tsx'
 
+/** Horizontal "&insieme" logo. Carries the purple background: use it on brand surfaces. */
 export function Logo({ className }: LogoProps) {
-  return <LogoMark className={cn('h-[30px] w-[100px] shrink-0', className)} />
+  return (
+    <img
+      src="/brand/logo-insieme.png"
+      alt="Insieme"
+      width={129}
+      height={36}
+      className={cn('h-9 w-auto shrink-0 select-none', className)}
+    />
+  )
 }
 
-export function ByPuntored({ className }: ByPuntoredProps) {
+/** "&" isotype (purple rounded square). */
+export function Isotipo({
+  className,
+  size = 40
+}: LogoProps & { size?: number }) {
+  return (
+    <img
+      src="/brand/isotipo-insieme.png"
+      alt=""
+      aria-hidden="true"
+      width={size}
+      height={size}
+      className={cn('shrink-0 select-none rounded-xl', className)}
+      style={{ width: size, height: size }}
+    />
+  )
+}
+
+/** Footer note shown at the end of every screen. */
+export function BrandFooter({ className }: BrandFooterProps) {
   return (
     <div
       className={cn(
-        'flex h-[15px] w-[79px] items-center justify-between',
+        'mt-auto flex w-full items-center justify-center gap-2 pt-2 text-3xs text-neutral-normal',
         className
       )}
     >
-      <span className="text-[8px] text-black">By</span>
-      <img
-        src="/assets/img/puntored-logo.svg"
-        alt="Insieme"
-        width={60}
-        height={15}
-        className="h-[15px] w-[60px]"
-      />
+      <Isotipo size={18} className="rounded-[5px]" />
+      <span>
+        Pagos seguros con{' '}
+        <span className="font-semibold text-allies">
+          Interledger Open Payments
+        </span>
+      </span>
     </div>
   )
 }
@@ -48,29 +74,35 @@ export function BackButton({
       onClick={onClick}
       aria-label={label}
       className={cn(
-        'flex w-9 shrink-0 flex-col items-center gap-0.5 bg-transparent p-0',
+        'flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-brand-soft-active bg-white text-brand transition-colors hover:bg-brand-soft focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand',
         className
       )}
     >
-      <img
-        src="/assets/icons/back-button.svg"
-        alt=""
-        width={36}
-        height={36}
-        className="h-9 w-9"
-      />
-      <span className="text-[10px] leading-[1.1] text-text01">{label}</span>
+      <svg
+        viewBox="0 0 24 24"
+        width="22"
+        height="22"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+      >
+        <path d="M19 12H5" />
+        <path d="m12 19-7-7 7-7" />
+      </svg>
     </button>
   )
 }
 
 export function StepTitle({ n, text, tip, className }: StepTitleProps) {
   return (
-    <div className={cn('relative flex items-center gap-2', className)}>
-      <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-pill bg-blue-normal text-xs font-medium text-white">
+    <div className={cn('relative flex items-start gap-2', className)}>
+      <span className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-pill bg-brand text-xs font-semibold text-white">
         {n}
       </span>
-      <span className="whitespace-nowrap text-sm leading-normal text-black">
+      <span className="min-w-0 text-sm font-medium leading-6 text-neutral-darker">
         {text}
       </span>
       {tip ? <Tip>{tip}</Tip> : null}
@@ -101,8 +133,8 @@ export function TitleBox({
     <h1
       className={cn(
         variant === 'box'
-          ? 'flex min-h-[46px] w-full items-center justify-center rounded-lg bg-neutral-light-active px-3 text-center text-xs font-bold text-blue-normal'
-          : 'w-full text-center text-lg font-normal leading-normal text-neutral-darker',
+          ? 'flex min-h-[48px] w-full items-center justify-center rounded-xl bg-brand-soft px-4 text-center text-base font-bold text-brand'
+          : 'w-full text-center text-xl font-bold leading-tight text-neutral-darker',
         className
       )}
     >
@@ -113,7 +145,7 @@ export function TitleBox({
 
 export function Actions({ children, className }: ActionsProps) {
   return (
-    <div className={cn('flex w-full items-start gap-2', className)}>
+    <div className={cn('flex w-full items-center gap-3', className)}>
       {children}
     </div>
   )
@@ -129,17 +161,17 @@ export function DialogCard({
   return (
     <div
       className={cn(
-        'flex w-full animate-fc-pop flex-col items-center gap-3 rounded-lg bg-white p-4 shadow-soft',
+        'flex w-full animate-fc-pop flex-col items-center gap-4 rounded-2xl border border-brand-soft-active bg-white p-6 shadow-soft',
         className
       )}
     >
       {icon ? (
-        <img src={icon} alt="" width={34} height={34} className="h-[34px]" />
+        <img src={icon} alt="" width={40} height={40} className="h-10 w-10" />
       ) : null}
       <p
         className={cn(
-          'w-full text-center font-semibold leading-[1.2] text-black',
-          large ? 'text-base' : 'text-sm'
+          'w-full text-center font-semibold leading-snug text-neutral-darker',
+          large ? 'text-lg' : 'text-base'
         )}
       >
         {text}

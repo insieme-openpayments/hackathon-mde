@@ -12,7 +12,7 @@ export interface ClassNameProp {
 }
 
 export type LogoProps = ClassNameProp
-export type ByPuntoredProps = ClassNameProp
+export type BrandFooterProps = ClassNameProp
 
 export interface BackButtonProps extends ClassNameProp {
   onClick: () => void
@@ -126,17 +126,7 @@ export interface KvRowsProps extends ClassNameProp {
   rows: KvRow[]
 }
 
-export type ProcessedByProps = ClassNameProp
-export interface BankBlockProps extends ClassNameProp {
-  /** servicios: toggle is interactive. facturas: static arrow. */
-  variant?: 'servicios' | 'facturas'
-  /** Controlled open state (the grey "Entidad financiera" block). */
-  open?: boolean
-  defaultOpen?: boolean
-  onOpenChange?: (open: boolean) => void
-  /** Centers the fine print (receipt). */
-  center?: boolean
-}
+export type SupportNoteProps = ClassNameProp
 
 export interface ReceiptProps extends ClassNameProp {
   /** e.g. "¡Transacción exitosa!" */

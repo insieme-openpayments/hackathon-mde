@@ -3,28 +3,29 @@ import { Slot } from '@radix-ui/react-slot'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
-const ACTIVE = 'bg-lime text-lime-text hover:bg-lime-hover'
+/** Primary call to action: brand yellow with dark text. */
+const PRIMARY =
+  'bg-accent text-accent-text shadow-soft hover:bg-accent-hover active:shadow-none'
 
 export const buttonVariants = cva(
-  'inline-flex h-9 select-none items-center justify-center whitespace-nowrap rounded p-2.5 font-btn text-xs font-medium leading-[1.1] outline-none transition-[background-color,transform] duration-150 focus-visible:ring-2 focus-visible:ring-blue-normal focus-visible:ring-offset-2 active:scale-[.98] disabled:cursor-not-allowed',
+  'inline-flex h-11 select-none items-center justify-center whitespace-nowrap rounded-pill px-5 font-btn text-sm font-semibold leading-none outline-none transition-[background-color,transform,box-shadow] duration-150 focus-visible:ring-2 focus-visible:ring-brand focus-visible:ring-offset-2 active:scale-[.98] disabled:cursor-not-allowed',
   {
     variants: {
       variant: {
         /** Alias of `active`. */
-        default: ACTIVE,
-        active: ACTIVE,
-        disabled: 'cursor-not-allowed bg-blue-btn text-white',
-        dark: 'bg-blue-btn text-white hover:bg-blue-hover',
-        solid:
-          'border border-blue-normal bg-blue-normal font-sans text-white hover:bg-blue-hover',
-        outline:
-          'border border-blue-normal bg-transparent font-sans text-blue-normal hover:bg-blue-light-hover',
-        secondary:
-          'bg-blue-light-hover font-sans text-blue-normal hover:bg-blue-light-active',
-        link: 'h-auto bg-transparent p-0 font-sans text-[10px] font-normal text-blue-normal underline hover:text-blue-hover'
+        default: PRIMARY,
+        active: PRIMARY,
+        disabled:
+          'cursor-not-allowed bg-neutral-light-active text-neutral-normal shadow-none',
+        dark: 'bg-brand text-white hover:bg-brand-hover',
+        solid: 'bg-brand text-white hover:bg-brand-hover',
+        outline: 'border border-brand bg-white text-brand hover:bg-brand-soft',
+        secondary: 'bg-brand-soft text-brand hover:bg-brand-soft-active',
+        link: 'h-auto rounded-none bg-transparent p-0 text-2xs font-medium text-brand underline underline-offset-2 hover:text-brand-hover'
       },
       size: {
-        md: ''
+        md: '',
+        sm: 'h-9 px-4 text-xs'
       },
       fullWidth: {
         true: 'w-full'

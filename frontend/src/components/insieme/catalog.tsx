@@ -1,5 +1,5 @@
-// Category grid, company list, logos and sort dropdown (servicios.css / facturas.css).
-import { useState, type CSSProperties } from 'react'
+// Category grid, company list, logos and sort dropdown.
+import { useState } from 'react'
 import { cn } from '@/lib/utils.ts'
 import { categoryIcon, resolveAssetUrl } from '@/lib/assets.ts'
 import {
@@ -18,7 +18,7 @@ import type {
 } from './types.ts'
 
 const CARD =
-  'flex h-12 w-full items-center gap-2 rounded-[10px] border bg-white p-2 text-left'
+  'flex min-h-[56px] w-full items-center gap-3 rounded-xl border bg-white px-3 py-2 text-left'
 
 export function CategoryCard({
   category,
@@ -30,19 +30,14 @@ export function CategoryCard({
   const content = (
     <>
       {icon ? (
-        <span className="flex h-[27px] w-[27px] shrink-0 items-center justify-center">
-          <img
-            src={icon}
-            alt=""
-            className="h-[27px] w-auto max-w-[27px] shrink-0"
-          />
+        <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-brand-soft">
+          <img src={icon} alt="" className="h-6 w-auto max-w-[24px] shrink-0" />
         </span>
       ) : null}
-      <span className="h-5 w-px shrink-0 bg-blue-normal" aria-hidden="true" />
       <span
         className={cn(
-          'min-w-0 text-[10px] leading-[1.1] tracking-[-0.1px] text-neutral-darker',
-          variant === 'plain' ? 'flex-none' : 'flex-[1_0_0]'
+          'min-w-0 text-sm font-medium leading-tight text-neutral-darker [overflow-wrap:anywhere]',
+          variant === 'plain' ? 'flex-none text-base font-semibold' : 'flex-1'
         )}
       >
         {category.label}
@@ -56,7 +51,7 @@ export function CategoryCard({
         className={cn(
           CARD,
           'border-transparent',
-          variant === 'plain' && 'justify-center border-0',
+          variant === 'plain' && 'justify-center border-0 bg-transparent',
           className
         )}
       >
@@ -72,10 +67,10 @@ export function CategoryCard({
       aria-pressed={variant === 'selected' ? true : undefined}
       className={cn(
         CARD,
-        'transition-[border-color,box-shadow] duration-150 hover:border-blue-normal hover:shadow-soft focus-visible:border-blue-normal focus-visible:shadow-soft focus-visible:outline-none',
+        'transition-[border-color,box-shadow,background-color] duration-150 hover:border-brand hover:shadow-soft focus-visible:border-brand focus-visible:shadow-soft focus-visible:outline-none',
         variant === 'selected'
-          ? 'border-blue-normal shadow-soft'
-          : 'border-[#d3d4d3]',
+          ? 'border-brand bg-brand-soft shadow-soft'
+          : 'border-neutral-light-active',
         className
       )}
     >
@@ -91,7 +86,7 @@ export function CategoryGrid({
   className
 }: CategoryGridProps) {
   return (
-    <div className={cn('grid w-full grid-cols-2 gap-2', className)}>
+    <div className={cn('grid w-full grid-cols-2 gap-2.5', className)}>
       {categories.map((category) => (
         <CategoryCard
           key={category.id}
@@ -106,110 +101,45 @@ export function CategoryGrid({
 
 const FALLBACK_LOGO = '/assets/servicios/receipt.svg'
 
-/** Image crops per `metadata.logoFit` (as laid out in the Figma). */
-const IMG_ABS: CSSProperties = { position: 'absolute', maxWidth: 'none' }
-const FILL: CSSProperties = {
-  ...IMG_ABS,
-  inset: 0,
-  width: '100%',
-  height: '100%'
-}
-const FITS: Record<
-  string,
-  { box?: CSSProperties; inner?: CSSProperties; img: CSSProperties }
-> = {
-  contain: { img: { ...FILL, objectFit: 'contain' } },
-  cover: { img: { ...FILL, objectFit: 'cover' } },
-  icetex: {
-    img: {
-      ...IMG_ABS,
-      width: '108.3%',
-      height: '391.3%',
-      left: '-4.06%',
-      top: '-142.39%'
-    }
-  },
-  gasnatural: {
-    img: {
-      ...IMG_ABS,
-      width: '100%',
-      height: '250%',
-      left: 0,
-      top: '-73.93%'
-    }
-  },
-  ricas: {
-    inner: { inset: '17.5% 4.17% 17.5% 5.42%' },
-    img: {
-      ...IMG_ABS,
-      width: '110.6%',
-      height: '153.85%',
-      left: '-5.99%',
-      top: '-26.92%'
-    }
-  },
-  vanti: {
-    box: { overflow: 'visible' },
-    inner: {
-      inset: 'auto 0 auto 1.54%',
-      top: '50%',
-      transform: 'translateY(-50%)',
-      aspectRatio: '286 / 134'
-    },
-    img: {
-      ...IMG_ABS,
-      width: '209.79%',
-      height: '335.82%',
-      left: '-54.9%',
-      top: '-117.91%'
-    }
-  }
-}
-
-/** 40x16 logo box. Without a logo shows the generic receipt icon. */
+/**
+ * Company logo in a fixed 56x28 box. Logos are trimmed to their content
+ * server-side, so `object-contain` keeps their proportions.
+ */
 export function CompanyLogo({ name, logo, fit, className }: CompanyLogoProps) {
-  if (!logo || fit === 'generic') {
-    return (
-      <span className={cn('flex h-full w-10 shrink-0 items-center', className)}>
+  const generic = !logo || fit === 'generic'
+  return (
+    <span
+      className={cn(
+        'flex h-7 w-14 shrink-0 items-center justify-center overflow-hidden rounded-md bg-white',
+        className
+      )}
+    >
+      {generic ? (
         <img
           src={FALLBACK_LOGO}
           alt=""
-          width={16}
-          height={16}
-          className="h-4 w-4"
+          width={18}
+          height={18}
+          className="h-[18px] w-[18px] opacity-70"
         />
-      </span>
-    )
-  }
-  const spec = FITS[fit ?? 'contain'] ?? FITS.contain
-  return (
-    <span className={cn('flex h-full w-10 shrink-0 items-center', className)}>
-      <span
-        className="relative block h-4 w-10 overflow-hidden"
-        style={spec.box}
-      >
-        <span
-          className="absolute inset-0 block overflow-hidden"
-          style={spec.inner}
-        >
-          <img
-            src={resolveAssetUrl(logo)}
-            alt={name}
-            style={spec.img}
-            onError={(e) => {
-              e.currentTarget.src = FALLBACK_LOGO
-              e.currentTarget.removeAttribute('style')
-              e.currentTarget.className = 'h-4 w-4'
-            }}
-          />
-        </span>
-      </span>
+      ) : (
+        <img
+          src={resolveAssetUrl(logo)}
+          alt={name}
+          loading="lazy"
+          className="h-full w-full object-contain"
+          onError={(e) => {
+            e.currentTarget.src = FALLBACK_LOGO
+            e.currentTarget.className = 'h-[18px] w-[18px] opacity-70'
+          }}
+        />
+      )}
     </span>
   )
 }
 
 const ROW =
-  'flex h-[30px] w-full shrink-0 items-center gap-2 overflow-hidden border-b-[.5px] border-[#78848c] bg-panel px-2.5 py-1 text-left'
+  'flex min-h-[48px] w-full shrink-0 items-center gap-3 border-b border-neutral-light-active bg-white px-3 py-2 text-left last:border-b-0'
 
 export function CompanyRow({ product, onSelect, className }: CompanyRowProps) {
   const fit =
@@ -224,14 +154,28 @@ export function CompanyRow({ product, onSelect, className }: CompanyRowProps) {
       onClick={() => onSelect(product)}
       className={cn(
         ROW,
-        'hover:bg-neutral-light-active focus-visible:bg-neutral-light-active focus-visible:outline-none',
+        'transition-colors hover:bg-brand-soft focus-visible:bg-brand-soft focus-visible:outline-none',
         className
       )}
     >
       <CompanyLogo name={product.name} logo={product.logo} fit={fit} />
-      <span className="line-clamp-2 min-w-0 flex-[1_0_0] text-xs font-medium leading-[1.1] text-blue-darker opacity-70">
+      <span className="min-w-0 flex-1 text-sm font-medium leading-snug text-neutral-darker [overflow-wrap:anywhere]">
         {product.name}
       </span>
+      <svg
+        viewBox="0 0 24 24"
+        width="18"
+        height="18"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        aria-hidden="true"
+        className="shrink-0 text-brand"
+      >
+        <path d="m9 18 6-6-6-6" />
+      </svg>
     </button>
   )
 }
@@ -246,14 +190,14 @@ export function CompanyList({
     <div
       role="listbox"
       className={cn(
-        'no-scrollbar flex w-full flex-col overflow-y-auto overflow-x-hidden rounded-lg',
+        'no-scrollbar flex w-full flex-col overflow-y-auto overflow-x-hidden rounded-xl border border-neutral-light-active bg-white',
         className
       )}
     >
       {products.length === 0
         ? (empty ?? (
-            <div className={cn(ROW, 'h-auto min-h-[30px] py-1.5')}>
-              <span className="min-w-0 flex-[1_0_0] text-xs font-medium leading-[1.1] text-blue-darker opacity-70">
+            <div className={cn(ROW, 'h-auto')}>
+              <span className="min-w-0 flex-1 text-sm text-neutral-normal">
                 No encontramos empresas o convenios con ese nombre
               </span>
             </div>
@@ -270,8 +214,8 @@ export function CompanyList({
 }
 
 const SORT_LABELS: Record<SortOrder, string> = {
-  asc: 'Ordenar por A-Z',
-  desc: 'Ordenar por Z-A'
+  asc: 'A-Z',
+  desc: 'Z-A'
 }
 
 export function SortSelect({ value, onChange, className }: SortSelectProps) {
@@ -283,12 +227,13 @@ export function SortSelect({ value, onChange, className }: SortSelectProps) {
           type="button"
           aria-haspopup="listbox"
           aria-expanded={open}
+          aria-label={`Ordenar por ${SORT_LABELS[value]}`}
           className={cn(
-            'flex w-[117px] items-center justify-center gap-2.5 whitespace-nowrap rounded bg-panel px-2.5 py-1 text-[10px] leading-[1.1] text-[#444a4f] shadow-soft',
+            'flex h-9 items-center justify-center gap-1.5 whitespace-nowrap rounded-pill border border-neutral-light-active bg-white px-3 text-2xs font-medium text-neutral-darker hover:border-brand',
             className
           )}
         >
-          <span>{SORT_LABELS[value]}</span>
+          <span>Ordenar {SORT_LABELS[value]}</span>
           <img
             src="/assets/icons/chevron-down.svg"
             alt=""
@@ -299,10 +244,10 @@ export function SortSelect({ value, onChange, className }: SortSelectProps) {
         </button>
       </PopoverTrigger>
       <PopoverContent
-        align="start"
-        sideOffset={0}
+        align="end"
+        sideOffset={4}
         role="listbox"
-        className="flex w-[117px] flex-col overflow-hidden rounded border-0 bg-panel p-0 shadow-soft"
+        className="flex w-36 flex-col overflow-hidden rounded-xl border border-neutral-light-active bg-white p-1 shadow-medium"
       >
         {(Object.keys(SORT_LABELS) as SortOrder[]).map((key) => (
           <button
@@ -315,13 +260,13 @@ export function SortSelect({ value, onChange, className }: SortSelectProps) {
               setOpen(false)
             }}
             className={cn(
-              'w-full whitespace-nowrap px-2.5 py-1 text-left text-[10px] leading-[1.1]',
+              'w-full whitespace-nowrap rounded-lg px-3 py-2 text-left text-2xs font-medium',
               key === value
-                ? 'bg-[#87959e] text-white'
-                : 'text-[#444a4f] hover:bg-neutral-light-active'
+                ? 'bg-brand text-white'
+                : 'text-neutral-darker hover:bg-brand-soft'
             )}
           >
-            {SORT_LABELS[key]}
+            Ordenar {SORT_LABELS[key]}
           </button>
         ))}
       </PopoverContent>

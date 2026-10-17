@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Actions,
   BackButton,
-  ByPuntored,
+  BrandFooter,
   DialogCard,
   Screen,
   TitleBox
@@ -39,7 +39,7 @@ export function Component() {
         <Actions>
           <BackButton onClick={() => setDelDone(false)} />
         </Actions>
-        <ByPuntored />
+        <BrandFooter />
       </Screen>
     )
   }
@@ -73,7 +73,7 @@ export function Component() {
             </ActionButton>
           </div>
         </DialogCard>
-        <ByPuntored />
+        <BrandFooter />
       </Screen>
     )
   }
@@ -82,17 +82,19 @@ export function Component() {
     return (
       <Screen>
         <TitleBox>Facturas guardadas</TitleBox>
-        <div className="flex w-full flex-col items-center gap-2 rounded-lg bg-white p-6 text-center shadow-soft">
-          <img
-            src="/assets/icons/cat-pago-servicios.svg"
-            alt=""
-            width={33}
-            height={32}
-          />
-          <p className="text-sm font-bold text-neutral-darker">
+        <div className="flex w-full flex-col items-center gap-3 rounded-2xl border border-brand-soft-active bg-white p-6 text-center shadow-soft">
+          <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-soft">
+            <img
+              src="/assets/icons/cat-pago-servicios.svg"
+              alt=""
+              width={30}
+              height={29}
+            />
+          </span>
+          <p className="text-base font-bold text-neutral-darker">
             Aún no tienes facturas guardadas
           </p>
-          <p className="text-xs text-text01">
+          <p className="text-sm leading-snug text-neutral-normal">
             Guarda tus facturas de servicios para pagarlas más rápido la próxima
             vez.
           </p>
@@ -107,7 +109,7 @@ export function Component() {
             Guardar facturas
           </ActionButton>
         </Actions>
-        <ByPuntored />
+        <BrandFooter />
       </Screen>
     )
   }
@@ -140,18 +142,20 @@ export function Component() {
               aria-selected={tab === t}
               onClick={() => setTab(t)}
               className={cn(
-                'flex-1 pb-2 text-sm',
-                tab === t ? 'font-bold text-blue-normal' : 'text-text01'
+                'min-w-0 flex-1 px-1 pb-2 text-sm leading-snug transition-colors',
+                tab === t
+                  ? 'font-bold text-brand'
+                  : 'font-medium text-neutral-normal'
               )}
             >
               {label}
             </button>
           ))}
         </div>
-        <div className="h-0.5 w-full bg-blue-light-active">
+        <div className="h-0.5 w-full rounded-full bg-neutral-light-active">
           <span
             className={cn(
-              'block h-full w-1/2 bg-blue-normal transition-transform',
+              'block h-full w-1/2 rounded-full bg-brand transition-transform',
               tab === 'off' && 'translate-x-full'
             )}
           />
@@ -177,7 +181,7 @@ export function Component() {
             )
           })
         ) : (
-          <p className="text-center text-sm text-text01">
+          <p className="py-6 text-center text-sm text-neutral-normal">
             {tab === 'on'
               ? 'No tienes facturas disponibles para pago.'
               : 'No tienes facturas en esta sección.'}
@@ -194,7 +198,7 @@ export function Component() {
           Guardar otra factura
         </ActionButton>
       </Actions>
-      <ByPuntored />
+      <BrandFooter />
     </Screen>
   )
 }

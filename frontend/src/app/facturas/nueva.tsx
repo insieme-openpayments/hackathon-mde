@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
   Actions,
   BackButton,
-  ByPuntored,
+  BrandFooter,
   CategoryGrid,
   FloatingInput,
   Screen,
@@ -37,7 +37,7 @@ export function Component() {
   if (view === 'categorias') {
     return (
       <Screen>
-        <TitleBox>Servicios</TitleBox>
+        <TitleBox>Elige la categoría</TitleBox>
         <CategoryGrid
           categories={categories}
           onSelect={(id) => {
@@ -49,7 +49,7 @@ export function Component() {
         <Actions>
           <BackButton onClick={() => setSearchParams({}, { replace: true })} />
         </Actions>
-        <ByPuntored />
+        <BrandFooter />
       </Screen>
     )
   }
@@ -98,8 +98,8 @@ export function Component() {
   return (
     <Screen>
       <TitleBox>Guardar facturas</TitleBox>
-      <p className="text-sm text-neutral-darker">
-        Selecciona la categoría o servicio:
+      <p className="text-sm leading-snug text-neutral-darker">
+        Elige la categoría y la empresa, y dale un nombre fácil de recordar.
       </p>
       <CategorySelector
         category={category}
@@ -159,7 +159,7 @@ export function Component() {
           Continuar
         </ActionButton>
       </Actions>
-      <ByPuntored />
+      <BrandFooter />
     </Screen>
   )
 }

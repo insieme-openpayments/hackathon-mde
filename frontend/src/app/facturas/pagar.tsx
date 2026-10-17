@@ -2,8 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import { useSnapshot } from 'valtio'
 import { useNavigate } from 'react-router-dom'
 import {
-  BankBlock,
-  ByPuntored,
+  BrandFooter,
   FloatingInput,
   MoneyInput,
   Screen,
@@ -16,7 +15,7 @@ import { useFacturasStore } from '@/hooks/use-facturas-store.ts'
 import { useProfileStore } from '@/hooks/use-profile-store.ts'
 import { useZodRouteParams } from '@/hooks/use-zod-params.ts'
 import { facturaParamsSchema } from '@/app/route-schemas.ts'
-import { categoryHeadIcon } from '@/lib/assets.ts'
+import { categoryIcon } from '@/lib/assets.ts'
 import { paymentDraftStore } from '@/lib/stores/payment-draft-store.ts'
 import { money } from '@/lib/money.ts'
 import { MAX_FACTURA_AMOUNT, MIN_AMOUNT, emailSchema } from '@/lib/schemas.ts'
@@ -68,7 +67,9 @@ export function Component() {
   if (!factura) {
     return (
       <Screen>
-        <p className="text-sm">La factura ya no existe.</p>
+        <p className="text-base text-neutral-darker">
+          La factura ya no existe.
+        </p>
         <ActionButton tone="dark" onClick={() => navigate('/facturas')}>
           Volver
         </ActionButton>
@@ -92,27 +93,29 @@ export function Component() {
     !emailOk && emailTouched ? 'Ingresa un correo válido' : undefined
 
   return (
-    <Screen className="pb-72">
-      <div className="flex w-full items-center gap-2 border-b border-neutral-light-active pb-3">
+    <Screen>
+      <div className="flex w-full items-center gap-3 rounded-2xl bg-brand-soft p-3">
         {category?.icon ? (
-          <span className="flex h-[30px] flex-shrink-0 items-center justify-center rounded-[3px] p-[5px]">
+          <span className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white">
             <img
-              src={categoryHeadIcon(category.icon)}
+              src={categoryIcon(category.icon)}
               alt=""
-              className="h-full w-auto"
+              className="h-6 w-auto"
             />
           </span>
         ) : null}
-        <span className="h-[30px] w-px bg-blue-normal" aria-hidden="true" />
         <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-          <p className="text-sm font-semibold leading-[1.2] text-blue-normal">
+          <p className="text-2xs font-semibold uppercase tracking-wide text-brand">
             {catLabel}
           </p>
-          <p className="truncate text-xs font-medium leading-[1.1] text-neutral-darker">
+          <h1 className="text-base font-bold leading-tight text-neutral-darker [overflow-wrap:anywhere]">
             {convName}
-          </p>
+          </h1>
         </div>
       </div>
+      <p className="w-full text-sm leading-snug text-neutral-darker">
+        Confirma el valor y el correo al que enviaremos el comprobante.
+      </p>
       <div className="flex w-full flex-col gap-3">
         <FloatingInput
           label="Nombre de la factura"
@@ -140,11 +143,9 @@ export function Component() {
             error={amountErr}
           />
           {(product ? product.requiresManualAmount : true) ? (
-            <div className="absolute right-3 top-3">
+            <div className="absolute right-3.5 top-3.5">
               <Tip defaultOpen icon="alert">
-                Tu factura permite
-                <br />
-                pagos parciales
+                Tu factura permite pagos parciales: puedes cambiar el valor.
               </Tip>
             </div>
           ) : null}
@@ -191,15 +192,12 @@ export function Component() {
           />
         </div>
         {mailErr ? null : (
-          <p className="text-center text-2xs text-text01">
-            Valida tu información, enviaremos el comprobante
-            <br />
-            de la transacción a tu correo
+          <p className="text-center text-2xs leading-snug text-neutral-normal">
+            Enviaremos el comprobante de la transacción a este correo.
           </p>
         )}
       </div>
-      <BankBlock />
-      <ByPuntored />
+      <BrandFooter />
       <ConfirmPanel
         rows={[
           { label: 'Categoría', value: catLabel },

@@ -6,7 +6,7 @@ export function Loader() {
       <motion.div
         role="status"
         aria-label="Procesando"
-        className="h-[22px] w-[22px] rounded-full border-2 border-blue-light-hover border-t-blue-normal"
+        className="h-[22px] w-[22px] rounded-full border-2 border-brand-soft-active border-t-brand"
         animate={{ rotate: 360 }}
         transition={{ repeat: Infinity, ease: 'linear', duration: 0.8 }}
       />
