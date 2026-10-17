@@ -134,6 +134,7 @@ Historia: el prototipo estático `customer-frontend` se retiró del repo en el c
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md): flujo de un pago de extremo a extremo y decisiones de diseño.
 - [docs/THREAT_MODEL.md](docs/THREAT_MODEL.md): amenazas, mitigaciones y estado.
 - [docs/PITCH.md](docs/PITCH.md): guion de 5 minutos con la demo.
+- [docs/demo.mov](docs/demo.mov): video de demostración (56 s, grabación de pantalla).
 - [AI_USAGE.md](AI_USAGE.md) y [prompts/](prompts/README.md): uso de IA y prompts reales.
 
 ## Límites conocidos
