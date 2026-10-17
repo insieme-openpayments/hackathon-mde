@@ -137,9 +137,13 @@ export const createOrderSchema = z.object({
   products: z.array(orderItemSchema).length(1)
 })
 
+/**
+ * `accessToken` y `manageUrl` son opcionales: sin ellos el servidor usa el grant
+ * guardado en la cuenta del usuario autenticado (400 si no hay ninguno).
+ */
 export const instantBuySchema = createOrderSchema.extend({
-  accessToken: z.string(),
-  manageUrl: z.string().url()
+  accessToken: z.string().optional(),
+  manageUrl: z.string().url().optional()
 })
 
 export const finishOrderSchema = z.object({

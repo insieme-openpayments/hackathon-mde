@@ -371,11 +371,23 @@ export class OrderController implements IOrderController {
     let order: Order | undefined
     try {
       const args = await validate(instantBuySchema, req.body)
+      // TODO(cuenta): sin tokens en el body, usar el grant guardado en la cuenta.
+      const { accessToken, manageUrl } = args
+      if (!accessToken || !manageUrl) {
+        throw new BadRequest('Invalid input', {
+          accessToken: 'Configura el pago en un clic antes de usarlo'
+        })
+      }
 
       order = await this.createPricedOrder(args.products)
       let tokenInfo
       try {
-        tokenInfo = await this.openPayments.instantBuy({ order, ...args })
+        tokenInfo = await this.openPayments.instantBuy({
+          order,
+          ...args,
+          accessToken,
+          manageUrl
+        })
       } catch (err) {
         await this.abandonOrder(
           order.id,
