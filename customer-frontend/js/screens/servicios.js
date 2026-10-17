@@ -113,6 +113,24 @@
     }).catch((e) => console.warn('Catálogo local (integration-backend no disponible):', e.message));
   }
 
+  /* Categorías que el catálogo remoto puede no traer (administracion/otros): se piden a /v1/catalog/companies */
+  const fetchedCats = new Set();
+  const ensureCategory = (catId) => {
+    if (!App.api || App.data.servicios.source !== 'api' || fetchedCats.has(catId)) return;
+    if (companies.some(c => c.category === catId)) return;
+    fetchedCats.add(catId);
+    App.api.companies({ category: catId, limit: 50 }).then((res) => {
+      const items = (res && res.items) || [];
+      let added = 0;
+      items.forEach((c) => {
+        if (!c || !c.id || companies.some(x => x.id === c.id)) return;
+        companies.push(co(c.id, c.name, c.category || catId, L[c.logo_key] ? c.logo_key : null, { partial: !!c.partial, ...(c.fixed_amount ? { amount: c.fixed_amount } : {}) }));
+        added++;
+      });
+      if (added && document.getElementById('app').dataset.screen === 'servicios-empresas') App.render();
+    }).catch((e) => { fetchedCats.delete(catId); console.warn('Empresas de la categoría no disponibles:', e.message); });
+  };
+
   /* ---------- Helpers de vista ---------- */
   const norm = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
   const sortBy = (list, dir) => list.slice().sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' }) * (dir === 'za' ? -1 : 1));
@@ -245,13 +263,13 @@
         </div>
       </div>`;
     },
-    mount: (root) => fitList(root),
+    mount: (root, ctx) => { fitList(root); if (ctx && ctx.flow) ensureCategory(ctx.flow.category); },
     actions: {
       setQuery,
       pickCompany,
       toggleSort: (ctx) => { ctx.flow.sortOpen = !ctx.flow.sortOpen; ctx.render(); },
       setSort: (ctx, el) => { ctx.flow.sort = el.dataset.v; ctx.flow.sortOpen = false; ctx.render(); },
-      pickCat: (ctx, el) => { ctx.flow.category = el.dataset.id; ctx.flow.cq = ''; ctx.flow.sortOpen = false; ctx.render({ scrollTop: true }); },
+      pickCat: (ctx, el) => { ctx.flow.category = el.dataset.id; ctx.flow.cq = ''; ctx.flow.sortOpen = false; ensureCategory(el.dataset.id); ctx.render({ scrollTop: true }); },
     },
   });
 
@@ -259,7 +277,9 @@
   const REF_MIN = 6, REF_MAX = 20, MIN_PAY = 1000;
   const refOk = (f) => { const d = ui.digits(f.ref1); return d.length >= REF_MIN && d.length <= REF_MAX; };
   const amountOf = (f) => Number(ui.digits(f.amountText));
-  const amountOk = (f) => amountOf(f) >= MIN_PAY && amountOf(f) <= (f.bill || 0);
+  const minPay = (f) => Number(f.minAmount) || MIN_PAY;
+  const maxPay = (f) => Number(f.maxAmount) || f.bill || 0;
+  const amountOk = (f) => amountOf(f) >= minPay(f) && amountOf(f) <= maxPay(f);
   const mailOk = (f) => /^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(f.email || '');
   const step2Ok = (f) => amountOk(f); // correo oculto (.sv-mail): no se exige
   const maskDoc = (d) => { d = ui.digits(d); return d ? (d.length > 4 ? d.slice(0, -4) + '****' : d) : '10265988****'; };
@@ -310,12 +330,15 @@
     try {
       if (!App.api) throw new Error('sin cliente API');
       const r = await App.api.validateService(companyId, ref);
-      return { amount: r.amount };
+      return {
+        amount: r.amount, trace: r.trace ?? null, requiresAmount: !!r.requires_amount, partialAllowed: r.partial_allowed,
+        minAmount: r.min_amount ?? null, maxAmount: r.max_amount ?? null, dueDate: r.due_date ?? null,
+      };
     } catch (e) {
       if (e.status) return { error: e.detail || 'No pudimos validar la referencia, intenta de nuevo' };
       console.warn('Validación local (integration-backend no disponible):', e.message);
       if (/^0+$/.test(ref)) return { error: 'No encontramos una factura pendiente con esta referencia' };
-      return { amount: (800 + Math.floor(Math.random() * 2701)) * 100 }; // igual que el servidor: $80.000 – $350.000
+      return { simulated: true, amount: (800 + Math.floor(Math.random() * 2701)) * 100 }; // igual que el servidor: $80.000 – $350.000
     }
   };
 
@@ -329,12 +352,19 @@
     f.loading = false;
     if (document.getElementById('app').dataset.screen !== 'servicios-form') return;
     if (res.error) { f.refError = res.error; ctx.render(); return; }
-    f.bill = Number(f.amount) || res.amount;
+    f.trace = res.trace ?? null;
+    f.requiresAmount = !!res.requiresAmount;
+    f.partialAllowed = res.partialAllowed;
+    f.minAmount = res.minAmount;
+    f.maxAmount = res.maxAmount;
+    f.dueDate = res.dueDate || null;
+    f.simulated = !!res.simulated;
+    f.bill = Number(f.amount) || res.amount || res.maxAmount || 0;
     f.amountText = ui.num(f.bill);
     if (f.email == null) f.email = (App.state.user && App.state.user.correo) || '';
     f.editMail = !mailOk(f);
     f.step = 2;
-    f.tipOpen = !!(companyById(f.company) || {}).partial;
+    f.tipOpen = f.partialAllowed === true || !!(companyById(f.company) || {}).partial;
     f.sheetOpen = false;
     ctx.render({ scrollTop: true });
     if (f.tipOpen) App.later(() => { f.tipOpen = false; App.render(); }, 3500);
@@ -378,7 +408,7 @@
         </div>`;
       }
 
-      const partial = !!c.partial;
+      const partial = !!c.partial || flow.partialAllowed === true || !!flow.requiresAmount;
       const amtErr = flow.amountText !== undefined && !amountOk(flow);
       const mailErr = !!flow.email && !mailOk(flow) && !flow.editMail;
       const tip = partial ? `
@@ -397,7 +427,8 @@
               label: 'Valor', key: 'amount', value: '$ ' + (flow.amountText || ''), action: 'setAmount', inputmode: 'numeric', maxlength: 12,
               readonly: !partial, error: amtErr, extra: tip,
             })}
-            ${amtErr ? `<p class="err">Ingresa un valor entre ${ui.money(MIN_PAY)} y ${ui.money(flow.bill)}</p>` : ''}
+            ${flow.payError ? `<p class="err" role="alert">${ui.esc(flow.payError)}</p>` : ''}
+            ${amtErr ? `<p class="err">Ingresa un valor entre ${ui.money(minPay(flow))} y ${ui.money(maxPay(flow))}</p>` : ''}
             <div class="sv-mail">
               ${input2({
                 label: 'Correo', key: 'email', value: flow.email || '', placeholder: 'Ingresa tu correo electrónico', action: 'setMail', inputmode: 'email',
@@ -452,7 +483,7 @@
       toggleTip2: (ctx) => { ctx.flow.tipOpen = !ctx.flow.tipOpen; ctx.render(); },
       setAmount: (ctx, el) => {
         const d = ui.digits(el.value).slice(0, 9);
-        ctx.flow.amountText = d ? ui.num(d) : '';
+        ctx.flow.amountText = d ? ui.num(d) : ''; ctx.flow.payError = '';
         ctx.render();
       },
       setMail: (ctx, el) => { ctx.flow.email = el.value.trim(); ctx.render(); },
@@ -466,7 +497,10 @@
         if (!step2Ok(f)) return;
         f.editMail = false;
         if (!f.sheetOpen) { f.sheetOpen = true; ctx.render(); return; }
-        f.receipt = { date: ui.now(), auth: ui.rand(9), trx: ui.rand(9) };
+        f.sheetOpen = false;
+        f.payError = '';
+        f.paying = true;
+        f.receipt = null;
         ctx.go('servicios-pasarela');
       },
     },
@@ -474,7 +508,51 @@
 
   App.register('servicios-pasarela', {
     render: () => ui.pasarela('assets/icons/cat-pago-servicios.svg', 33.156, 31.985),
-    mount: () => App.later(() => App.go('servicios-ok', {}, { replace: true }), 2200),
+    mount: () => {
+      const f = App.flow;
+      const fail = (msg) => {
+        f.paying = false;
+        f.payStarted = false;
+        f.refError = '';
+        f.payError = msg;
+        App.go('servicios-form', {}, { replace: true });
+      };
+      if (!f || !f.paying) { App.go('servicios-form', {}, { replace: true }); return; }
+      if (f.payStarted) return; // un re-render no debe repetir el pago
+      f.payStarted = true;
+      const minWait = new Promise(r => setTimeout(r, 2200));
+      const pay = (async () => {
+        try {
+          if (!App.api) throw new Error('sin cliente API');
+          const r = await App.api.payService({
+            trace: f.trace ?? null, company_id: f.company, reference: ui.digits(f.ref1), amount: amountOf(f), client_ip: null,
+          });
+          return { ok: r };
+        } catch (e) {
+          // Sin servidor (error de red sin status): simulación local como respaldo. Con status no se reintenta.
+          if (!e.status) return { sim: true, e };
+          return { err: e };
+        }
+      })();
+      Promise.all([pay, minWait]).then(([res]) => {
+        if (App.flow !== f || document.getElementById('app').dataset.screen !== 'servicios-pasarela') return;
+        f.paying = false;
+        f.payStarted = false;
+        if (res.ok) {
+          const r = res.ok;
+          f.receipt = {
+            status: r.status, trx: r.transaction_id, auth: r.authorization_code, date: ui.now(), message: r.message, simulated: false,
+          };
+          App.go('servicios-ok', {}, { replace: true });
+        } else if (res.sim) {
+          console.warn('Pago simulado (integration-backend no disponible):', res.e && res.e.message);
+          f.receipt = { status: 'approved', date: ui.now(), auth: ui.rand(9), trx: ui.rand(9), simulated: true };
+          App.go('servicios-ok', {}, { replace: true });
+        } else {
+          fail(App.api.errorMessage(res.err, 'No pudimos confirmar el pago, intenta de nuevo'));
+        }
+      });
+    },
   });
 
   /* ---------- Comprobante ---------- */
@@ -482,12 +560,19 @@
     render({ flow }) {
       const c = companyById(flow.company) || {};
       const r = flow.receipt || {};
+      const ST = {
+        approved: ['Aprobada', 'sv-kv--ok'],
+        pending: ['Pendiente', ''],
+        rejected: ['Rechazada', 'sv-kv--bad'],
+      };
+      const [stLabel, stCls] = ST[r.status] || ST.approved;
+      const stHtml = stLabel;
       const rows = [
         ['Fecha y hora', r.date || ui.now()],
-        ['Estado', 'Aprobada', 'sv-kv--ok'],
+        ['Estado', stHtml + (r.simulated ? ' · Simulado' : ''), stCls],
         ['Operación', 'Pago de servicios'],
-        ['Numero de autorización', r.auth || ''],
-        ['ID transacción', r.trx || ''],
+        ['Número de autorización', ui.esc(r.auth || '')],
+        ['ID transacción', ui.esc(r.trx || '')],
         ['Convenio', ui.esc(c.name || '')],
         ['Referencia de pago 1', ui.esc(ui.digits(flow.ref1))],
       ];
@@ -497,18 +582,15 @@
       <div class="screen screen--gray">
         <div class="content sv-receipt" data-scroll="main">
           ${ui.logo()}
-          <p class="receipt-title">¡Transacción exitosa!</p>
+          <p class="receipt-title">${r.status === 'rejected' ? 'Transacción rechazada' : r.status === 'pending' ? 'Transacción pendiente' : '¡Transacción exitosa!'}</p>
           <div class="receipt-rows">${ui.rows(rows)}</div>
+          ${r.message && !r.simulated ? `<p class="sv-receipt__line">${ui.esc(r.message)}</p>` : ''}
           <div class="sv-receipt__bank">
-            ${bank(!!flow.bankOpen, { center: true })}
-            <p class="sv-receipt__line">Línea de atención personalizada Davivienda en Bogotá: 3487881<br>Resto del Pais: 01 8000 960 505</p>
+            <p class="sv-receipt__line">Si se requiere soporte o ampliar información contáctenos a hola@oplat.co o al WhatsApp 3332822713</p>
           </div>
           ${ui.finishLink()}
         </div>
       </div>`;
-    },
-    actions: {
-      toggleBank: (ctx) => { ctx.flow.bankOpen = !ctx.flow.bankOpen; ctx.render(); },
     },
   });
 })();

@@ -98,3 +98,26 @@ Manual de identidad enviado a continuación por el equipo (resumen literal):
 Los archivos de marca (`frontend/public/brand/`) los aportó el equipo; Claude Code los recortó y
 redimensionó (favicon, apple-touch-icon, logo del encabezado) y recortó el espacio en blanco de
 los logos de convenios en `backend/images/convenios/`.
+
+## 13. Productos nuevos en customer-frontend: Giro Efecty, Bre-B y pago real de servicios (17 oct 2026)
+
+> Usando dyamic worflows y delegando a agentes:
+>
+> Trabaja en `customer-frontend/` (JS plano, sin build: `js/core.js` router y `App.ui`, pantallas en
+> `js/screens/*.js` registradas con `App.register(nombre, {render, actions, mount})`, cliente HTTP en
+> `js/api.js`). Hoy el único flujo conectado al backend es **Pago de servicios** (`js/screens/servicios.js`)
+> usando `App.api.catalog()` y `App.api.validateService()`. Quiero habilitar dos productos nuevos,
+> **Giro Efecty** y **Transferencia Bre-B**, consumiendo `integration-backend` (branch
+> `feature/puntored-integration`, corre en `http://localhost:8000`, header `X-API-Key: insieme-dev-key`,
+> base configurable con `?api=`). Conserva las convenciones del repo (Figma tokens en `css/styles.css`,
+> un CSS por flujo, `App.flow` por flujo, `ui.stepper`, comprobante, "Ver detalles", `localStorage` solo
+> para conveniencias).
+>
+> [Sigue la especificación completa del contrato de `integration-backend`: secciones "1. Descubrimiento
+> de productos" (`GET /v1/products`), "2. Contrato de errores", "3. Giro Efecty (`/v1/efecty`)",
+> "4. Transferencia Bre-B (`/v1/breb`)", "5. Pago de servicios (ya conectado; completa el pago)",
+> "6. Qué implementar" (api.js, Home, pantallas efecty/breb, servicios.js con `payService`, mensajes
+> de error, README) y la prueba manual con los seis casos. El texto íntegro está en
+> `prompts/integration-backend-productos.md` (copia verbatim de `docs/prompts/frontend-productos.md`
+> de `integration-backend`, commit 4ff9b65, que fue lo que se pegó en la sesión) y se pasó tal cual a
+> los agentes como argumento `spec` del workflow `prompts/workflows/03-customer-frontend-productos.js`.]

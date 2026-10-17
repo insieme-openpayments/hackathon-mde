@@ -132,7 +132,7 @@
       App.reset(screens[start] && App.isEntry(start) ? start : 'home');
     },
 
-    entries: ['tyc', 'home', 'recargas', 'paquetes', 'pines', 'servicios', 'facturas'],
+    entries: ['tyc', 'home', 'recargas', 'paquetes', 'pines', 'servicios', 'facturas', 'efecty', 'breb'],
     isEntry(n) { return App.entries.includes(n); },
 
     /** Escala el dispositivo 320×568 para llenar la ventana */

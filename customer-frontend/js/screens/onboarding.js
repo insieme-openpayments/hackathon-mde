@@ -96,7 +96,22 @@
     { id: 'paquetes', label: 'Paquetes', icon: 'cat-paquetes', tip: 'Compra paquetes de datos,<br>minutos y apps' },
     { id: 'servicios', label: 'Pago de servicios', icon: 'cat-pago-servicios', tip: 'Paga tus facturas de<br>servicios públicos y más' },
     { id: 'pines', label: 'Pines y entretenimiento', icon: 'cat-pines', tip: 'Compra pines de streaming,<br>juegos y licencias' },
+    { id: 'efecty', label: 'Giro Efecty', icon: 'cat-efecty', tip: 'Envía efectivo para reclamar<br>en un punto Efecty' },
+    { id: 'breb', label: 'Bre-B', icon: 'cat-breb', tip: 'Transfiere al instante<br>a una llave Bre-B' },
   ];
+
+  // id local → id en GET /v1/products (los no listados no existen en la API y se muestran siempre)
+  const API_ID = { servicios: 'services', efecty: 'efecty', breb: 'breb' };
+  App.data = App.data || {};
+  const visibleProducts = () => {
+    const list = App.data.products;
+    if (!Array.isArray(list)) return PRODUCTS;
+    return PRODUCTS.filter(p => {
+      const remote = API_ID[p.id] && list.find(r => r && r.id === API_ID[p.id]);
+      return !(remote && remote.enabled === false);
+    });
+  };
+  let productsRequested = false;
 
   App.register('home', {
     render() {
@@ -114,7 +129,7 @@
         <div class="home__main">
           ${ui.logo()}
           <div class="home__grid">
-            ${PRODUCTS.map(p => `
+            ${visibleProducts().map(p => `
               <div class="cat-card" role="button" tabindex="0" data-action="open" data-id="${p.id}">
                 <span class="cat-card__icon"><img src="assets/icons/${p.icon}.svg" alt="" width="33" height="37"></span>
                 <span class="cat-card__label">${p.label}</span>
@@ -124,6 +139,16 @@
           <div class="footer">${ui.byPuntored()}</div>
         </div>
       </div>`;
+    },
+    mount(root) {
+      if (productsRequested || !App.api || !App.api.products) return;
+      productsRequested = true;
+      const home = root.querySelector('.home');
+      App.api.products().then(res => {
+        if (!res || !Array.isArray(res.products)) { productsRequested = false; return; }
+        App.data.products = res.products;
+        if (home && home.isConnected) App.render(); // sigue siendo la pantalla activa
+      }).catch(() => { productsRequested = false; }); // sin backend: tarjetas locales
     },
     actions: {
       open: (ctx, el, e) => {
