@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-labelledby="t">
+<title id="t">Retrato ilustrado de Don Álvaro, tendero de 58 años con bigote, cabello canoso corto y delantal verde de tienda</title>
+<defs><clipPath id="c"><circle cx="80" cy="80" r="80"/></clipPath></defs>
+<circle cx="80" cy="80" r="80" fill="#FFF0BF"/>
+<g clip-path="url(#c)">
+
+<path d="M18 160c0-34 26-52 62-52s62 18 62 52z" fill="#F4F1E8"/>
+<rect x="68" y="92" width="24" height="24" rx="8" fill="#D49A72"/>
+<circle cx="80" cy="68" r="30" fill="#D49A72"/>
+<path d="M50 62c0-22 13-33 30-33s30 11 30 33c-4-8-8-12-14-14-10 4-22 4-32 0-6 2-10 6-14 14z" fill="#BDB7B0"/><path d="M66 82q14-8 28 0q-6 6-14 3q-8 3-14-3z" fill="#7C746C"/>
+<circle cx="69" cy="70" r="2.6" fill="#2B2230"/><circle cx="91" cy="70" r="2.6" fill="#2B2230"/>
+<path d="M72 88q8 5 16 0" fill="none" stroke="#2B2230" stroke-width="2.4" stroke-linecap="round"/>
+<path d="M56 112h48l6 48H50z" fill="#137766"/><path d="M68 112l-4 -10M92 112l4-10" stroke="#137766" stroke-width="4"/><rect x="68" y="130" width="24" height="16" rx="3" fill="#0F5E50"/>
+</g></svg>

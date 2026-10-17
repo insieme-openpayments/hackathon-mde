@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-labelledby="t">
+<title id="t">Retrato ilustrado de Samuel, niño de 9 años con camiseta amarilla y un morral escolar al hombro</title>
+<defs><clipPath id="c"><circle cx="80" cy="80" r="80"/></clipPath></defs>
+<circle cx="80" cy="80" r="80" fill="#D9ECF9"/>
+<g clip-path="url(#c)">
+<path d="M44 160l6-40c2-8 10-12 16-10l-4 50z" fill="#7A1FA2"/><path d="M116 160l-6-40c-2-8-10-12-16-10l4 50z" fill="#7A1FA2"/>
+<path d="M18 160c0-34 26-52 62-52s62 18 62 52z" fill="#FFC20E"/>
+<rect x="68" y="92" width="24" height="24" rx="8" fill="#EDB88E"/>
+<circle cx="80" cy="68" r="28" fill="#EDB88E"/>
+<path d="M51 66c0-22 13-33 29-33s29 11 29 33c-6-8-14-12-29-12S57 58 51 66z" fill="#5A3A24"/>
+<circle cx="69" cy="70" r="2.6" fill="#2B2230"/><circle cx="91" cy="70" r="2.6" fill="#2B2230"/>
+<path d="M72 82q8 7 16 0" fill="none" stroke="#2B2230" stroke-width="2.4" stroke-linecap="round"/>
+<circle cx="63" cy="79" r="4" fill="#F29B8A" opacity=".5"/><circle cx="97" cy="79" r="4" fill="#F29B8A" opacity=".5"/>
+</g></svg>

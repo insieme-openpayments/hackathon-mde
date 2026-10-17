@@ -46,7 +46,10 @@ pnpm local:up       # Postgres en localhost:15434
 pnpm dev            # backend en :3004, frontend en :4004
 ```
 
-Abre http://localhost:4004.
+- Landing: http://localhost:4004/
+- Portal de pagos: http://localhost:4004/pay/
+
+`FRONTEND_URL` debe terminar en `/pay` (p. ej. `FRONTEND_URL=http://localhost:4004/pay`): las URLs de retorno de Open Payments cuelgan de él y CORS usa su origen. Actualiza a mano `backend/.env.local` para `pnpm dev`.
 
 Todo en Docker (imágenes de producción del backend y el frontend junto a Postgres):
 

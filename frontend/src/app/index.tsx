@@ -58,7 +58,7 @@ export const routes = [
   }
 ] satisfies RouteObject[]
 
-const router = createBrowserRouter(routes)
+const router = createBrowserRouter(routes, { basename: '/pay' })
 
 export function App() {
   return (

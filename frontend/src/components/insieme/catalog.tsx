@@ -1,3 +1,4 @@
+import { publicUrl } from '@/lib/assets.ts'
 // Category grid, company list, logos and sort dropdown.
 import { useState } from 'react'
 import { cn } from '@/lib/utils.ts'
@@ -104,7 +105,7 @@ export function CategoryGrid({
   )
 }
 
-const FALLBACK_LOGO = '/assets/servicios/receipt.svg'
+const FALLBACK_LOGO = publicUrl('assets/servicios/receipt.svg')
 
 /**
  * Company logo in a fixed 56x28 box. Logos are trimmed to their content
@@ -240,7 +241,7 @@ export function SortSelect({ value, onChange, className }: SortSelectProps) {
         >
           <span>Ordenar {SORT_LABELS[value]}</span>
           <img
-            src="/assets/icons/chevron-down.svg"
+            src={publicUrl('assets/icons/chevron-down.svg')}
             alt=""
             width={16}
             height={16}

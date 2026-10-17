@@ -1,3 +1,4 @@
+import { publicUrl } from '@/lib/assets.ts'
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router-dom'
 import {
@@ -33,7 +34,7 @@ export function Component() {
     return (
       <Screen>
         <DialogCard
-          icon="/assets/facturas/trash-lg.svg"
+          icon={publicUrl('assets/facturas/trash-lg.svg')}
           text="Factura eliminada"
         />
         <Actions>
@@ -48,7 +49,7 @@ export function Component() {
     return (
       <Screen>
         <DialogCard
-          icon="/assets/facturas/trash-lg.svg"
+          icon={publicUrl('assets/facturas/trash-lg.svg')}
           text={
             <>
               ¿Estás seguro de que deseas
@@ -85,7 +86,7 @@ export function Component() {
         <div className="flex w-full flex-col items-center gap-3 rounded-2xl border border-brand-soft-active bg-white p-6 text-center shadow-soft">
           <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-soft">
             <img
-              src="/assets/icons/cat-pago-servicios.svg"
+              src={publicUrl('assets/icons/cat-pago-servicios.svg')}
               alt=""
               width={30}
               height={29}

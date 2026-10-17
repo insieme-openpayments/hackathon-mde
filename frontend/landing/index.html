@@ -1,0 +1,953 @@
+<!doctype html>
+<html lang="es-CO">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Insieme | Paga en Colombia desde donde estés</title>
+    <meta
+      name="description"
+      content="Insieme es una corresponsalía virtual: pagas desde tu wallet, en tu moneda, y tu familia en Colombia recibe por Bre-B o en efectivo cerca de casa."
+    />
+    <link rel="canonical" href="/" />
+    <meta name="theme-color" content="#7A1FA2" />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Insieme" />
+    <meta property="og:locale" content="es_CO" />
+    <meta
+      property="og:title"
+      content="Insieme | Paga en Colombia desde donde estés"
+    />
+    <meta
+      property="og:description"
+      content="Pagas desde tu wallet, sin la cadena de intermediarios. Tu familia recibe cerca de casa, por Bre-B o en efectivo."
+    />
+    <meta property="og:url" content="/" />
+    <meta property="og:image" content="/assets/og.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta
+      property="og:image:alt"
+      content="Logo de Insieme sobre fondo morado con el lema: paga en Colombia desde donde estés"
+    />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Insieme | Paga en Colombia desde donde estés"
+    />
+    <meta
+      name="twitter:description"
+      content="Pagas desde tu wallet. Tu familia recibe cerca de casa."
+    />
+    <meta name="twitter:image" content="/assets/og.png" />
+    <link rel="icon" type="image/png" href="./favicon.png" />
+    <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=Sora:wght@500;600;700&amp;display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+    <script>
+      try {
+        var t = localStorage.getItem('insieme-theme')
+        if (t === 'dark' || t === 'light')
+          document.documentElement.setAttribute('data-theme', t)
+      } catch (e) {}
+    </script>
+  </head>
+  <body>
+    <a class="skip" href="#contenido">Saltar al contenido</a>
+    <header class="site-header">
+      <div class="wrap">
+        <a class="logo" href="./" aria-label="Insieme, inicio"
+          ><img
+            src="./brand/logo-insieme.png"
+            width="136"
+            height="38"
+            alt="Insieme"
+        /></a>
+        <nav class="site-nav" aria-label="Principal">
+          <a href="#que-es">Qué es</a>
+          <a href="#formas">Formas de usarlo</a>
+          <a href="#historias">Historias</a>
+          <a href="#empezar">Cómo empezar</a>
+          <a href="#confianza">Confianza</a>
+        </nav>
+        <button type="button" class="theme-btn" id="theme-toggle" hidden>
+          Modo oscuro
+        </button>
+      </div>
+    </header>
+
+    <main id="contenido">
+      <section class="hero" id="hero" aria-labelledby="hero-titulo">
+        <div class="wrap hero-grid">
+          <div>
+            <p class="eyebrow">Corresponsalía virtual</p>
+            <h1 id="hero-titulo">
+              Paga en Colombia desde donde estés. Tu familia lo recibe cerca de
+              casa.
+            </h1>
+            <p class="lead">
+              Pagas desde tu wallet, en tu moneda. Sin la cadena de
+              intermediarios en el camino.
+            </p>
+            <div class="cta-row">
+              <a class="btn btn-primary" href="./pay/"
+                >Ir al portal de pagos
+                <svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.4"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <path d="M5 12h14M13 6l6 6-6 6" /></svg
+              ></a>
+              <a
+                class="btn btn-secondary"
+                href="https://wallet.interledger-test.dev/"
+                target="_blank"
+                rel="noopener"
+                ><svg
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  aria-hidden="true"
+                  focusable="false"
+                >
+                  <path d="M3 7a2 2 0 0 1 2-2h13v4" />
+                  <path
+                    d="M3 7v11a2 2 0 0 0 2 2h14a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1H5a2 2 0 0 1-2-2z"
+                  />
+                  <circle cx="16" cy="14.5" r="1.2" fill="currentColor" /></svg
+                >Crear mi wallet Interledger<span class="sr-only">
+                  (se abre en una pestaña nueva)</span
+                ></a
+              >
+            </div>
+            <p class="wallet-line">
+              Tu billetera para pagar en cualquier moneda.
+            </p>
+            <p class="cta-note">
+              Entorno de pruebas: es una demostración y no mueve dinero real.
+            </p>
+          </div>
+          <div class="hero-art">
+            <div class="pair">
+              <img
+                src="./assets/marcela.svg"
+                width="96"
+                height="96"
+                alt="Marcela, auxiliar de enfermería de 34 años, con uniforme verde agua y el cabello recogido"
+              />
+              <img
+                src="./assets/dona-rosa.svg"
+                width="96"
+                height="96"
+                alt="Doña Rosa, abuela de 67 años con gafas redondas, moño canoso y chal rosado"
+              />
+            </div>
+            <span
+              >Marcela paga desde Madrid. Doña Rosa recibe en su barrio.</span
+            >
+          </div>
+        </div>
+      </section>
+
+      <section class="block" id="problema" aria-labelledby="problema-titulo">
+        <div class="wrap">
+          <p class="eyebrow">El problema</p>
+          <h2 id="problema-titulo">
+            Nadie se va por gusto, y la demora la paga la familia que se queda
+          </h2>
+          <p class="lede">
+            Hoy el dinero pasa por varias manos antes de llegar. Cada una lo
+            retiene, lo cobra o lo demora, y al final quien espera es tu
+            familia.
+          </p>
+          <img
+            class="puente"
+            src="./assets/puente.svg"
+            width="600"
+            height="200"
+            alt="Antes, varios intermediarios tachados entre quien paga en el exterior y su familia en Colombia; con Insieme, una línea directa"
+          />
+        </div>
+      </section>
+
+      <section class="block alt" id="que-es" aria-labelledby="que-es-titulo">
+        <div class="wrap">
+          <p class="eyebrow">Qué es Insieme</p>
+          <h2 id="que-es-titulo">Una corresponsalía virtual en tres pasos</h2>
+          <p class="lede">
+            Insieme significa “juntos” en italiano. El &amp; de nuestro logo une
+            a quien se fue con la familia que se quedó.
+          </p>
+          <div class="grid cols-3">
+            <div class="card">
+              <img
+                class="icon ico"
+                src="./assets/wallet.svg"
+                width="32"
+                height="32"
+                alt="Icono de una billetera"
+              /><span class="step-num" aria-hidden="true">1</span>
+              <h3>Pagas desde tu wallet</h3>
+              <p>Usas tu billetera en tu propia moneda, desde el celular.</p>
+            </div>
+            <div class="card">
+              <img
+                class="icon ico"
+                src="./assets/interledger.svg"
+                width="32"
+                height="32"
+                alt="Icono de nodos conectados entre sí"
+              /><span class="step-num" aria-hidden="true">2</span>
+              <h3>Insieme coordina</h3>
+              <p>
+                Mueve el valor entre países y avisa al punto de entrega en
+                Colombia.
+              </p>
+            </div>
+            <div class="card">
+              <img
+                class="icon ico"
+                src="./assets/corresponsal.svg"
+                width="32"
+                height="32"
+                alt="Icono de una tienda de barrio"
+              /><span class="step-num" aria-hidden="true">3</span>
+              <h3>Tu familia recibe</h3>
+              <p>
+                Por Bre-B o en efectivo, en un punto de atención cerca de casa.
+              </p>
+            </div>
+          </div>
+          <details>
+            <summary>Para quien quiere saber más</summary>
+            <p>
+              Insieme usa Open Payments, un estándar abierto para pedir y
+              autorizar pagos entre cuentas de distintos proveedores. El dinero
+              cruza entre países con el Protocolo Interledger (ILP), que conecta
+              redes de pago y convierte entre monedas.
+            </p>
+            <p>
+              Después, el orquestador de Insieme entrega en Colombia por Bre-B o
+              en efectivo en un corresponsal físico.
+            </p>
+          </details>
+        </div>
+      </section>
+
+      <section class="block" id="formas" aria-labelledby="formas-titulo">
+        <div class="wrap">
+          <p class="eyebrow">Dos formas de usar Insieme</p>
+          <h2 id="formas-titulo">Elige lo que tu familia necesita</h2>
+          <div class="scenarios">
+            <button
+              type="button"
+              class="scn-btn"
+              id="scn-1"
+              aria-expanded="true"
+              aria-controls="panel-1"
+            >
+              <img
+                class="ico"
+                src="./assets/servicios.svg"
+                width="32"
+                height="32"
+                alt=""
+              />Pago la obligación directamente<svg
+                class="chev"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              class="scn-btn"
+              id="scn-2"
+              aria-expanded="false"
+              aria-controls="panel-2"
+            >
+              <img
+                src="./assets/breb.svg"
+                class="ico"
+                width="32"
+                height="32"
+                alt=""
+              />Le envío dinero a mi familiar<svg
+                class="chev"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </button>
+          </div>
+          <div class="panels">
+            <div
+              class="card panel"
+              id="panel-1"
+              role="region"
+              aria-labelledby="scn-1"
+            >
+              <p>
+                Pagas desde el exterior un recibo, una matrícula o un servicio
+                de tu familia. No tienes que girar efectivo.
+              </p>
+              <div class="story-mini">
+                <img
+                  class="avatar"
+                  src="./assets/marcela.svg"
+                  width="96"
+                  height="96"
+                  alt="Marcela, auxiliar de enfermería de 34 años, con uniforme verde agua y el cabello recogido"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <p>
+                  Marcela paga la matrícula de Samuel y el recibo de la luz al
+                  salir del turno. Ve la confirmación en el celular.
+                </p>
+              </div>
+              <p class="nota">
+                Historia ilustrativa basada en situaciones frecuentes de
+                familias con migrantes.
+              </p>
+              <p>
+                <a class="btn btn-primary" href="./pay/"
+                  >Ir al portal de pagos
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.4"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                    focusable="false"
+                  >
+                    <path d="M5 12h14M13 6l6 6-6 6" /></svg
+                ></a>
+              </p>
+            </div>
+            <div
+              class="card panel"
+              id="panel-2"
+              role="region"
+              aria-labelledby="scn-2"
+            >
+              <p>Dos caminos, según tu familiar:</p>
+              <div class="subs">
+                <button
+                  type="button"
+                  class="sub-btn"
+                  id="sub-1"
+                  aria-expanded="true"
+                  aria-controls="subpanel-1"
+                >
+                  <img
+                    src="./assets/breb.svg"
+                    class="ico"
+                    width="32"
+                    height="32"
+                    alt=""
+                  />Bre-B: tiene cuenta bancaria<svg
+                    class="chev"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.4"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                    focusable="false"
+                  >
+                    <path d="M6 9l6 6 6-6" />
+                  </svg>
+                </button>
+                <button
+                  type="button"
+                  class="sub-btn"
+                  id="sub-2"
+                  aria-expanded="false"
+                  aria-controls="subpanel-2"
+                >
+                  <img
+                    src="./assets/corresponsal.svg"
+                    class="ico"
+                    width="32"
+                    height="32"
+                    alt=""
+                  />Giro en efectivo: no tiene cuenta<svg
+                    class="chev"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.4"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                    focusable="false"
+                  >
+                    <path d="M6 9l6 6 6-6" />
+                  </svg>
+                </button>
+              </div>
+              <div id="subpanel-1" role="region" aria-labelledby="sub-1">
+                <p>
+                  Bre-B es el sistema de pagos inmediatos de Colombia: llega al
+                  instante a la llave o cuenta de tu familiar.
+                </p>
+                <div class="story-mini">
+                  <img
+                    class="avatar"
+                    src="./assets/andres.svg"
+                    width="96"
+                    height="96"
+                    alt="Andrés, repartidor de 28 años con casco de bicicleta naranja y camiseta oscura"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <p>
+                    Andrés paga en pesos chilenos y su hermana Daniela recibe en
+                    su llave Bre-B. Paga el semestre ese mismo día.
+                  </p>
+                </div>
+                <p class="nota">
+                  Historia ilustrativa basada en situaciones frecuentes de
+                  familias con migrantes.
+                </p>
+              </div>
+              <div id="subpanel-2" role="region" aria-labelledby="sub-2">
+                <p>
+                  Tu familiar cobra con su cédula en un corresponsal físico, en
+                  un punto de atención cerca de casa. Ese paso hace parte del
+                  camino.
+                </p>
+                <div class="story-mini">
+                  <img
+                    class="avatar"
+                    src="./assets/dona-rosa.svg"
+                    width="96"
+                    height="96"
+                    alt="Doña Rosa, abuela de 67 años con gafas redondas, moño canoso y chal rosado"
+                    loading="lazy"
+                    decoding="async"
+                  />
+                  <p>
+                    Doña Rosa presenta su cédula en el corresponsal de su barrio
+                    y recibe el efectivo. Don Álvaro, el agente, valida y
+                    entrega.
+                  </p>
+                </div>
+                <p class="nota">
+                  Historia ilustrativa basada en situaciones frecuentes de
+                  familias con migrantes.
+                </p>
+              </div>
+              <p>
+                <a class="btn btn-primary" href="./pay/"
+                  >Ir al portal de pagos
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    stroke-width="2.4"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                    aria-hidden="true"
+                    focusable="false"
+                  >
+                    <path d="M5 12h14M13 6l6 6-6 6" /></svg
+                ></a>
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section
+        class="block alt"
+        id="historias"
+        aria-labelledby="historias-titulo"
+      >
+        <div class="wrap">
+          <p class="eyebrow">Personajes e historias</p>
+          <h2 id="historias-titulo">
+            Dos familias, seis personas, un mismo camino
+          </h2>
+          <p class="lede">
+            Así cambian las cosas para quien paga y para quien recibe.
+          </p>
+          <div class="grid cols-2 stories">
+            <article class="card story" aria-labelledby="h-marcela">
+              <header>
+                <img
+                  class="avatar"
+                  src="./assets/marcela.svg"
+                  width="96"
+                  height="96"
+                  alt="Marcela, auxiliar de enfermería de 34 años, con uniforme verde agua y el cabello recogido"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <div>
+                  <h3 id="h-marcela">Marcela, 34</h3>
+                  <p class="role">
+                    Auxiliar de enfermería en Madrid. Salió de Dosquebradas
+                    cuando cerró la empresa donde trabajaba.
+                  </p>
+                  <span class="tag">Pago directo</span>
+                </div>
+              </header>
+              <h4>Lo que vivieron</h4>
+              <p>
+                Hace turnos dobles. Para la matrícula de Samuel envió dinero por
+                una cadena de intermediarios: llegó tarde y una parte se quedó
+                en el camino.
+              </p>
+              <h4>Con Insieme</h4>
+              <p class="con">
+                Paga la matrícula y el recibo de la luz desde su wallet al salir
+                del turno, sin girar efectivo. Ve la confirmación en el celular
+                y ya no llama cada noche a preguntar si llegó.
+              </p>
+              <p class="nota">
+                Historia ilustrativa basada en situaciones frecuentes de
+                familias con migrantes.
+              </p>
+            </article>
+            <article class="card story" aria-labelledby="h-samuel">
+              <header>
+                <img
+                  class="avatar"
+                  src="./assets/samuel.svg"
+                  width="96"
+                  height="96"
+                  alt="Samuel, niño de 9 años con camiseta amarilla y morral escolar al hombro"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <div>
+                  <h3 id="h-samuel">Samuel, 9</h3>
+                  <p class="role">
+                    Hijo de Marcela, cuarto de primaria. Vive con su abuela.
+                  </p>
+                  <span class="tag">Pago directo</span>
+                </div>
+              </header>
+              <h4>Lo que vivieron</h4>
+              <p>
+                Estuvo cerca de perder su cupo por una matrícula que llegó
+                tarde.
+              </p>
+              <h4>Con Insieme</h4>
+              <p class="con">
+                La matrícula queda pagada a tiempo y no vuelve a perder clases.
+              </p>
+              <p class="nota">
+                Historia ilustrativa basada en situaciones frecuentes de
+                familias con migrantes.
+              </p>
+            </article>
+            <article class="card story" aria-labelledby="h-andres">
+              <header>
+                <img
+                  class="avatar"
+                  src="./assets/andres.svg"
+                  width="96"
+                  height="96"
+                  alt="Andrés, repartidor de 28 años con casco de bicicleta naranja y camiseta oscura"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <div>
+                  <h3 id="h-andres">Andrés, 28</h3>
+                  <p class="role">
+                    Repartidor en bicicleta en Santiago de Chile. Es de
+                    Bucaramanga.
+                  </p>
+                  <span class="tag">Envío por Bre-B</span>
+                </div>
+              </header>
+              <h4>Lo que vivieron</h4>
+              <p>
+                El plazo del semestre vencía un lunes y la transferencia
+                internacional tardaba días y pedía datos de bancos
+                intermediarios.
+              </p>
+              <h4>Con Insieme</h4>
+              <p class="con">
+                Paga en pesos chilenos desde su wallet y el dinero llega por
+                Bre-B a la llave de su hermana, al instante.
+              </p>
+              <p class="nota">
+                Historia ilustrativa basada en situaciones frecuentes de
+                familias con migrantes.
+              </p>
+            </article>
+            <article class="card story" aria-labelledby="h-daniela">
+              <header>
+                <img
+                  class="avatar"
+                  src="./assets/daniela.svg"
+                  width="96"
+                  height="96"
+                  alt="Daniela, universitaria de 19 años con audífonos grandes, cabello largo y sudadera morada"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <div>
+                  <h3 id="h-daniela">Daniela, 19</h3>
+                  <p class="role">
+                    Hermana de Andrés. Recién entró a la universidad en
+                    Bucaramanga y tiene cuenta bancaria.
+                  </p>
+                  <span class="tag">Envío por Bre-B</span>
+                </div>
+              </header>
+              <h4>Lo que vivieron</h4>
+              <p>
+                Pasó el fin de semana pidiendo una prórroga a la universidad.
+              </p>
+              <h4>Con Insieme</h4>
+              <p class="con">
+                Recibe en su llave Bre-B y paga el semestre ese mismo día.
+              </p>
+              <p class="nota">
+                Historia ilustrativa basada en situaciones frecuentes de
+                familias con migrantes.
+              </p>
+            </article>
+            <article class="card story" aria-labelledby="h-dona-rosa">
+              <header>
+                <img
+                  class="avatar"
+                  src="./assets/dona-rosa.svg"
+                  width="96"
+                  height="96"
+                  alt="Doña Rosa, abuela de 67 años con gafas redondas, moño canoso y chal rosado"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <div>
+                  <h3 id="h-dona-rosa">Doña Rosa, 67</h3>
+                  <p class="role">
+                    Mamá de Marcela. Cuida a su nieto y nunca ha tenido cuenta
+                    bancaria.
+                  </p>
+                  <span class="tag">Giro en efectivo</span>
+                </div>
+              </header>
+              <h4>Lo que vivieron</h4>
+              <p>
+                Para cobrar un giro viajaba al centro, hacía fila con Samuel de
+                la mano y a veces la oficina ya había cerrado.
+              </p>
+              <h4>Con Insieme</h4>
+              <p class="con">
+                Presenta su cédula en el corresponsal de su barrio y recibe el
+                efectivo, o paga ahí mismo el recibo de la luz. Marcela ve la
+                confirmación en su celular en el momento en que Doña Rosa
+                recibe.
+              </p>
+              <p class="nota">
+                Historia ilustrativa basada en situaciones frecuentes de
+                familias con migrantes.
+              </p>
+            </article>
+            <article class="card story" aria-labelledby="h-don-alvaro">
+              <header>
+                <img
+                  class="avatar"
+                  src="./assets/don-alvaro.svg"
+                  width="96"
+                  height="96"
+                  alt="Don Álvaro, tendero de 58 años con bigote, cabello canoso corto y delantal verde"
+                  loading="lazy"
+                  decoding="async"
+                />
+                <div>
+                  <h3 id="h-don-alvaro">Don Álvaro, 58</h3>
+                  <p class="role">
+                    Agente corresponsal. Tiene la tienda de la esquina hace
+                    veinte años.
+                  </p>
+                  <span class="tag">Giro en efectivo</span>
+                </div>
+              </header>
+              <h4>Lo que vivieron</h4>
+              <p>Su tienda era solo una tienda.</p>
+              <h4>Con Insieme</h4>
+              <p class="con">
+                Ahora es también un punto de atención de confianza: consulta el
+                pago, valida la cédula y entrega el efectivo.
+              </p>
+              <p class="nota">
+                Historia ilustrativa basada en situaciones frecuentes de
+                familias con migrantes.
+              </p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <section class="block" id="empezar" aria-labelledby="empezar-titulo">
+        <div class="wrap">
+          <p class="eyebrow">Cómo empezar</p>
+          <h2 id="empezar-titulo">Tres pasos para pagar o enviar</h2>
+          <ol class="trust-list">
+            <li class="card">
+              <span class="step-num" aria-hidden="true">1</span>
+              <h3>Crea tu wallet</h3>
+              <p>Es tu billetera para pagar en cualquier moneda.</p>
+            </li>
+            <li class="card">
+              <span class="step-num" aria-hidden="true">2</span>
+              <h3>Fóndala</h3>
+              <p>Carga saldo en tu propia moneda.</p>
+            </li>
+            <li class="card">
+              <span class="step-num" aria-hidden="true">3</span>
+              <h3>Paga o envía</h3>
+              <p>
+                Entra al portal de pagos y elige el camino que sirve a tu
+                familia.
+              </p>
+            </li>
+          </ol>
+          <p style="margin-top: 20px">
+            <a
+              class="btn btn-secondary on-light"
+              href="https://wallet.interledger-test.dev/"
+              target="_blank"
+              rel="noopener"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path d="M3 7a2 2 0 0 1 2-2h13v4" />
+                <path
+                  d="M3 7v11a2 2 0 0 0 2 2h14a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1H5a2 2 0 0 1-2-2z"
+                />
+                <circle cx="16" cy="14.5" r="1.2" fill="currentColor" /></svg
+              >Crear mi wallet Interledger<span class="sr-only">
+                (se abre en una pestaña nueva)</span
+              ></a
+            >
+          </p>
+          <p class="test-flag">
+            <strong>Entorno de pruebas.</strong> La wallet es de demostración y
+            no mueve dinero real.
+          </p>
+        </div>
+      </section>
+
+      <section
+        class="block alt"
+        id="confianza"
+        aria-labelledby="confianza-titulo"
+      >
+        <div class="wrap">
+          <p class="eyebrow">Confianza</p>
+          <h2 id="confianza-titulo">Claro desde el principio</h2>
+          <ul class="trust-list">
+            <li class="card">
+              <h3>Tú autorizas cada pago</h3>
+              <p>Nada sale de tu wallet sin que tú lo apruebes.</p>
+            </li>
+            <li class="card">
+              <h3>Supervisión regulatoria</h3>
+              <p>
+                Insieme está en fase de demostración. La operación con dinero
+                real dependerá de la validación regulatoria y de los aliados.
+              </p>
+            </li>
+            <li class="card">
+              <h3>Entrega verificada</h3>
+              <p>
+                En efectivo, el corresponsal valida la cédula de tu familiar
+                antes de entregar.
+              </p>
+            </li>
+          </ul>
+          <p style="margin-top: 20px">
+            Nace en Beyond Access 2026, hackatón de Interledger, de nuestros
+            aliados:
+          </p>
+          <div class="allies">
+            <span class="ally">Intrust</span
+            ><span class="ally">Twelve Network</span
+            ><span class="ally">Oplat</span>
+          </div>
+        </div>
+      </section>
+
+      <section class="closing" id="cierre" aria-labelledby="cierre-titulo">
+        <div class="wrap">
+          <h2 id="cierre-titulo">Tu familia no tiene que esperar</h2>
+          <p class="lede">Paga o envía hoy, o crea tu wallet para empezar.</p>
+          <div class="cta-row">
+            <a class="btn btn-primary" href="./pay/"
+              >Ir al portal de pagos
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2.4"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path d="M5 12h14M13 6l6 6-6 6" /></svg
+            ></a>
+            <a
+              class="btn btn-secondary"
+              href="https://wallet.interledger-test.dev/"
+              target="_blank"
+              rel="noopener"
+              ><svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+                aria-hidden="true"
+                focusable="false"
+              >
+                <path d="M3 7a2 2 0 0 1 2-2h13v4" />
+                <path
+                  d="M3 7v11a2 2 0 0 0 2 2h14a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1H5a2 2 0 0 1-2-2z"
+                />
+                <circle cx="16" cy="14.5" r="1.2" fill="currentColor" /></svg
+              >Crear mi wallet Interledger<span class="sr-only">
+                (se abre en una pestaña nueva)</span
+              ></a
+            >
+          </div>
+          <p class="cta-note">
+            Tu billetera para pagar en cualquier moneda. Entorno de pruebas: no
+            mueve dinero real.
+          </p>
+          <h3 style="margin-top: 32px">Preguntas frecuentes</h3>
+          <details>
+            <summary>¿Mi familiar necesita cuenta bancaria?</summary>
+            <p>
+              No. Si tiene cuenta, recibe por Bre-B. Si no la tiene, cobra en
+              efectivo con su cédula en un corresponsal físico.
+            </p>
+          </details>
+          <details>
+            <summary>¿Tengo que girar efectivo?</summary>
+            <p>
+              No. Pagas desde tu wallet; el efectivo solo lo entrega el
+              corresponsal a tu familiar.
+            </p>
+          </details>
+          <details>
+            <summary>¿Puedo usar esto con dinero real?</summary>
+            <p>
+              Hoy es un entorno de demostración y no mueve dinero real, salvo
+              que Oplat indique lo contrario.
+            </p>
+          </details>
+        </div>
+      </section>
+    </main>
+
+    <footer class="closing foot">
+      <div class="wrap">
+        <a class="logo" href="./" aria-label="Insieme, inicio"
+          ><img
+            src="./brand/logo-insieme.png"
+            width="158"
+            height="44"
+            alt="Insieme"
+            loading="lazy"
+        /></a>
+        <p class="fine">
+          Historia ilustrativa basada en situaciones frecuentes de familias con
+          migrantes. Los personajes no son clientes reales.
+        </p>
+        <p class="fine">
+          Insieme nace en Beyond Access 2026, hackatón de Interledger. Intrust,
+          Twelve Network y Oplat.
+        </p>
+      </div>
+    </footer>
+
+    <nav class="sticky-bar" aria-label="Acciones rápidas">
+      <a class="btn btn-primary" href="./pay/"
+        >Ir al portal de pagos
+        <svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2.4"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path d="M5 12h14M13 6l6 6-6 6" /></svg
+      ></a>
+      <a
+        class="btn btn-secondary"
+        href="https://wallet.interledger-test.dev/"
+        target="_blank"
+        rel="noopener"
+        ><svg
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+          focusable="false"
+        >
+          <path d="M3 7a2 2 0 0 1 2-2h13v4" />
+          <path
+            d="M3 7v11a2 2 0 0 0 2 2h14a1 1 0 0 0 1-1v-9a1 1 0 0 0-1-1H5a2 2 0 0 1-2-2z"
+          />
+          <circle cx="16" cy="14.5" r="1.2" fill="currentColor" /></svg
+        >Crear mi wallet<span class="sr-only">
+          Interledger (pestaña nueva)</span
+        ></a
+      >
+    </nav>
+    <script src="./script.js" defer></script>
+  </body>
+</html>

@@ -1,3 +1,4 @@
+import { publicUrl } from '@/lib/assets.ts'
 import { useState } from 'react'
 import { FloatingInput } from '@/components/insieme'
 import type { CatalogProduct } from '@/lib/api-types.ts'
@@ -39,7 +40,7 @@ export function ConvDropdown({
         >
           <span>Borrar selección</span>
           <img
-            src="/assets/facturas/eraser.svg"
+            src={publicUrl('assets/facturas/eraser.svg')}
             alt=""
             width={13}
             height={13}
@@ -64,7 +65,7 @@ export function ConvDropdown({
             onClick={() => setOpen((o) => !o)}
           >
             <img
-              src="/assets/facturas/search.svg"
+              src={publicUrl('assets/facturas/search.svg')}
               alt=""
               width={24}
               height={24}

@@ -1,3 +1,4 @@
+import { publicUrl } from '@/lib/assets.ts'
 // Fixed bottom confirmation panel. First "Confirmar" opens it; the second one
 // either instant-buys (matching one-click token) or stores the payment draft,
 // creates the order and redirects to the wallet.
@@ -236,7 +237,9 @@ export function ConfirmPanel(props: ConfirmPanelProps) {
       >
         {open ? 'Ocultar detalles' : 'Ver detalles'}
         <img
-          src={`/assets/icons/${open ? 'chevron-down-dark' : 'chevron-up'}.svg`}
+          src={publicUrl(
+            `assets/icons/${open ? 'chevron-down-dark' : 'chevron-up'}.svg`
+          )}
           alt=""
           width={16}
           height={16}

@@ -1,3 +1,4 @@
+import { publicUrl } from '@/lib/assets.ts'
 // Layout primitives of the Insieme design system.
 import { cn } from '@/lib/utils.ts'
 import type {
@@ -16,7 +17,7 @@ import { Tip } from './tip.tsx'
 export function Logo({ className }: LogoProps) {
   return (
     <img
-      src="/brand/logo-insieme.png"
+      src={publicUrl('brand/logo-insieme.png')}
       alt="Insieme"
       width={129}
       height={36}
@@ -32,7 +33,7 @@ export function Isotipo({
 }: LogoProps & { size?: number }) {
   return (
     <img
-      src="/brand/isotipo-insieme.png"
+      src={publicUrl('brand/isotipo-insieme.png')}
       alt=""
       aria-hidden="true"
       width={size}

@@ -1,3 +1,4 @@
+import { publicUrl } from '@/lib/assets.ts'
 // Form inputs (floating label, money, search).
 import { forwardRef, useId } from 'react'
 import { get, useFormContext } from 'react-hook-form'
@@ -167,7 +168,7 @@ export function SearchInput({
       )}
     >
       <img
-        src="/assets/servicios/search.svg"
+        src={publicUrl('assets/servicios/search.svg')}
         alt=""
         width={20}
         height={20}

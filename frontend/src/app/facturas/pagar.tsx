@@ -1,3 +1,4 @@
+import { publicUrl } from '@/lib/assets.ts'
 import { useEffect, useRef, useState } from 'react'
 import { useSnapshot } from 'valtio'
 import { useNavigate } from 'react-router-dom'
@@ -159,7 +160,7 @@ export function Component() {
             placeholder="Digita tu correo electrónico"
             leading={
               <img
-                src="/assets/icons/field-mail.svg"
+                src={publicUrl('assets/icons/field-mail.svg')}
                 alt=""
                 width={16}
                 height={13}
@@ -182,7 +183,7 @@ export function Component() {
                 }}
               >
                 <img
-                  src="/assets/facturas/edit.svg"
+                  src={publicUrl('assets/facturas/edit.svg')}
                   alt=""
                   width={16}
                   height={16}

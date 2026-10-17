@@ -1,3 +1,4 @@
+import { publicUrl } from '@/lib/assets.ts'
 import { useMemo, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
@@ -93,7 +94,7 @@ export function Component() {
           <summary className="flex cursor-pointer list-none items-center justify-between rounded-xl border border-neutral-light-active bg-white px-4 py-3 text-sm font-medium text-brand [&::-webkit-details-marker]:hidden">
             Cambiar de categoría
             <img
-              src="/assets/icons/chevron-down.svg"
+              src={publicUrl('assets/icons/chevron-down.svg')}
               alt=""
               width={16}
               height={16}

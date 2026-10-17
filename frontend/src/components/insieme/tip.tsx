@@ -1,3 +1,4 @@
+import { publicUrl } from '@/lib/assets.ts'
 // Tooltip: "!" icon that opens a small bubble. Radix Popover, controlled,
 // auto-closes after 3.5 s.
 import { useEffect, useState } from 'react'
@@ -40,7 +41,7 @@ export function Tip({
         >
           {icon === 'alert' ? (
             <img
-              src="/assets/icons/alert-circle.svg"
+              src={publicUrl('assets/icons/alert-circle.svg')}
               alt=""
               width={20}
               height={20}
@@ -48,7 +49,7 @@ export function Tip({
             />
           ) : (
             <img
-              src="/assets/icons/exclamation.svg"
+              src={publicUrl('assets/icons/exclamation.svg')}
               alt=""
               width={10}
               height={10}

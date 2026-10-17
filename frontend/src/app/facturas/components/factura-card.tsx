@@ -1,3 +1,4 @@
+import { publicUrl } from '@/lib/assets.ts'
 import type { FacturaItem } from '@/lib/stores/facturas-store.ts'
 import { categoryIcon } from '@/lib/assets.ts'
 import { cn } from '@/lib/utils.ts'
@@ -62,7 +63,7 @@ export function FacturaCard({
             className={ICON_BUTTON}
           >
             <img
-              src="/assets/facturas/pencil.svg"
+              src={publicUrl('assets/facturas/pencil.svg')}
               alt=""
               width={14}
               height={14}
@@ -75,7 +76,7 @@ export function FacturaCard({
             className={ICON_BUTTON}
           >
             <img
-              src="/assets/facturas/trash.svg"
+              src={publicUrl('assets/facturas/trash.svg')}
               alt=""
               width={18}
               height={18}

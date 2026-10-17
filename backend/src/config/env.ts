@@ -29,7 +29,11 @@ const base64String = requiredString.refine(
 const envSchema = z.object({
   PORT: z.coerce.number(),
   NODE_ENV: z.string().min(1),
-  FRONTEND_URL: z.string().url(),
+  // Return URLs are built by concatenation: never keep a trailing slash.
+  FRONTEND_URL: z
+    .string()
+    .url()
+    .transform((value) => value.replace(/\/+$/, '')),
   DATABASE_URL: z.string().url(),
   PAYMENT_POINTER: httpsUrlString,
   KEY_ID: requiredString,

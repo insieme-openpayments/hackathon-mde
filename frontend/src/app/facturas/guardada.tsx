@@ -1,3 +1,4 @@
+import { publicUrl } from '@/lib/assets.ts'
 import { useNavigate } from 'react-router-dom'
 import {
   Actions,
@@ -13,7 +14,7 @@ export function Component() {
   return (
     <Screen>
       <DialogCard
-        icon="/assets/facturas/check-circle.svg"
+        icon={publicUrl('assets/facturas/check-circle.svg')}
         large
         text={
           <>

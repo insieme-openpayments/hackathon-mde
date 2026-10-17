@@ -1,3 +1,4 @@
+import { publicUrl } from '@/lib/assets.ts'
 import type { Category } from '@/lib/api-types.ts'
 import { categoryIcon } from '@/lib/assets.ts'
 import { cn } from '@/lib/utils.ts'
@@ -12,7 +13,7 @@ interface CategorySelectorProps {
 
 const CHEVRON = (
   <img
-    src="/assets/facturas/chevron-right.svg"
+    src={publicUrl('assets/facturas/chevron-right.svg')}
     alt=""
     width={16}
     height={16}

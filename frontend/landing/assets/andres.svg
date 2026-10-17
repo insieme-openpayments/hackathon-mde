@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-labelledby="t">
+<title id="t">Retrato ilustrado de Andrés, repartidor de 28 años con casco de bicicleta naranja y camiseta oscura</title>
+<defs><clipPath id="c"><circle cx="80" cy="80" r="80"/></clipPath></defs>
+<circle cx="80" cy="80" r="80" fill="#DDF1E4"/>
+<g clip-path="url(#c)">
+
+<path d="M18 160c0-34 26-52 62-52s62 18 62 52z" fill="#2E3A4D"/>
+<rect x="68" y="92" width="24" height="24" rx="8" fill="#C98D63"/>
+<circle cx="80" cy="68" r="30" fill="#C98D63"/>
+<path d="M47 66c0-26 15-40 33-40s33 14 33 40z" fill="#F26B1D"/><path d="M80 26v22M64 30l6 20M96 30l-6 20" stroke="#fff" stroke-width="3" stroke-linecap="round" opacity=".6"/><rect x="47" y="62" width="66" height="6" rx="3" fill="#C94F0C"/><path d="M64 96q16 10 32 0v6H64z" fill="#3A2A22"/>
+<circle cx="69" cy="70" r="2.6" fill="#2B2230"/><circle cx="91" cy="70" r="2.6" fill="#2B2230"/>
+<path d="M72 82q8 7 16 0" fill="none" stroke="#2B2230" stroke-width="2.4" stroke-linecap="round"/>
+<rect x="108" y="122" width="26" height="22" rx="4" fill="#FFC20E"/><path d="M114 122v-6h14v6" fill="none" stroke="#B88A00" stroke-width="3"/>
+</g></svg>

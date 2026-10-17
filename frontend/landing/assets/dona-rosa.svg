@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" role="img" aria-labelledby="t">
+<title id="t">Retrato ilustrado de Doña Rosa, abuela de 67 años con gafas redondas, moño canoso y chal rosado</title>
+<defs><clipPath id="c"><circle cx="80" cy="80" r="80"/></clipPath></defs>
+<circle cx="80" cy="80" r="80" fill="#FCE3D2"/>
+<g clip-path="url(#c)">
+
+<path d="M18 160c0-34 26-52 62-52s62 18 62 52z" fill="#D9548A"/>
+<rect x="68" y="92" width="24" height="24" rx="8" fill="#E5B08B"/>
+<circle cx="80" cy="68" r="30" fill="#E5B08B"/>
+<path d="M50 68c-2-24 12-38 30-38s32 14 30 38c-4-12-14-18-30-18S54 56 50 68z" fill="#D8D4DC"/><circle cx="80" cy="24" r="12" fill="#D8D4DC"/><circle cx="80" cy="24" r="12" fill="none" stroke="#B9B3C0" stroke-width="2"/><path d="M62 52q18-10 36 0" fill="none" stroke="#B9B3C0" stroke-width="2"/>
+<circle cx="69" cy="70" r="2.6" fill="#2B2230"/><circle cx="91" cy="70" r="2.6" fill="#2B2230"/>
+<path d="M72 82q8 7 16 0" fill="none" stroke="#2B2230" stroke-width="2.4" stroke-linecap="round"/>
+<g fill="none" stroke="#5A3A52" stroke-width="2.6"><circle cx="69" cy="70" r="9"/><circle cx="91" cy="70" r="9"/><path d="M78 70h4"/></g><path d="M56 110q24 14 48 0" fill="none" stroke="#F3A9C6" stroke-width="6" stroke-linecap="round"/><path d="M62 70h-6M104 70h-6" stroke="#5A3A52" stroke-width="2.4"/>
+</g></svg>

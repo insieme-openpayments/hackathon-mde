@@ -14,6 +14,15 @@ Desde la raíz del repo (`pnpm --filter @insieme/frontend <script>`):
 | `build`   | Compila `shared`, comprueba tipos con `tsc` y construye con `vite build` |
 | `preview` | Sirve el build de producción                                             |
 
+## URLs
+
+El portal vive bajo `/pay/` (Vite `base: "/pay/"`, router con `basename: "/pay"`) y la landing estática (`frontend/landing/`) en `/`:
+
+- Landing: http://localhost:4004/
+- Portal de pagos: http://localhost:4004/pay/
+
+En desarrollo un plugin de Vite sirve `frontend/landing/` en `/`; en Docker lo hace nginx. Para assets públicos usa `publicUrl("assets/...")` de `src/lib/assets.ts`.
+
 ## Variables de entorno
 
 Van en `frontend/.env.local` (en `.gitignore`). Plantilla: `frontend/.env.example`.

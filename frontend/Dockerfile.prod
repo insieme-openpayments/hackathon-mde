@@ -35,7 +35,8 @@ RUN pnpm insieme:frontend build
 
 FROM nginx:stable-alpine AS runner
 
-COPY --from=builder /app/frontend/dist /usr/share/nginx/html
+COPY frontend/landing /usr/share/nginx/html
+COPY --from=builder /app/frontend/dist /usr/share/nginx/html/pay
 COPY frontend/nginx/nginx.conf /etc/nginx/conf.d/default.conf
 COPY frontend/docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh

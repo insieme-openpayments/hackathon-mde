@@ -1,3 +1,4 @@
+import { publicUrl } from '@/lib/assets.ts'
 import type { KeyboardEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BrandFooter, Isotipo, Screen, Tip } from '@/components/insieme'
@@ -138,7 +139,7 @@ export function Component() {
                     )}
                   >
                     <img
-                      src={`/assets/icons/${p.icon}.svg`}
+                      src={publicUrl(`assets/icons/${p.icon}.svg`)}
                       alt=""
                       width={26}
                       height={26}
