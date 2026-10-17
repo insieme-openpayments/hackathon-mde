@@ -64,6 +64,7 @@ export interface MoneyInputProps extends ClassNameProp {
   name?: string
   id?: string
   onBlur?: () => void
+  placeholder?: string
 }
 
 export interface SearchInputProps extends ClassNameProp {

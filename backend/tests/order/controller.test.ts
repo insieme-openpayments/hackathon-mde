@@ -131,6 +131,18 @@ describe('Order Controller', (): void => {
       expect(order.orderItems[0].product?.slug).toBe('vanti')
     })
 
+    it('deletes the order when preparing the payment fails', async (): Promise<void> => {
+      jest
+        .spyOn(openPayments, 'preparePayment')
+        .mockRejectedValue(new Error('boom'))
+      const res = await run(orderController.create, {
+        walletAddressUrl,
+        products: [await item('vanti', { amount: 18000 })]
+      })
+      expect(res.statusCode).toBe(500)
+      expect(await Order.query()).toHaveLength(0)
+    })
+
     it('prices a non-partial service with the amount of the lookup snapshot', async (): Promise<void> => {
       const enel = await productService.getBySlug('enel')
       const lookupRes = createResponse<Response>()
@@ -201,6 +213,36 @@ describe('Order Controller', (): void => {
         res._getJSONData().result.orderId
       )
       expect(order?.total).toBe(18000)
+    })
+  })
+
+  describe('finish', (): void => {
+    const runFinish = async (id: string, body: Record<string, unknown>) => {
+      const req = createRequest<Request>({ params: { id }, body })
+      const res = createResponse<Response>()
+      await orderController.finish(req, res, (err) => {
+        next()
+        app.errorHandler(err, req, res, next)
+      })
+      return res
+    }
+
+    it('returns 400 for a non-uuid id', async (): Promise<void> => {
+      const res = await runFinish('abc', { result: 'grant_rejected' })
+      expect(res.statusCode).toBe(400)
+    })
+
+    it('returns 409 for an order that is no longer pending', async (): Promise<void> => {
+      const created = await run(orderController.create, {
+        walletAddressUrl,
+        products: [await item('vanti', { amount: 18000 })]
+      })
+      const id = created._getJSONData().result.orderId
+      await Order.query()
+        .patch({ status: 'FAILED' as never })
+        .where({ id })
+      const res = await runFinish(id, { result: 'grant_rejected' })
+      expect(res.statusCode).toBe(409)
     })
   })
 })

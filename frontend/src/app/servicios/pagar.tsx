@@ -48,7 +48,12 @@ export function Component() {
     serviciosPagarSearchParamsSchema
   )
   const draft = useSnapshot(paymentDraftStore)
-  const { data, isLoading: catalogLoading } = useCatalogQuery()
+  const {
+    data,
+    isLoading: catalogLoading,
+    isError: catalogError,
+    refetch: refetchCatalog
+  } = useCatalogQuery()
 
   const product = useMemo(
     () =>
@@ -134,6 +139,23 @@ export function Component() {
     )
   }
 
+  if (catalogError && !data) {
+    return (
+      <Screen>
+        <p className="text-sm text-neutral-darker">
+          No pudimos cargar el catálogo, intenta de nuevo
+        </p>
+        <Button
+          aria-label="Reintentar"
+          variant="dark"
+          onClick={() => void refetchCatalog()}
+        >
+          Reintentar
+        </Button>
+      </Screen>
+    )
+  }
+
   if (!product) {
     return (
       <Screen>
@@ -200,6 +222,7 @@ export function Component() {
       <form onSubmit={onSubmit} className="flex w-full flex-col gap-4">
         <FloatingInput
           label="Referencia de pago 1"
+          placeholder="Referencia de pago"
           name="ref1"
           inputMode="numeric"
           enterKeyHint="search"
@@ -251,7 +274,7 @@ export function Component() {
               />
               {partial ? (
                 <div className="absolute right-3 top-3">
-                  <Tip defaultOpen>
+                  <Tip defaultOpen icon="alert">
                     <span>
                       Tu factura permite
                       <br />
@@ -295,7 +318,6 @@ export function Component() {
             productId={product.id}
             kind="servicio"
             details={{ ref1 }}
-            source="servicios"
             enabled={amountOk}
             onBack={() => {
               setBill(null)

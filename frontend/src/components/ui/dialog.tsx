@@ -87,7 +87,7 @@ export const DialogTitle = forwardRef<
   <DialogPrimitive.Title
     ref={ref}
     className={cn(
-      "text-lg font-['DejaVuSansMonoBold'] leading-none tracking-tight",
+      'font-sans text-lg font-semibold leading-none tracking-tight',
       className
     )}
     {...props}

@@ -1,13 +1,14 @@
 import type { ButtonHTMLAttributes } from 'react'
 import { cn } from '@/lib/utils.ts'
 
-type Tone = 'active' | 'disabled' | 'secondary' | 'dark' | 'yes' | 'no'
+type Tone = 'active' | 'disabled' | 'secondary' | 'dark' | 'yes' | 'no' | 'blue'
 
 const tones: Record<Tone, string> = {
   active: 'bg-lime text-lime-text hover:bg-lime-hover',
   disabled: 'cursor-not-allowed bg-neutral-light-active text-neutral-normal',
   secondary: 'border border-blue-normal bg-white text-blue-normal',
   dark: 'bg-blue-normal text-white hover:bg-blue-hover',
+  blue: 'bg-blue-hover text-white hover:bg-blue-normal',
   yes: 'bg-blue-normal text-white hover:bg-blue-hover',
   no: 'border border-blue-normal bg-white text-blue-normal'
 }

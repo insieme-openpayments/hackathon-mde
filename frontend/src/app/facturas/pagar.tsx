@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
+import { useSnapshot } from 'valtio'
 import { useNavigate } from 'react-router-dom'
 import {
   BankBlock,
@@ -16,6 +17,7 @@ import { useProfileStore } from '@/hooks/use-profile-store.ts'
 import { useZodRouteParams } from '@/hooks/use-zod-params.ts'
 import { facturaParamsSchema } from '@/app/route-schemas.ts'
 import { categoryIcon } from '@/lib/assets.ts'
+import { paymentDraftStore } from '@/lib/stores/payment-draft-store.ts'
 import { money } from '@/lib/money.ts'
 import { MAX_FACTURA_AMOUNT, MIN_AMOUNT, emailSchema } from '@/lib/schemas.ts'
 import { ActionButton } from './components/buttons.tsx'
@@ -28,10 +30,22 @@ export function Component() {
   const { data } = useCatalogQuery()
   const factura = items.find((i) => i.id === id)
 
-  const [amount, setAmount] = useState<number | null>(factura?.amount ?? null)
-  const [email, setEmail] = useState(profile.email)
+  const draft = useSnapshot(paymentDraftStore)
+  // Returning from the one-click setup: restore what the user confirmed.
+  const draftMatches =
+    !!factura && draft.kind === 'factura' && draft.facturaId === factura.id
+
+  const [amount, setAmount] = useState<number | null>(
+    draftMatches && draft.amount != null
+      ? draft.amount
+      : (factura?.amount ?? null)
+  )
+  const [email, setEmail] = useState(
+    draftMatches && draft.email ? draft.email : profile.email
+  )
   const [emailTouched, setEmailTouched] = useState(false)
-  const amountEdited = useRef(false)
+  const [amountTouched, setAmountTouched] = useState(false)
+  const amountEdited = useRef(draftMatches && draft.amount != null)
   const emailRef = useRef<HTMLInputElement>(null)
   const lookup = useBillLookupMutation()
   const { mutate } = lookup
@@ -71,11 +85,11 @@ export function Component() {
     amount != null && amount >= MIN_AMOUNT && amount <= MAX_FACTURA_AMOUNT
   const emailOk = emailSchema.safeParse(email).success
   const amountErr =
-    amount != null && !amountOk
+    (amount != null || amountTouched) && !amountOk
       ? `El valor debe estar entre ${money(MIN_AMOUNT)} y ${money(MAX_FACTURA_AMOUNT)}`
       : undefined
   const mailErr =
-    email && !emailOk && emailTouched ? 'Ingresa un correo válido' : undefined
+    !emailOk && emailTouched ? 'Ingresa un correo válido' : undefined
 
   return (
     <Screen className="pb-72">
@@ -114,6 +128,7 @@ export function Component() {
         <div className="relative w-full">
           <MoneyInput
             label="Valor"
+            placeholder="$ 0"
             value={amount}
             onChange={(v) => {
               amountEdited.current = true
@@ -121,28 +136,32 @@ export function Component() {
             }}
             error={amountErr}
           />
-          <div className="absolute right-3 top-3">
-            <Tip defaultOpen icon="alert">
-              Tu factura permite
-              <br />
-              pagos parciales
-            </Tip>
-          </div>
+          {(product ? product.requiresManualAmount : true) ? (
+            <div className="absolute right-3 top-3">
+              <Tip defaultOpen icon="alert">
+                Tu factura permite
+                <br />
+                pagos parciales
+              </Tip>
+            </div>
+          ) : null}
         </div>
         <div className="relative w-full">
-          <img
-            src="/assets/icons/field-mail.svg"
-            alt=""
-            width={16}
-            height={13}
-            className="pointer-events-none absolute left-3 top-3.5"
-          />
           <FloatingInput
             ref={emailRef}
             label="Correo"
             type="email"
             autoComplete="email"
-            className="pl-9"
+            placeholder="Digita tu correo electrónico"
+            leading={
+              <img
+                src="/assets/icons/field-mail.svg"
+                alt=""
+                width={16}
+                height={13}
+                className="pointer-events-none"
+              />
+            }
             value={email}
             onChange={(e) => {
               setEmail(e.target.value.trim())
@@ -193,9 +212,12 @@ export function Component() {
           ...(factura.ref2 ? { ref2: factura.ref2 } : {}),
           email
         }}
-        source="facturas"
         facturaId={factura.id}
         enabled={amountOk && emailOk}
+        onInvalid={() => {
+          setAmountTouched(true)
+          setEmailTouched(true)
+        }}
         onBack={() => navigate(-1)}
       />
     </Screen>

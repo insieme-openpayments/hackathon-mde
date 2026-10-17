@@ -74,6 +74,14 @@ export class BillService implements IBillService {
         ) {
           throw new BadRequest('Invalid input', { ref1: err.detail })
         }
+        if (
+          err instanceof HttpError &&
+          (err.status === 401 || err.status === 403)
+        ) {
+          this.logger.error(
+            `integration-backend rejected our credentials (${err.status}); check INTEGRATION_API_KEY.`
+          )
+        }
         if (err instanceof IntegrationUnavailable || err instanceof HttpError) {
           this.logger.warn(
             `integration-backend failed (${err.message}); using the local bill simulation.`

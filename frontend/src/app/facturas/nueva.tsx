@@ -109,6 +109,7 @@ export function Component() {
       <div className="flex w-full flex-col gap-3">
         <FloatingInput
           label="Nombre de la factura"
+          placeholder="Digita el sobrenombre para la factura"
           maxLength={30}
           autoComplete="off"
           value={name}
@@ -130,6 +131,7 @@ export function Component() {
         />
         <FloatingInput
           label="Referencia No.1"
+          placeholder="Digita el número de referencia 1"
           inputMode="numeric"
           maxLength={20}
           autoComplete="off"
@@ -139,6 +141,7 @@ export function Component() {
         />
         <FloatingInput
           label="Referencia No.2"
+          placeholder="Digita el número de referencia 2"
           inputMode="numeric"
           maxLength={20}
           autoComplete="off"

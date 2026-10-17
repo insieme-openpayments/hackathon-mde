@@ -113,7 +113,8 @@ export const MoneyInput = forwardRef<HTMLInputElement, MoneyInputProps>(
       trailing,
       name,
       id,
-      className
+      className,
+      placeholder
     },
     ref
   ) => (
@@ -130,6 +131,7 @@ export const MoneyInput = forwardRef<HTMLInputElement, MoneyInputProps>(
       className={className}
       inputMode="numeric"
       autoComplete="off"
+      placeholder={placeholder}
       value={value == null ? '' : '$ ' + group(value)}
       onBlur={onBlur}
       onChange={(e) => {

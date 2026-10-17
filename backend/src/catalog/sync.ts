@@ -104,6 +104,7 @@ export class CatalogSyncService implements ICatalogSyncService {
       this.lastSyncAt = new Date()
       return true
     } catch (err) {
+      this.catalogSource = 'local'
       this.logger.warn(
         `Catalog sync with integration-backend failed; keeping the current catalog. ${
           err instanceof Error ? err.message : String(err)

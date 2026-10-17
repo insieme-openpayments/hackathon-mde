@@ -187,7 +187,7 @@ export function Component() {
       <Actions>
         <BackButton onClick={() => navigate('/')} />
         <ActionButton
-          tone="secondary"
+          tone="blue"
           grow
           onClick={() => navigate('/facturas/nueva')}
         >

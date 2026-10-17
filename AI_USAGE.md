@@ -13,7 +13,7 @@ https://interledger.org/es/hackathon/ai-policy/
 
 La IA se usó en todo el proyecto:
 
-- **Fork y rename** de `boutique` a `insieme` (paquetes, Docker, configuración, cadenas).
+- **Fork y rename** del proyecto upstream a `insieme` (paquetes, Docker, configuración, cadenas).
 - **Backend** (`backend/src/`): catálogo y categorías (`product/`, `category/`), facturas (`bill/`), órdenes (`order/`, `order-item/`), integración con integration-backend (`integration/client.ts`, `catalog/sync.ts`), liquidación con router de proveedores (`settlement/`) y `shared/src/` (esquemas y tipos del contrato).
 - **Frontend** (`frontend/src/`): migración de las pantallas del prototipo a React (`app/`, `components/insieme/`, `hooks/`, `lib/stores/`), tracker de estados y comprobante.
 - **Documentación**: `README.md`, `backend/README.md`, `frontend/README.md`, `docs/` y este archivo.

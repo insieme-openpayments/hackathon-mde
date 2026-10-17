@@ -10,7 +10,7 @@ import helmet from 'helmet'
 import type { Server } from 'http'
 import type { Cradle } from './container'
 import { Model } from 'objection'
-import { initErrorHandler, toSuccessResponse } from '@/lib'
+import { BadRequest, initErrorHandler, toSuccessResponse } from '@/lib'
 import path from 'path'
 
 export class App {
@@ -119,14 +119,24 @@ export class App {
 
       res.status(404).send({
         success: false,
-        message: e.message,
-        stack: env.NODE_ENV === 'development' ? e.stack : undefined
+        message: e.message
       })
     })
 
-    router.use(initErrorHandler(logger))
-
     app.use(router)
+
+    app.use(
+      (
+        e: Error & { type?: string },
+        req: Request,
+        res: TypedResponse,
+        next: NextFunction
+      ) => {
+        const err =
+          e.type === 'entity.parse.failed' ? new BadRequest('Invalid JSON') : e
+        initErrorHandler(logger)(err, req, res, next)
+      }
+    )
 
     return app
   }

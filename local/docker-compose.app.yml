@@ -19,7 +19,7 @@ services:
         required: false
     environment:
       PORT: 3004
-      NODE_ENV: ${BACKEND_NODE_ENV:-development}
+      NODE_ENV: ${BACKEND_NODE_ENV:-production}
       FRONTEND_URL: ${FRONTEND_URL:-http://localhost:4004}
       DATABASE_URL: postgres://insieme_backend:insieme_backend@postgres:5432/insieme_backend
       INTEGRATION_API_URL: ${INTEGRATION_API_URL:-http://host.docker.internal:8000}

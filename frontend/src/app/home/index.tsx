@@ -100,7 +100,7 @@ export function Component() {
                 'relative flex h-[88px] flex-col items-center justify-center gap-0.5 rounded-lg border border-blue-light-active bg-white px-1 py-2 transition-[border-color,box-shadow]',
                 active
                   ? 'cursor-pointer hover:border-blue-normal hover:shadow-medium focus-visible:border-blue-normal focus-visible:shadow-medium focus-visible:outline-none'
-                  : 'cursor-not-allowed opacity-50'
+                  : 'cursor-not-allowed pb-[22px] pt-1.5 opacity-50'
               )}
             >
               <span className="flex h-[38px] w-full items-center justify-center">

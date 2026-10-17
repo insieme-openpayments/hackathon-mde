@@ -1,9 +1,11 @@
 import { NextFunction, Request } from 'express'
 import { IOrderService } from './service'
 import { Order, type OrderEvent } from './model'
+import { Payment } from '@/payment/model'
 import type { ProviderAttempt } from '@/settlement/providers'
 import {
   BadRequest,
+  Conflict,
   Unauthorized,
   Controller,
   InternalServerError,
@@ -14,6 +16,7 @@ import { IOpenPayments, TokenInfo } from '@/open-payments/service'
 import { validate } from '@/middleware/validate'
 import { IPaymentService } from '@/payment/service'
 import { Knex } from 'knex'
+import { z } from 'zod'
 import { OneClickCache } from '@/cache/one-click'
 import {
   instantBuySchema,
@@ -75,6 +78,27 @@ export class OrderController implements IOrderController {
     private oneClickCache: OneClickCache
   ) {}
 
+  /**
+   * Cleans up an order whose payment could not be prepared: deletes it when no
+   * payment row exists, otherwise marks it FAILED.
+   */
+  private async abandonOrder(orderId: string, reason: string): Promise<void> {
+    try {
+      await Order.transaction(async (trx) => {
+        const payment = await Payment.query(trx).findOne({ orderId })
+        if (payment) {
+          await this.orderService.fail(orderId, trx)
+          await this.orderService.addEvent(orderId, reason, trx)
+        } else {
+          await this.orderService.delete(orderId, trx)
+        }
+      })
+    } catch (cleanupErr) {
+      this.logger.error(`Could not clean up order ${orderId}`)
+      this.logger.error(cleanupErr)
+    }
+  }
+
   /** Prices every item server-side and persists the order with its total. */
   private async createPricedOrder(items: OrderItemInput[]): Promise<Order> {
     const orderItems: PricedOrderItem[] = []
@@ -104,6 +128,10 @@ export class OrderController implements IOrderController {
       }
 
       const order = await this.orderService.get(params.id)
+      // A failed settlement attempt has no receipt: expose null, not empty fields.
+      if (order.settlement && order.settlement.status !== 'SETTLED') {
+        order.settlement = null
+      }
 
       res.status(200).json(toSuccessResponse(order))
     } catch (err) {
@@ -125,12 +153,20 @@ export class OrderController implements IOrderController {
 
       const order = await this.createPricedOrder(products)
 
-      const grant = await this.openPayments.preparePayment({
-        order,
-        walletAddressUrl
-      })
+      let grant
+      try {
+        grant = await this.openPayments.preparePayment({
+          order,
+          walletAddressUrl
+        })
+      } catch (err) {
+        await this.abandonOrder(
+          order.id,
+          'No se pudo preparar el pago; orden cancelada'
+        )
+        throw err
+      }
 
-      this.logger.debug(JSON.stringify(grant, null, 2))
       res.status(201).json(
         toSuccessResponse({
           redirectUrl: grant.interact.redirect,
@@ -145,8 +181,8 @@ export class OrderController implements IOrderController {
   finish = async (req: Request, res: TypedResponse, next: NextFunction) => {
     try {
       const orderId = req.params.id
-      if (!orderId) {
-        throw new BadRequest('Order ID was not provided.')
+      if (!orderId || !z.string().uuid().safeParse(orderId).success) {
+        throw new BadRequest('Order ID is not valid.')
       }
 
       const { interactRef, hash, result } = await validate(
@@ -155,6 +191,15 @@ export class OrderController implements IOrderController {
       )
 
       const order = await this.orderService.ensurePendingState(orderId)
+
+      if (order.payments.authorizedAt) {
+        if (result) {
+          throw new Conflict('Order was already authorized.')
+        }
+        // Replayed callback: already consumed, nothing else to do.
+        res.status(200).json({ success: true, message: 'SUCCESS' })
+        return
+      }
 
       if (result) {
         const isRejected = result === 'grant_rejected'
@@ -174,11 +219,28 @@ export class OrderController implements IOrderController {
         interactNonce: order.payments.interactNonce,
         walletAddressUrl: order.payments.walletAddress
       })
+
+      // Atomically claim the callback so a concurrent replay is a no-op.
+      const claimed = await Payment.query()
+        .patch({ authorizedAt: new Date() })
+        .where({ id: order.payments.id })
+        .whereNull('authorizedAt')
+      if (claimed === 0) {
+        res.status(200).json({ success: true, message: 'SUCCESS' })
+        return
+      }
+      try {
+        await this.openPayments.createOutgoingPayment(order, interactRef)
+      } catch (err) {
+        await Payment.query()
+          .patch({ authorizedAt: null })
+          .where({ id: order.payments.id })
+        throw err
+      }
       await this.orderService.addEvent(
         orderId,
         'Pagador autorizó; ejecutando pago saliente'
       )
-      await this.openPayments.createOutgoingPayment(order, interactRef)
 
       res.status(200).json({ success: true, message: 'SUCCESS' })
     } catch (err) {
@@ -299,7 +361,16 @@ export class OrderController implements IOrderController {
       const args = await validate(instantBuySchema, req.body)
 
       order = await this.createPricedOrder(args.products)
-      const tokenInfo = await this.openPayments.instantBuy({ order, ...args })
+      let tokenInfo
+      try {
+        tokenInfo = await this.openPayments.instantBuy({ order, ...args })
+      } catch (err) {
+        await this.abandonOrder(
+          order.id,
+          'No se pudo ejecutar el pago en un clic; orden cancelada'
+        )
+        throw err
+      }
 
       res.status(200).json(
         toSuccessResponse({
@@ -317,10 +388,6 @@ export class OrderController implements IOrderController {
         next(
           new Unauthorized('Instant-buy is not valid please initiate it again')
         )
-        const orderId = order.id
-        await Order.transaction(async (trx) => {
-          return await this.orderService.delete(orderId, trx)
-        })
       } else next(err)
     }
   }

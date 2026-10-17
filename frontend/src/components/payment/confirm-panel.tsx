@@ -37,12 +37,12 @@ export interface ConfirmPanelProps {
   productId: string
   kind: OrderItemKind
   details: OrderItemDetails
-  /** Which flow renders the panel (decides where to return to). */
-  source: 'servicios' | 'facturas'
   /** Saved invoice being paid (facturas flow); the confirmation page marks it paid once SETTLED. */
   facturaId?: string
   /** "Confirmar" is clickable. */
   enabled: boolean
+  /** Called when "Confirmar" is pressed while not enabled (show field errors). */
+  onInvalid?: () => void
   onBack: () => void
   /** Called with the new order id once the order was created. */
   onCreated?: (orderId: string) => void
@@ -61,6 +61,7 @@ export function ConfirmPanel({
   details,
   facturaId,
   enabled,
+  onInvalid,
   onBack,
   onCreated
 }: ConfirmPanelProps) {
@@ -211,6 +212,10 @@ export function ConfirmPanel({
         noValidate
         onSubmit={(e) => {
           e.preventDefault()
+          if (!enabled) {
+            onInvalid?.()
+            return
+          }
           if (!open) {
             setOpen(true)
             return
@@ -244,12 +249,13 @@ export function ConfirmPanel({
           </>
         ) : null}
         <Actions>
-          <BackButton onClick={onBack} />
+          <BackButton onClick={() => (open ? setOpen(false) : onBack())} />
           <Button
             type="submit"
             aria-label="Confirmar"
             variant={enabled && !busy ? 'active' : 'disabled'}
-            disabled={!enabled || busy}
+            aria-disabled={!enabled || busy}
+            disabled={busy}
             className={cn('flex-1')}
           >
             Confirmar

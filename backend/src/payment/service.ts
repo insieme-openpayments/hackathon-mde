@@ -17,7 +17,7 @@ export interface IPaymentService {
 
 export class PaymentService implements IPaymentService {
   private readonly TRESHOLD_MS: number = 5000
-  private readonly MAX_ATTEMPTS: number = 24
+  private readonly MAX_ATTEMPTS: number = 360 // 30 min at 5 s: the incoming payment expiry
 
   constructor(
     private logger: Logger,
@@ -67,10 +67,17 @@ export class PaymentService implements IPaymentService {
   }
 
   public async fail(payment: Payment, trx?: TransactionOrKnex): Promise<void> {
-    const promise =
-      payment.attempts < 5
-        ? this.orderService.reject(payment.orderId, trx)
-        : this.orderService.fail(payment.orderId, trx)
+    const rejected = payment.attempts < 5
+    const promise = rejected
+      ? this.orderService.reject(payment.orderId, trx)
+      : this.orderService.fail(payment.orderId, trx)
+    await this.orderService.addEvent(
+      payment.orderId,
+      rejected
+        ? 'Pagador rechazó la autorización'
+        : 'Tiempo de espera agotado; pago no recibido',
+      trx
+    )
     await Promise.all([
       this.updatePaymentStatus(payment.id, PaymentStatus.FAILED, trx),
       promise,
@@ -124,16 +131,13 @@ export class PaymentService implements IPaymentService {
         payment.incomingPaymentUrl
       )
 
-      if (payment.attempts === this.MAX_ATTEMPTS) {
-        await this.fail(payment, trx)
-        return payment.id
-      }
-
       if (this.ensurePaymentIsCompleted(incomingPayment, payment.order.total)) {
         await Promise.all([
           this.complete(payment, trx),
           payment.$query(trx).patch({ processAt: null })
         ])
+      } else if (payment.attempts >= this.MAX_ATTEMPTS) {
+        await this.fail(payment, trx)
       } else {
         await payment.$query(trx).patch({
           attempts: payment.attempts + 1,

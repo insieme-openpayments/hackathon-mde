@@ -59,8 +59,8 @@ export function FacturaCard({
           </p>
           {available ? (
             <ActionButton
-              tone="active"
-              className="h-8 px-4 text-xs"
+              tone="blue"
+              className="h-6 px-4 text-xs"
               onClick={() => onPay(factura.id)}
             >
               Ir a pagar

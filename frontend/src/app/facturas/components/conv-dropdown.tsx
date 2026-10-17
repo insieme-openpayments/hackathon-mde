@@ -48,6 +48,7 @@ export function ConvDropdown({
       ) : null}
       <FloatingInput
         label="Convenio o proveedor"
+        placeholder="Selecciona el proveedor de tu servicio"
         autoComplete="off"
         error={error}
         value={value ? value.name : query}

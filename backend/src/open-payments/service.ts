@@ -384,6 +384,25 @@ export class OpenPayments implements IOpenPayments {
       walletAddress: customerWalletAddress,
       receiver: incomingPayment.id
     })
+    // The manage URL comes from the client: only follow it when it lives on
+    // the payer wallet's own auth server (prevents SSRF with our signature).
+    const allowedOrigins = new Set<string>()
+    let manage: URL
+    try {
+      manage = new URL(manageUrl)
+      allowedOrigins.add(new URL(customerWalletAddress.authServer).origin)
+      if (this.env.NODE_ENV === 'development') {
+        allowedOrigins.add(
+          new URL(replaceHost(customerWalletAddress.authServer)).origin
+        )
+      }
+    } catch {
+      throw new BadRequest('Invalid manage URL.')
+    }
+    if (!allowedOrigins.has(manage.origin)) {
+      throw new BadRequest('Invalid manage URL.')
+    }
+
     const grant = await this.opClient.token.rotate({
       accessToken,
       url: manageUrl
@@ -533,7 +552,7 @@ export class OpenPayments implements IOpenPayments {
           accessToken: accessToken
         },
         {
-          expiresAt: new Date(Date.now() + 6000 * 60 * 5).toISOString(),
+          expiresAt: new Date(Date.now() + 30 * 60 * 1000).toISOString(),
           walletAddress: walletAddress.id,
           incomingAmount: {
             assetCode: walletAddress.assetCode,

@@ -2,6 +2,7 @@ import { useState, type ReactNode } from 'react'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger
@@ -72,6 +73,9 @@ export const OneClickSetupDialog = ({
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Pago en un clic</DialogTitle>
+          <DialogDescription className="sr-only">
+            Autoriza un monto máximo en tu billetera para pagar sin redirección.
+          </DialogDescription>
           <Form
             form={form}
             disabled={form.formState.isSubmitting || isPending || redirecting}
@@ -90,7 +94,7 @@ export const OneClickSetupDialog = ({
             />
             <InputField
               inputMode="numeric"
-              label="Monto máximo"
+              label="Monto máximo (en la moneda de tu billetera)"
               step="any"
               type="number"
               {...form.register('amount')}

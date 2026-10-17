@@ -92,6 +92,14 @@ export function Component() {
       return
     }
     patched.current = true
+    // Survive reloads: never re-send the same callback.
+    const guardKey = `patched:${orderId}:${interact_ref ?? result}`
+    try {
+      if (sessionStorage.getItem(guardKey)) return
+      sessionStorage.setItem(guardKey, '1')
+    } catch {
+      // sessionStorage unavailable: the backend is idempotent anyway
+    }
     finish(
       { result, hash, interactRef: interact_ref },
       { onSettled: () => void refetch() }
@@ -132,10 +140,18 @@ export function Component() {
     )
   }
 
-  const retry = initialDraft.current.returnTo || '/servicios'
+  const firstItem = order.orderItems[0]
   const isFacturas =
-    initialDraft.current.facturas ||
-    order.orderItems[0]?.details?.kind === 'factura'
+    initialDraft.current.facturas || firstItem?.details?.kind === 'factura'
+  const retry =
+    initialDraft.current.returnTo ||
+    (isFacturas
+      ? '/facturas'
+      : firstItem?.productId
+        ? `/servicios/pagar/${firstItem.productId}${
+            firstItem.details?.ref1 ? `?ref1=${firstItem.details.ref1}` : ''
+          }`
+        : '/servicios')
 
   const homeLink = (
     <Link to="/" className={LINK_CLASS}>

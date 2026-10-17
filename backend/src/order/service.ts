@@ -2,7 +2,8 @@ import { type OrderItem } from '@/order-item/model'
 import { Order, OrderStatus } from './model'
 import { TransactionOrKnex } from 'objection'
 import { Logger } from 'winston'
-import { InternalServerError, NotFound } from '@/lib'
+import { BadRequest, Conflict, NotFound } from '@/lib'
+import { z } from 'zod'
 
 type OrderItemParams = Pick<OrderItem, 'productId' | 'quantity'> &
   Partial<Pick<OrderItem, 'price' | 'details'>>
@@ -59,6 +60,9 @@ export class OrderService implements IOrderService {
   }
 
   public async get(id: string, userId?: string): Promise<Order> {
+    if (!z.string().uuid().safeParse(id).success) {
+      throw new NotFound('Order was not found.')
+    }
     const row = Order.query()
       .findById(id)
       .withGraphFetched(
@@ -82,12 +86,16 @@ export class OrderService implements IOrderService {
   public async ensurePendingState(id: string): Promise<Order> {
     const order = await this.get(id)
     if (order.status !== 'PROCESSING') {
-      this.logger.error(
+      this.logger.warn(
         `Trying to perform a checkout confirmation on a non-pending order (ID: ${id}).`
       )
-      throw new InternalServerError()
+      throw new Conflict('Order is not pending.')
     }
-    return order.$query().withGraphFetched('payments')
+    const withPayments = await order.$query().withGraphFetched('payments')
+    if (!withPayments.payments) {
+      throw new BadRequest('Order has no payment in progress.')
+    }
+    return withPayments
   }
 
   public async list(userId: string): Promise<Order[]> {

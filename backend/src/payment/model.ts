@@ -21,6 +21,7 @@ export class Payment extends BaseModel {
   public clientNonce!: string
   public walletAddress!: string
   public processAt!: Date | null
+  public authorizedAt!: Date | null
   public status!: PaymentStatus
   public order!: Order
   public attempts!: number
