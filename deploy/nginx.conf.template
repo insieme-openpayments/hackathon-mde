@@ -1,0 +1,76 @@
+# Basado en frontend/nginx/nginx.conf + proxy /api/ al backend Node (mismo origen, sin CORS).
+# El entrypoint reemplaza __PORT__ y lo escribe en /etc/nginx/http.d/insieme.conf.
+server {
+    listen __PORT__;
+    server_name _;
+
+    root /usr/share/nginx/html;
+    index index.html;
+    absolute_redirect off;
+
+    access_log /dev/stdout;
+    error_log /dev/stderr warn;
+
+    gzip on;
+    gzip_types text/plain application/xml application/json text/css application/javascript;
+    gzip_vary on;
+
+    client_max_body_size 5m;
+
+    location = /healthz {
+        access_log off;
+        default_type text/plain;
+        return 200 "ok\n";
+    }
+
+    # Backend Node (antes http://localhost:3004): /api/orders -> :3004/orders
+    location /api/ {
+        proxy_pass http://127.0.0.1:3004/;
+        proxy_http_version 1.1;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 120s;
+    }
+
+    location = /pay {
+        return 301 /pay/;
+    }
+
+    location = /pay/env.js {
+        add_header Cache-Control "no-store";
+    }
+
+    location /pay/ {
+        try_files $uri $uri/ /pay/index.html;
+        # El index.html del SPA siempre se revalida: uno en caché apuntaría a chunks que ya no existen tras un deploy.
+        add_header Cache-Control "no-cache";
+
+        location ^~ /pay/assets/ {
+            expires 1y;
+            add_header Cache-Control "public, max-age=31536000, immutable";
+        }
+
+        location ~* \.(js|css|png|jpg|jpeg|gif|svg|webp|woff|woff2|ttf|eot|ico)$ {
+            expires 30d;
+            add_header Cache-Control "public, max-age=2592000";
+        }
+    }
+
+    location / {
+        try_files $uri $uri/ /index.html;
+        add_header Cache-Control "no-cache";
+
+        location ~* \.(js|css|png|jpg|jpeg|gif|svg|webp|woff|woff2|ttf|eot|ico)$ {
+            expires 30d;
+            add_header Cache-Control "public, max-age=2592000";
+        }
+    }
+
+    location ~ /\. {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+}

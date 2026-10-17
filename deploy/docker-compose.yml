@@ -1,0 +1,27 @@
+# Demo completa en un solo contenedor (ver deploy/README.md).
+# Uso (desde la raíz de hackathon-mde, con integration-backend clonado al lado):
+#   cp deploy/.env.example deploy/.env   # y completa las credenciales de Open Payments
+#   docker compose -f deploy/docker-compose.yml up -d --build
+services:
+  insieme:
+    image: insieme-demo:latest
+    container_name: insieme-demo
+    build:
+      context: ..
+      dockerfile: deploy/Dockerfile
+      additional_contexts:
+        # Ruta local al repo integration-backend (privado). Cambia con INTEGRATION_CONTEXT.
+        integration: ${INTEGRATION_CONTEXT:-../../integration-backend}
+    env_file:
+      - path: .env
+        required: false
+    environment:
+      PORT: 8080
+    ports:
+      - '${HOST_PORT:-8080}:8080'
+    volumes:
+      - insieme-pg:/var/lib/postgresql/data
+    restart: unless-stopped
+
+volumes:
+  insieme-pg:

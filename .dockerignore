@@ -7,3 +7,8 @@
 **/.env
 **/.env.*
 !**/.env.example
+# Contexto de build más liviano
+.git
+prompts
+docs
+customer-frontend
