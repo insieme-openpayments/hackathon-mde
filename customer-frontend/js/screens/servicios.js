@@ -95,7 +95,23 @@
   };
 
   App.data = App.data || {};
-  App.data.servicios = { categories, companies, companyById, categoryById: catById, billFor };
+  App.data.servicios = { categories, companies, companyById, categoryById: catById, billFor, source: 'local' };
+
+  /* Catálogo desde integration-backend (GET /v1/catalog). Se reemplaza el arreglo en sitio para que
+   * Facturas guardadas (que lee App.data.servicios.companies) vea los mismos datos. Íconos y logos
+   * siguen siendo locales; si el servidor no responde se conserva el catálogo de arriba. */
+  if (App.api) {
+    App.api.catalog().then((cat) => {
+      const known = new Set(categories.map(c => c.id));
+      const list = (cat.companies || []).filter(c => known.has(c.category)).map(c =>
+        co(c.id, c.name, c.category, L[c.logo_key] ? c.logo_key : null, { partial: !!c.partial, ...(c.fixed_amount ? { amount: c.fixed_amount } : {}) }));
+      if (!list.length) return;
+      (cat.categories || []).forEach(s => { const c = catById(s.id); if (c && s.label) c.label = s.label; });
+      companies.splice(0, companies.length, ...list);
+      App.data.servicios.source = 'api';
+      if (/^(servicios|facturas)/.test(document.getElementById('app').dataset.screen || '')) App.render();
+    }).catch((e) => console.warn('Catálogo local (integration-backend no disponible):', e.message));
+  }
 
   /* ---------- Helpers de vista ---------- */
   const norm = (s) => String(s || '').normalize('NFD').replace(/[̀-ͯ]/g, '').toLowerCase().trim();
@@ -288,23 +304,40 @@
       ${extra}
     </div>`;
 
-  const startConsult = (ctx) => {
+  /** Valida la referencia en integration-backend (POST /v1/services/validate).
+   * Sin servidor (error de red) usa la simulación local; los 4xx se muestran como error de referencia. */
+  const validateRef = async (companyId, ref) => {
+    try {
+      if (!App.api) throw new Error('sin cliente API');
+      const r = await App.api.validateService(companyId, ref);
+      return { amount: r.amount };
+    } catch (e) {
+      if (e.status) return { error: e.detail || 'No pudimos validar la referencia, intenta de nuevo' };
+      console.warn('Validación local (integration-backend no disponible):', e.message);
+      if (/^0+$/.test(ref)) return { error: 'No encontramos una factura pendiente con esta referencia' };
+      return { amount: billFor(companyId, ref) };
+    }
+  };
+
+  const startConsult = async (ctx) => {
     const f = ctx.flow;
     f.loading = true;
     ctx.render();
-    App.later(() => {
-      f.loading = false;
-      if (/^0+$/.test(ui.digits(f.ref1))) { f.refError = 'No encontramos una factura pendiente con esta referencia'; ctx.render(); return; }
-      f.bill = Number(f.amount) || billFor(f.company, ui.digits(f.ref1));
-      f.amountText = ui.num(f.bill);
-      if (f.email == null) f.email = (App.state.user && App.state.user.correo) || '';
-      f.editMail = !mailOk(f);
-      f.step = 2;
-      f.tipOpen = !!(companyById(f.company) || {}).partial;
-      f.sheetOpen = false;
-      ctx.render({ scrollTop: true });
-      if (f.tipOpen) App.later(() => { f.tipOpen = false; App.render(); }, 3500);
-    }, 1100);
+    const [res] = await Promise.all([validateRef(f.company, ui.digits(f.ref1)), new Promise(r => setTimeout(r, 600))]);
+    // El usuario salió de la pantalla mientras se consultaba
+    if (App.flow !== f) return;
+    f.loading = false;
+    if (document.getElementById('app').dataset.screen !== 'servicios-form') return;
+    if (res.error) { f.refError = res.error; ctx.render(); return; }
+    f.bill = Number(f.amount) || res.amount;
+    f.amountText = ui.num(f.bill);
+    if (f.email == null) f.email = (App.state.user && App.state.user.correo) || '';
+    f.editMail = !mailOk(f);
+    f.step = 2;
+    f.tipOpen = !!(companyById(f.company) || {}).partial;
+    f.sheetOpen = false;
+    ctx.render({ scrollTop: true });
+    if (f.tipOpen) App.later(() => { f.tipOpen = false; App.render(); }, 3500);
   };
 
   App.register('servicios-form', {

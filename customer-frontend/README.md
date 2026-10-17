@@ -12,6 +12,8 @@ Con servidor local, desde la raíz del repo:
 cd customer-frontend && python3 -m http.server 8080
 ```
 
+**Pago de servicios** consume [integration-backend](https://github.com/insieme-openpayments/integration-backend) (catálogo y validación de referencia) en `http://localhost:8000` con la API key de demo (`js/api.js`). Otra URL: `?api=http://host:puerto`. Si el servidor no responde, usa los datos locales.
+
 Luego abre http://localhost:8080 (inicia en `#home`; usa `#recargas`, `#pines`, `#tyc`… para saltar a cada flujo).
 
 - En escritorio se muestra el teléfono (320×568 escalado).
