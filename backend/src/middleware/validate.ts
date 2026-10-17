@@ -1,9 +1,10 @@
-import { AnyZodObject, z, ZodEffects } from 'zod'
+import { z } from 'zod'
 import { BadRequest } from '@/lib'
 
-export async function validate<
-  T extends AnyZodObject | ZodEffects<AnyZodObject>
->(schema: T, data: unknown): Promise<z.infer<T>> {
+export async function validate<T extends z.ZodTypeAny>(
+  schema: T,
+  data: unknown
+): Promise<z.infer<T>> {
   const res = await schema.safeParseAsync(data)
   if (!res.success) {
     const errors: Record<string, string> = {}

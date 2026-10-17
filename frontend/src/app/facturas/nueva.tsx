@@ -12,7 +12,7 @@ import {
 import { useCatalogQuery } from '@/hooks/use-catalog-query.ts'
 import { digits } from '@/lib/money.ts'
 import type { CatalogProduct } from '@/lib/api-types.ts'
-import { addFactura } from '@/lib/stores/facturas-store.ts'
+import { useFacturaActions } from '@/hooks/use-facturas-store.ts'
 import { ActionButton } from './components/buttons.tsx'
 import { CategorySelector } from './components/category-selector.tsx'
 import { ConvDropdown } from './components/conv-dropdown.tsx'
@@ -30,6 +30,9 @@ export function Component() {
   const [ref1, setRef1] = useState('')
   const [ref2, setRef2] = useState('')
   const [tried, setTried] = useState(false)
+  const { addFactura, saving } = useFacturaActions()
+  const [apiErrors, setApiErrors] = useState<Record<string, string>>({})
+  const [formError, setFormError] = useState<string | null>(null)
 
   const view = searchParams.get('view')
   const category = categories.find((c) => c.id === catId) ?? null
@@ -82,17 +85,30 @@ export function Component() {
       setTried(true)
       return
     }
+    if (saving) return
+    setApiErrors({})
+    setFormError(null)
     addFactura({
-      name: name.trim(),
-      cat: catId,
-      conv: product.slug,
       productId: product.id,
+      name: name.trim(),
       ref1,
-      ref2,
-      lastPay: null,
-      amount: null
+      ...(ref2 ? { ref2 } : {})
     })
-    navigate('/facturas/guardada', { replace: true })
+      .then(() => navigate('/facturas/guardada', { replace: true }))
+      .catch((e: unknown) => {
+        const err = e as {
+          message?: string
+          errors?: Record<string, string>
+        }
+        const fields: Record<string, string> = {}
+        for (const [path, msg] of Object.entries(err.errors ?? {})) {
+          fields[path.split('.').pop() ?? path] = msg
+        }
+        setApiErrors(fields)
+        if (Object.keys(fields).length === 0) {
+          setFormError(err.message ?? 'No pudimos guardar la factura.')
+        }
+      })
   }
 
   return (
@@ -114,7 +130,7 @@ export function Component() {
           autoComplete="off"
           value={name}
           onChange={(e) => setName(e.target.value.replace(/^\s+/, ''))}
-          error={nameErr}
+          error={nameErr ?? apiErrors.name}
         />
         <ConvDropdown
           key={catId ?? 'none'}
@@ -137,7 +153,7 @@ export function Component() {
           autoComplete="off"
           value={ref1}
           onChange={(e) => setRef1(digits(e.target.value))}
-          error={refErr}
+          error={refErr ?? apiErrors.ref1}
         />
         <FloatingInput
           label="Referencia No.2"
@@ -147,12 +163,18 @@ export function Component() {
           autoComplete="off"
           value={ref2}
           onChange={(e) => setRef2(digits(e.target.value))}
+          error={apiErrors.ref2}
         />
+        {formError || apiErrors.productId ? (
+          <p role="alert" className="text-sm text-magenta">
+            {formError ?? apiErrors.productId}
+          </p>
+        ) : null}
       </div>
       <Actions>
         <BackButton onClick={() => navigate('/facturas')} />
         <ActionButton
-          tone={ok && !isLoading ? 'active' : 'disabled'}
+          tone={ok && !isLoading && !saving ? 'active' : 'disabled'}
           grow
           onClick={save}
         >

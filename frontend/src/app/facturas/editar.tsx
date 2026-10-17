@@ -9,20 +9,32 @@ import {
   TitleBox
 } from '@/components/insieme'
 import { useCatalogQuery } from '@/hooks/use-catalog-query.ts'
-import { useFacturasStore } from '@/hooks/use-facturas-store.ts'
+import {
+  useFacturaActions,
+  useFacturasStore
+} from '@/hooks/use-facturas-store.ts'
 import { useZodRouteParams } from '@/hooks/use-zod-params.ts'
 import { facturaParamsSchema } from '@/app/route-schemas.ts'
-import { updateFactura } from '@/lib/stores/facturas-store.ts'
 import { ActionButton } from './components/buttons.tsx'
 import { CategorySelector } from './components/category-selector.tsx'
 
 export function Component() {
   const { id } = useZodRouteParams(facturaParamsSchema)
   const navigate = useNavigate()
-  const { items } = useFacturasStore()
+  const { items, isLoading } = useFacturasStore()
+  const { updateFactura, updating } = useFacturaActions()
+  const [apiError, setApiError] = useState<string | null>(null)
   const { data } = useCatalogQuery()
   const factura = items.find((i) => i.id === id)
   const [name, setName] = useState<string | null>(null)
+
+  if (isLoading) {
+    return (
+      <Screen>
+        <div className="h-28 w-full animate-pulse rounded-2xl bg-brand-soft" />
+      </Screen>
+    )
+  }
 
   if (!factura) {
     return (
@@ -44,7 +56,7 @@ export function Component() {
     factura.conv
   const current = name ?? factura.name
   const valid = current.trim().length >= 3
-  const ok = valid && current.trim() !== factura.name
+  const ok = valid && !updating && current.trim() !== factura.name
 
   return (
     <Screen>
@@ -73,7 +85,9 @@ export function Component() {
           error={
             current && !valid
               ? 'El nombre debe tener al menos 3 caracteres'
-              : undefined
+              : apiError
+                ? apiError
+                : undefined
           }
         />
         <FloatingInput
@@ -99,8 +113,18 @@ export function Component() {
           aria-disabled={!ok}
           onClick={() => {
             if (!ok) return
-            updateFactura(factura.id, { name: current.trim() })
-            navigate(-1)
+            setApiError(null)
+            updateFactura({ id: factura.id, name: current.trim() })
+              .then(() => navigate(-1))
+              .catch((e: unknown) => {
+                const err = e as {
+                  message?: string
+                  errors?: Record<string, string>
+                }
+                setApiError(
+                  err.errors?.name ?? err.message ?? 'No pudimos guardar'
+                )
+              })
           }}
         >
           Guardar

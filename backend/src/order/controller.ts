@@ -3,7 +3,11 @@ import { IOrderService } from './service'
 import { Order, type OrderEvent } from './model'
 import { Payment, PaymentStatus } from '@/payment/model'
 import type { ProviderAttempt } from '@/settlement/providers'
-import type { SettlementReceipt } from '@insieme/shared'
+import type {
+  InstantBuyAccountResponse,
+  SetupFinishResponse,
+  SettlementReceipt
+} from '@insieme/shared'
 import {
   BadRequest,
   Conflict,
@@ -13,7 +17,7 @@ import {
   toSuccessResponse
 } from '@/lib'
 import { Logger } from 'winston'
-import { IOpenPayments, TokenInfo } from '@/open-payments/service'
+import { IOpenPayments } from '@/open-payments/service'
 import { validate } from '@/middleware/validate'
 import { IPaymentService } from '@/payment/service'
 import { Knex } from 'knex'
@@ -28,6 +32,7 @@ import {
 } from '@insieme/shared'
 import { OpenPaymentsClientError } from '@interledger/open-payments'
 import type { OrderItemInput } from '@insieme/shared'
+import { IUserService } from '@/user/service'
 import { IBillService, type PricedOrderItem } from '@/bill/service'
 
 export interface AdminOrder {
@@ -54,18 +59,13 @@ interface CreateOrderResponse extends CreateResponse {
   orderId: string
 }
 
-interface InstantBuyResponse extends TokenInfo {
-  walletAddressUrl: string
-  orderId: string
-}
-
 export interface IOrderController {
   get: Controller<Order>
   create: Controller<CreateOrderResponse>
   finish: Controller
   setup: Controller<CreateResponse>
-  setupFinish: Controller<TokenInfo>
-  instantBuy: Controller<InstantBuyResponse>
+  setupFinish: Controller<SetupFinishResponse>
+  instantBuy: Controller<InstantBuyAccountResponse>
   admin: Controller<AdminOrder[]>
 }
 
@@ -77,7 +77,8 @@ export class OrderController implements IOrderController {
     private orderService: IOrderService,
     private paymentService: IPaymentService,
     private billService: IBillService,
-    private oneClickCache: OneClickCache
+    private oneClickCache: OneClickCache,
+    private userService: IUserService
   ) {}
 
   /**
@@ -106,13 +107,19 @@ export class OrderController implements IOrderController {
   }
 
   /** Prices every item server-side and persists the order with its total. */
-  private async createPricedOrder(items: OrderItemInput[]): Promise<Order> {
+  private async createPricedOrder(
+    items: OrderItemInput[],
+    userId?: string
+  ): Promise<Order> {
     const orderItems: PricedOrderItem[] = []
     for (const item of items) {
       orderItems.push(await this.billService.priceOrderItem(item))
     }
     return await Order.transaction(async (trx) => {
-      const newOrder = await this.orderService.create({ orderItems }, trx)
+      const newOrder = await this.orderService.create(
+        { orderItems, userId },
+        trx
+      )
       await this.orderService.addEvent(
         newOrder.id,
         'Cobro creado; esperando autorización del pagador',
@@ -157,7 +164,7 @@ export class OrderController implements IOrderController {
         req.body
       )
 
-      const order = await this.createPricedOrder(products)
+      const order = await this.createPricedOrder(products, req.user?.id)
 
       let grant
       try {
@@ -312,7 +319,7 @@ export class OrderController implements IOrderController {
 
   setupFinish = async (
     req: Request,
-    res: TypedResponse<TokenInfo>,
+    res: TypedResponse<SetupFinishResponse>,
     next: NextFunction
   ) => {
     try {
@@ -352,10 +359,35 @@ export class OrderController implements IOrderController {
         interactRef
       })
 
+      const { walletAddressUrl } = identifierData
+      if (req.user) {
+        // Con sesión, el grant queda en la cuenta y no viaja al navegador.
+        const previous = req.user.oneClickGrant
+        if (previous && previous.accessToken !== tokenInfo.accessToken) {
+          // Best-effort: no deja un token huérfano vivo en la billetera.
+          await this.openPayments
+            .revokeToken({
+              accessToken: previous.accessToken,
+              manageUrl: previous.manageUrl
+            })
+            .catch((e) => this.logger.error(e))
+        }
+        await this.userService.setGrant(req.user.id, {
+          ...tokenInfo,
+          walletAddressUrl,
+          createdAt: new Date().toISOString()
+        })
+        res
+          .status(200)
+          .json(toSuccessResponse({ walletAddressUrl, storedInAccount: true }))
+        return
+      }
+
       res.status(200).json(
         toSuccessResponse({
           ...tokenInfo,
-          walletAddressUrl: identifierData.walletAddressUrl
+          walletAddressUrl,
+          storedInAccount: false
         })
       )
     } catch (err) {
@@ -365,26 +397,43 @@ export class OrderController implements IOrderController {
 
   instantBuy = async (
     req: Request,
-    res: TypedResponse<InstantBuyResponse>,
+    res: TypedResponse<InstantBuyAccountResponse>,
     next: NextFunction
   ) => {
     let order: Order | undefined
+    // Token del grant guardado en la cuenta que se está usando (si aplica).
+    let accountToken: string | undefined
     try {
       const args = await validate(instantBuySchema, req.body)
-      // TODO(cuenta): sin tokens en el body, usar el grant guardado en la cuenta.
-      const { accessToken, manageUrl } = args
-      if (!accessToken || !manageUrl) {
-        throw new BadRequest('Invalid input', {
-          accessToken: 'Configura el pago en un clic antes de usarlo'
-        })
-      }
+      const missingGrant = new BadRequest('Invalid input', {
+        accessToken: 'Configura el pago en un clic antes de usarlo'
+      })
 
-      order = await this.createPricedOrder(args.products)
+      let accessToken = args.accessToken
+      let manageUrl = args.manageUrl
+      const useAccountGrant = !accessToken || !manageUrl
+      if (useAccountGrant) {
+        const grant = req.user?.oneClickGrant
+        if (
+          !req.user ||
+          !grant ||
+          grant.walletAddressUrl.replace(/\/+$/, '').toLowerCase() !==
+            args.walletAddressUrl.replace(/\/+$/, '').toLowerCase()
+        ) {
+          throw missingGrant
+        }
+        accessToken = grant.accessToken
+        manageUrl = grant.manageUrl
+        accountToken = grant.accessToken
+      }
+      if (!accessToken || !manageUrl) throw missingGrant
+
+      order = await this.createPricedOrder(args.products, req.user?.id)
       let tokenInfo
       try {
         tokenInfo = await this.openPayments.instantBuy({
           order,
-          ...args,
+          walletAddressUrl: args.walletAddressUrl,
           accessToken,
           manageUrl
         })
@@ -396,6 +445,28 @@ export class OrderController implements IOrderController {
         throw err
       }
 
+      if (useAccountGrant && req.user && accountToken) {
+        // El token rota en cada pago: se persiste en la cuenta y no se devuelve.
+        try {
+          await this.userService.rotateGrant(req.user.id, accountToken, {
+            ...tokenInfo,
+            walletAddressUrl: args.walletAddressUrl,
+            createdAt:
+              req.user.oneClickGrant?.createdAt ?? new Date().toISOString()
+          })
+        } catch (persistErr) {
+          this.logger.error('Could not persist the rotated account grant')
+          this.logger.error(persistErr)
+        }
+        res.status(200).json(
+          toSuccessResponse({
+            walletAddressUrl: args.walletAddressUrl,
+            orderId: order.id
+          })
+        )
+        return
+      }
+
       res.status(200).json(
         toSuccessResponse({
           ...tokenInfo,
@@ -404,11 +475,23 @@ export class OrderController implements IOrderController {
         })
       )
     } catch (err) {
-      if (
-        order &&
-        err instanceof OpenPaymentsClientError &&
-        err.status === 401
-      ) {
+      const status =
+        err instanceof OpenPaymentsClientError ? err.status : undefined
+      const isLimitExceeded =
+        err instanceof BadRequest &&
+        err.message.startsWith('One click buy spending limit exceeded')
+      // Con grant de cuenta, un fallo del auth server o del límite deja el
+      // token guardado inservible: se limpia para que la UI reconfigure.
+      const accountGrantFailed =
+        !!accountToken &&
+        (isLimitExceeded ||
+          (status !== undefined && [400, 401, 403, 404, 500].includes(status)))
+      if (order && (status === 401 || accountGrantFailed)) {
+        if (req.user && accountToken) {
+          await this.userService
+            .clearGrantIfToken(req.user.id, accountToken)
+            .catch((e) => this.logger.error(e))
+        }
         next(
           new Unauthorized('Instant-buy is not valid please initiate it again')
         )

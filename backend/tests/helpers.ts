@@ -1,6 +1,9 @@
 import { Product } from '@/product/model'
 import { type PartialModelObject } from 'objection'
 import { type Knex } from 'knex'
+import type { AwilixContainer } from 'awilix'
+import type { AccountUser } from '@insieme/shared'
+import type { Cradle } from '@/container'
 import catalog from '../data/catalog.json'
 
 export async function createProducts(args: PartialModelObject<Product>[]) {
@@ -71,4 +74,47 @@ export async function seedMoneyProducts(knex: Knex): Promise<void> {
     )
     .onConflict('slug')
     .ignore()
+}
+
+let userSeq = 0
+
+/** Registers an account through AuthService and returns its session token. */
+export async function registerUser(
+  container: AwilixContainer<Cradle>,
+  overrides: Partial<{
+    name: string
+    document: string
+    email: string
+    phone: string
+    password: string
+  }> = {}
+): Promise<{ token: string; user: AccountUser }> {
+  userSeq += 1
+  return await container.resolve('authService').register({
+    name: 'Ana Pérez',
+    document: `1000${String(userSeq).padStart(6, '0')}`,
+    email: `ana${userSeq}@correo.com`,
+    phone: '3001234567',
+    password: 'secreto-123',
+    ...overrides
+  })
+}
+
+/** Minimal HTTP helper against the test server (exercises real middleware). */
+export async function api(
+  port: number,
+  method: string,
+  path: string,
+  opts: { token?: string; body?: unknown } = {}
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): Promise<{ status: number; json: any }> {
+  const res = await fetch(`http://127.0.0.1:${port}${path}`, {
+    method,
+    headers: {
+      'content-type': 'application/json',
+      ...(opts.token ? { authorization: `Bearer ${opts.token}` } : {})
+    },
+    body: opts.body === undefined ? undefined : JSON.stringify(opts.body)
+  })
+  return { status: res.status, json: await res.json().catch(() => null) }
 }

@@ -25,7 +25,7 @@ import { ActionButton } from './components/buttons.tsx'
 export function Component() {
   const { id } = useZodRouteParams(facturaParamsSchema)
   const navigate = useNavigate()
-  const { items } = useFacturasStore()
+  const { items, isLoading: loadingBills } = useFacturasStore()
   const profile = useProfileStore()
   const { data } = useCatalogQuery()
   const factura = items.find((i) => i.id === id)
@@ -64,6 +64,14 @@ export function Component() {
       }
     )
   }, [mutate, productId, ref1])
+
+  if (loadingBills) {
+    return (
+      <Screen>
+        <div className="h-28 w-full animate-pulse rounded-2xl bg-brand-soft" />
+      </Screen>
+    )
+  }
 
   if (!factura) {
     return (

@@ -24,8 +24,8 @@ import {
   clearPaymentDraft,
   paymentDraftStore
 } from '@/lib/stores/payment-draft-store.ts'
-import { formatDateTime, money, today } from '@/lib/money.ts'
-import { getFactura, markPaid } from '@/lib/stores/facturas-store.ts'
+import { formatDateTime, money } from '@/lib/money.ts'
+import { useFacturaActions } from '@/hooks/use-facturas-store.ts'
 import { checkoutConfirmationSearchParamsSchema } from '../route-schemas.ts'
 
 const TIMEOUT_MS = 90_000
@@ -201,6 +201,7 @@ export function Component() {
   }, [status])
 
   // Saved invoice: record the last payment only once it was really paid.
+  const { markPaid } = useFacturaActions()
   const markedPaid = useRef(false)
   useEffect(() => {
     const facturaId = initialDraft.current.facturaId
@@ -208,9 +209,11 @@ export function Component() {
       return
     }
     markedPaid.current = true
-    if (getFactura(facturaId) && order) {
-      markPaid(facturaId, order.total, today())
+    if (order) {
+      // Best-effort: anonymous sessions or a deleted bill just fail silently.
+      void markPaid(facturaId, order.total).catch(() => undefined)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, order])
 
   useEffect(() => {

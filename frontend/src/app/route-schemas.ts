@@ -23,3 +23,13 @@ export const oneClickConfirmationSearchParamsSchema =
     .extend({
       identifier: z.string().uuid()
     })
+
+// Sin .uuid(): un ?destino malformado no debe tumbar la ruta; simplemente no
+// coincide con ningún destino guardado y la página arranca vacía.
+export const destinoSearchParamsSchema = z.object({
+  destino: z.string().optional()
+})
+
+export const nextSearchParamsSchema = z.object({
+  next: z.string().optional()
+})

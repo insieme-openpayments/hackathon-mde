@@ -44,7 +44,7 @@ export function Component() {
       <div className="flex w-full flex-col gap-3 rounded-2xl bg-brand-soft p-4">
         <div className="flex flex-col gap-0.5">
           <p className="text-sm font-semibold text-neutral-darker">
-            Facturas guardadas
+            Mis facturas
           </p>
           <p className="text-2xs leading-snug text-neutral-normal">
             Guarda tus facturas frecuentes y págalas en segundos.

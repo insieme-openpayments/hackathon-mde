@@ -1,7 +1,7 @@
 import { OrderItem } from '@/order-item/model'
 import { Payment } from '@/payment/model'
 import { User } from '@/user/model'
-import { Model, TransactionOrKnex } from 'objection'
+import { Model, Pojo, TransactionOrKnex } from 'objection'
 import { BaseModel } from '@/lib'
 import { Settlement } from '@/settlement/model'
 
@@ -31,6 +31,15 @@ export class Order extends BaseModel {
   public payments!: Payment
   public settlement?: Settlement | null
   public events!: OrderEvent[]
+
+  // GET /orders/:id is public (the confirmation page polls it by id): the
+  // owner account id is not part of that response.
+  $formatJson(json: Pojo): Pojo {
+    json = super.$formatJson(json)
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { userId, ...safe } = json
+    return safe
+  }
 
   async calculateTotalAmount(trx: TransactionOrKnex): Promise<Order> {
     const { totalAmount } = (await OrderItem.query(trx)

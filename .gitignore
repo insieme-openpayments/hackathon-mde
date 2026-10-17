@@ -133,3 +133,4 @@ dist
 .idea
 tmp
 .vscode/settings.json
+.playwright-mcp/

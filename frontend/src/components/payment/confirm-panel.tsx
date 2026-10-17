@@ -2,7 +2,8 @@ import { publicUrl } from '@/lib/assets.ts'
 // Fixed bottom confirmation panel. First "Confirmar" opens it; the second one
 // either instant-buys (matching one-click token) or stores the payment draft,
 // creates the order and redirects to the wallet.
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { useLocation, useNavigate } from 'react-router-dom'
 import {
   Actions,
@@ -16,6 +17,7 @@ import { OneClickSetupDialog } from '@/components/payment/one-click-setup-dialog
 import { useZodForm } from '@/hooks/use-zod-form.ts'
 import { useCreateOrderMutation } from '@/hooks/use-create-order-mutation.ts'
 import { useInstantBuyMutation } from '@/hooks/use-instant-buy-mutation.ts'
+import { useMeQuery } from '@/hooks/use-me-query.ts'
 import { useTokenStore } from '@/hooks/use-token-store.ts'
 import { useProfileStore } from '@/hooks/use-profile-store.ts'
 import { toast } from '@/hooks/use-toast.tsx'
@@ -53,8 +55,11 @@ interface ConfirmPanelBaseProps {
   /** Called when "Confirmar" is pressed while not enabled (show field errors). */
   onInvalid?: () => void
   onBack: () => void
-  /** Called with the new order id once the order was created. */
-  onCreated?: (orderId: string) => void
+  /**
+   * Called with the new order id once the order was created. May return a
+   * promise: it is awaited (capped) before redirecting so requests aren't cut.
+   */
+  onCreated?: (orderId: string) => void | Promise<unknown>
 }
 
 const normalizeWallet = (url: string) =>
@@ -87,17 +92,37 @@ export function ConfirmPanel(props: ConfirmPanelProps) {
   const { kind, details } = props
   const navigate = useNavigate()
   const location = useLocation()
+  const queryClient = useQueryClient()
   const token = useTokenStore()
+  const me = useMeQuery()
+  const accountGrant = me.data?.result.grant ?? null
   const profile = useProfileStore()
   const [open, setOpen] = useState(false)
 
   const form = useZodForm({
     schema: confirmWalletSchema,
     defaultValues: {
-      walletAddressUrl: token.walletAddressUrl || profile.walletAddressUrl || ''
+      walletAddressUrl:
+        accountGrant?.walletAddressUrl ||
+        token.walletAddressUrl ||
+        profile.walletAddressUrl ||
+        ''
     }
   })
   const walletValue = form.watch('walletAddressUrl') ?? ''
+  // The grant of the account arrives after /me: prefill unless the user typed.
+  const grantWallet = accountGrant?.walletAddressUrl
+  useEffect(() => {
+    if (grantWallet && !form.getFieldState('walletAddressUrl').isDirty) {
+      form.setValue('walletAddressUrl', grantWallet)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [grantWallet])
+  const hasAccountGrant =
+    !!accountGrant &&
+    !!walletValue &&
+    normalizeWallet(accountGrant.walletAddressUrl) ===
+      normalizeWallet(walletValue)
   const hasMatchingToken =
     !!token.accessToken &&
     !!token.manageUrl &&
@@ -156,12 +181,20 @@ export function ConfirmPanel(props: ConfirmPanelProps) {
     }
   }
 
-  const onSaved = (walletAddressUrl: string, orderId: string) => {
+  const onSaved = async (walletAddressUrl: string, orderId: string) => {
     setProfile({
       walletAddressUrl,
       ...(details.email ? { email: details.email } : {})
     })
-    onCreated?.(orderId)
+    // Let the caller persist things (saved destination) before we leave the page.
+    try {
+      await Promise.race([
+        Promise.resolve(onCreated?.(orderId)),
+        new Promise((resolve) => setTimeout(resolve, 2500))
+      ])
+    } catch {
+      // non-critical
+    }
   }
 
   const createOrder = useCreateOrderMutation({
@@ -175,8 +208,8 @@ export function ConfirmPanel(props: ConfirmPanelProps) {
     createOrder.mutate(
       { walletAddressUrl, products: [item] },
       {
-        onSuccess({ result }) {
-          onSaved(walletAddressUrl, result.orderId)
+        async onSuccess({ result }) {
+          await onSaved(walletAddressUrl, result.orderId)
           window.location.href = result.redirectUrl
         }
       }
@@ -184,21 +217,23 @@ export function ConfirmPanel(props: ConfirmPanelProps) {
   }
 
   const submit = ({ walletAddressUrl }: { walletAddressUrl: string }) => {
-    if (!hasMatchingToken) {
+    if (!hasAccountGrant && !hasMatchingToken) {
       submitRedirect(walletAddressUrl)
       return
     }
     writeDraft()
+    // Account grant: the server uses (and rotates) the stored one, no tokens sent.
     instantBuy.mutate(
       {
         walletAddressUrl,
         products: [item],
-        accessToken: token.accessToken,
-        manageUrl: token.manageUrl
+        ...(hasAccountGrant
+          ? {}
+          : { accessToken: token.accessToken, manageUrl: token.manageUrl })
       },
       {
-        onSuccess({ result }) {
-          onSaved(walletAddressUrl, result.orderId)
+        async onSuccess({ result }) {
+          await onSaved(walletAddressUrl, result.orderId)
           navigate('/checkout/confirmation?orderId=' + result.orderId)
         },
         onError({ message, errors }) {
@@ -208,7 +243,12 @@ export function ConfirmPanel(props: ConfirmPanelProps) {
             return
           }
           // Token expired / limit exceeded: fall back to the redirect flow.
-          resetToken()
+          if (hasAccountGrant) {
+            // The server drops a rejected account grant: refresh /me.
+            void queryClient.invalidateQueries({ queryKey: ['me'] })
+          } else {
+            resetToken()
+          }
           toast({
             variant: 'error',
             title: 'Pago en un clic no disponible',
@@ -277,7 +317,7 @@ export function ConfirmPanel(props: ConfirmPanelProps) {
               error={walletError}
               {...form.register('walletAddressUrl')}
             />
-            {hasMatchingToken ? (
+            {hasAccountGrant || hasMatchingToken ? (
               <p className="text-2xs leading-snug text-allies">
                 Pago en un clic activo para esta billetera: se pagará sin
                 redirección.

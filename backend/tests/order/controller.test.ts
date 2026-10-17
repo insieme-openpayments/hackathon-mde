@@ -3,7 +3,8 @@ import { env } from '@/config/env'
 import { createApp, TestApp } from '@/tests/app'
 import { AwilixContainer } from 'awilix'
 import { truncateTables } from '@/tests/tables'
-import { seedCatalog, seedMoneyProducts } from '@/tests/helpers'
+import { registerUser, seedCatalog, seedMoneyProducts } from '@/tests/helpers'
+import { User } from '@/user/model'
 import { createRequest, createResponse } from 'node-mocks-http'
 import { NextFunction, Request, Response } from 'express'
 import { IOrderController } from '@/order/controller'
@@ -29,10 +30,15 @@ describe('Order Controller', (): void => {
   const next = jest.fn() as unknown as NextFunction
 
   const run = async (
-    handler: IOrderController['create'] | IOrderController['instantBuy'],
-    body: Record<string, unknown>
+    handler:
+      | IOrderController['create']
+      | IOrderController['instantBuy']
+      | IOrderController['setupFinish'],
+    body: Record<string, unknown>,
+    user?: User
   ) => {
     const req = createRequest<Request>({ body })
+    if (user) req.user = user
     const res = createResponse<Response>()
     await handler(req, res, (err) => {
       next()
@@ -302,6 +308,252 @@ describe('Order Controller', (): void => {
         res._getJSONData().result.orderId
       )
       expect(order?.total).toBe(18000)
+    })
+  })
+
+  describe('instantBuy with an Insieme account', (): void => {
+    const manageUrl = 'https://auth.example.com/token/1'
+    const grant = {
+      accessToken: 'stored-token',
+      manageUrl,
+      walletAddressUrl,
+      createdAt: '2026-10-17T00:00:00.000Z'
+    }
+
+    const sessionUser = async (withGrant: boolean): Promise<User> => {
+      const { user } = await registerUser(container)
+      if (withGrant)
+        await container.resolve('userService').setGrant(user.id, grant)
+      return (await User.query().findById(user.id)) as User
+    }
+
+    it('returns 400 errors.accessToken without tokens and without session', async (): Promise<void> => {
+      const spy = jest.spyOn(openPayments, 'instantBuy')
+      const res = await run(orderController.instantBuy, {
+        walletAddressUrl,
+        products: [await item('vanti', { amount: 18000 })]
+      })
+      expect(res.statusCode).toBe(400)
+      expect(res._getJSONData().errors).toHaveProperty('accessToken')
+      expect(spy).not.toHaveBeenCalled()
+    })
+
+    it('returns 400 errors.accessToken with a session but no stored grant', async (): Promise<void> => {
+      const user = await sessionUser(false)
+      const res = await run(
+        orderController.instantBuy,
+        {
+          walletAddressUrl,
+          products: [await item('vanti', { amount: 18000 })]
+        },
+        user
+      )
+      expect(res.statusCode).toBe(400)
+      expect(res._getJSONData().errors).toHaveProperty('accessToken')
+    })
+
+    it('returns 400 when the stored grant belongs to another wallet', async (): Promise<void> => {
+      const user = await sessionUser(true)
+      const res = await run(
+        orderController.instantBuy,
+        {
+          walletAddressUrl: 'https://ilp.example.com/bob',
+          products: [await item('vanti', { amount: 18000 })]
+        },
+        user
+      )
+      expect(res.statusCode).toBe(400)
+      expect(res._getJSONData().errors).toHaveProperty('accessToken')
+    })
+
+    it('uses the stored grant, hides tokens and persists the rotated one', async (): Promise<void> => {
+      const user = await sessionUser(true)
+      const spy = jest.spyOn(openPayments, 'instantBuy').mockResolvedValue({
+        accessToken: 'rotated-token',
+        manageUrl: 'https://auth.example.com/token/2'
+      } as never)
+
+      const res = await run(
+        orderController.instantBuy,
+        {
+          walletAddressUrl,
+          products: [await item('vanti', { amount: 18000 })]
+        },
+        user
+      )
+
+      expect(res.statusCode).toBe(200)
+      expect(spy).toHaveBeenCalledWith(
+        expect.objectContaining({ accessToken: 'stored-token', manageUrl })
+      )
+      const { result } = res._getJSONData()
+      expect(result).toEqual({ walletAddressUrl, orderId: expect.any(String) })
+      expect(JSON.stringify(res._getJSONData())).not.toMatch(/token/i)
+
+      const stored = await User.query().findById(user.id)
+      expect(stored?.oneClickGrant).toMatchObject({
+        accessToken: 'rotated-token',
+        manageUrl: 'https://auth.example.com/token/2',
+        walletAddressUrl,
+        createdAt: grant.createdAt
+      })
+      const order = await Order.query().findById(result.orderId)
+      expect(order?.userId).toBe(user.id)
+    })
+
+    it('uses body tokens when present and still links the order to the user', async (): Promise<void> => {
+      const user = await sessionUser(true)
+      jest.spyOn(openPayments, 'instantBuy').mockResolvedValue({
+        accessToken: 'body-rotated',
+        manageUrl: 'https://auth.example.com/token/3'
+      } as never)
+      const res = await run(
+        orderController.instantBuy,
+        {
+          walletAddressUrl,
+          accessToken: 'body-token',
+          manageUrl,
+          products: [await item('vanti', { amount: 18000 })]
+        },
+        user
+      )
+      expect(res.statusCode).toBe(200)
+      expect(res._getJSONData().result.accessToken).toBe('body-rotated')
+      const stored = await User.query().findById(user.id)
+      expect(stored?.oneClickGrant?.accessToken).toBe('stored-token')
+    })
+
+    it('clears the stored grant and answers 401 when Open Payments rejects it', async (): Promise<void> => {
+      const user = await sessionUser(true)
+      const { OpenPaymentsClientError } = await import(
+        '@interledger/open-payments'
+      )
+      jest.spyOn(openPayments, 'instantBuy').mockRejectedValue(
+        new OpenPaymentsClientError('invalid token', {
+          status: 401,
+          description: 'invalid token'
+        })
+      )
+      const res = await run(
+        orderController.instantBuy,
+        {
+          walletAddressUrl,
+          products: [await item('vanti', { amount: 18000 })]
+        },
+        user
+      )
+      expect(res.statusCode).toBe(401)
+      const stored = await User.query().findById(user.id)
+      expect(stored?.oneClickGrant).toBeNull()
+    })
+    it('clears the stored grant when the spending limit is exceeded', async (): Promise<void> => {
+      const user = await sessionUser(true)
+      const { BadRequest } = await import('../../src/lib/errors')
+      jest
+        .spyOn(openPayments, 'instantBuy')
+        .mockRejectedValue(
+          new BadRequest(
+            'One click buy spending limit exceeded. Please setup again.'
+          )
+        )
+      const res = await run(
+        orderController.instantBuy,
+        {
+          walletAddressUrl,
+          products: [await item('vanti', { amount: 18000 })]
+        },
+        user
+      )
+      expect(res.statusCode).toBe(401)
+      const stored = await User.query().findById(user.id)
+      expect(stored?.oneClickGrant).toBeNull()
+    })
+  })
+
+  describe('setupFinish', (): void => {
+    const identifier = '4f6d8b0a-1c2e-4a3b-9c4d-5e6f7a8b9c0d'
+
+    beforeEach(async (): Promise<void> => {
+      await container.resolve('oneClickCache').set(identifier, {
+        walletAddressUrl,
+        clientNonce: 'c',
+        interactNonce: 'i',
+        continueToken: 'ct',
+        continueUri: 'https://auth.example.com/continue/1'
+      } as never)
+      jest.spyOn(openPayments, 'verifyHash').mockResolvedValue(undefined)
+      jest.spyOn(openPayments, 'continueGrant').mockResolvedValue({
+        accessToken: 'new-token',
+        manageUrl: 'https://auth.example.com/token/9'
+      })
+    })
+
+    it('without a session returns the tokens as before', async (): Promise<void> => {
+      const res = await run(orderController.setupFinish, {
+        identifier,
+        interactRef: '4f6d8b0a-1c2e-4a3b-9c4d-5e6f7a8b9c0e',
+        hash: 'h'
+      })
+      expect(res.statusCode).toBe(200)
+      expect(res._getJSONData().result).toEqual({
+        accessToken: 'new-token',
+        manageUrl: 'https://auth.example.com/token/9',
+        walletAddressUrl,
+        storedInAccount: false
+      })
+    })
+
+    it('with a session stores the grant in the account and returns no tokens', async (): Promise<void> => {
+      const { user: account } = await registerUser(container)
+      const user = (await User.query().findById(account.id)) as User
+      const res = await run(
+        orderController.setupFinish,
+        {
+          identifier,
+          interactRef: '4f6d8b0a-1c2e-4a3b-9c4d-5e6f7a8b9c0e',
+          hash: 'h'
+        },
+        user
+      )
+      expect(res.statusCode).toBe(200)
+      expect(res._getJSONData().result).toEqual({
+        walletAddressUrl,
+        storedInAccount: true
+      })
+      expect(JSON.stringify(res._getJSONData())).not.toMatch(/token/i)
+      const stored = await User.query().findById(user.id)
+      expect(stored?.oneClickGrant).toMatchObject({
+        accessToken: 'new-token',
+        manageUrl: 'https://auth.example.com/token/9',
+        walletAddressUrl
+      })
+    })
+    it('revokes the previous account grant when replacing it', async (): Promise<void> => {
+      const { user: account } = await registerUser(container)
+      await container.resolve('userService').setGrant(account.id, {
+        accessToken: 'old-token',
+        manageUrl: 'https://auth.example.com/token/1',
+        walletAddressUrl,
+        createdAt: new Date().toISOString()
+      })
+      const user = (await User.query().findById(account.id)) as User
+      const revoke = jest
+        .spyOn(openPayments, 'revokeToken')
+        .mockResolvedValue(undefined)
+      const res = await run(
+        orderController.setupFinish,
+        {
+          identifier,
+          interactRef: '4f6d8b0a-1c2e-4a3b-9c4d-5e6f7a8b9c0e',
+          hash: 'h'
+        },
+        user
+      )
+      expect(res.statusCode).toBe(200)
+      expect(revoke).toHaveBeenCalledWith({
+        accessToken: 'old-token',
+        manageUrl: 'https://auth.example.com/token/1'
+      })
     })
   })
 

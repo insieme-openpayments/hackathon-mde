@@ -1,6 +1,7 @@
 import { useZodSearchParams } from '@/hooks/use-zod-search-params.ts'
 import { cn } from '@/lib/utils.ts'
 import { useEffect } from 'react'
+import { useQueryClient } from '@tanstack/react-query'
 import { Navigate, useNavigate } from 'react-router-dom'
 import { oneClickConfirmationSearchParamsSchema } from '../route-schemas.ts'
 import { Loader } from '@/components/loader.tsx'
@@ -10,6 +11,7 @@ import { paymentDraftStore } from '@/lib/stores/payment-draft-store.ts'
 
 export function Component() {
   const navigate = useNavigate()
+  const queryClient = useQueryClient()
   const [{ identifier, hash, interact_ref, result }] = useZodSearchParams(
     oneClickConfirmationSearchParamsSchema
   )
@@ -22,7 +24,17 @@ export function Component() {
         { identifier, hash, interactRef: interact_ref },
         {
           onSuccess({ result }) {
-            if (result) setToken(result)
+            if (!result) return
+            if (result.storedInAccount) {
+              // The grant lives in the account: refresh /me.
+              void queryClient.invalidateQueries({ queryKey: ['me'] })
+            } else if (result.accessToken && result.manageUrl) {
+              setToken({
+                accessToken: result.accessToken,
+                manageUrl: result.manageUrl,
+                walletAddressUrl: result.walletAddressUrl
+              })
+            }
           }
         }
       )
@@ -39,7 +51,9 @@ export function Component() {
 
   if (result || data) {
     let color: string = 'text-success'
-    let text: string = '¡Pago en un clic configurado!'
+    let text: string = data?.result.storedInAccount
+      ? '¡Pago en un clic guardado en tu cuenta!'
+      : '¡Pago en un clic configurado!'
 
     if (result === 'grant_rejected') {
       color = 'text-magenta'

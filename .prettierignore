@@ -9,3 +9,4 @@ Dockerfile
 .prettierignore
 coverage
 prompts
+.playwright-mcp

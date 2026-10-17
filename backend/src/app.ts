@@ -17,6 +17,7 @@ import {
   toSuccessResponse
 } from '@/lib'
 import path from 'path'
+import { optionalAuth, requireAuth } from '@/middleware/auth'
 
 export class App {
   private server!: Server
@@ -63,6 +64,15 @@ export class App {
     const orderController = this.container.resolve('orderController')
     const billController = this.container.resolve('billController')
     const moneyController = this.container.resolve('moneyController')
+    const authService = this.container.resolve('authService')
+    const authController = this.container.resolve('authController')
+    const meController = this.container.resolve('meController')
+    const savedBillController = this.container.resolve('savedBillController')
+    const savedDestinationController = this.container.resolve(
+      'savedDestinationController'
+    )
+    const withAuth = requireAuth(authService)
+    const withOptionalAuth = optionalAuth(authService)
     const catalogSync = this.container.resolve('catalogSyncService')
     const openPayments = this.container.resolve('openPayments')
     const frontendOrigin = new URL(env.FRONTEND_URL).origin
@@ -112,10 +122,41 @@ export class App {
     router.post('/efecty/quote', moneyController.quote)
     router.post('/breb/resolve', moneyController.resolve)
 
-    router.post('/orders', orderController.create)
-    router.post('/orders/instant-buy', orderController.instantBuy)
+    router.post('/auth/register', authController.register)
+    router.post('/auth/login', authController.login)
+    router.post('/auth/logout', withAuth, authController.logout)
+
+    router.get('/me', withAuth, meController.me)
+    router.delete('/me/grant', withAuth, meController.clearGrant)
+    router.get('/me/bills', withAuth, savedBillController.list)
+    router.post('/me/bills', withAuth, savedBillController.save)
+    router.patch('/me/bills/:id', withAuth, savedBillController.update)
+    router.delete('/me/bills/:id', withAuth, savedBillController.remove)
+    router.get('/me/destinations', withAuth, savedDestinationController.list)
+    router.post('/me/destinations', withAuth, savedDestinationController.save)
+    router.patch(
+      '/me/destinations/:id',
+      withAuth,
+      savedDestinationController.update
+    )
+    router.delete(
+      '/me/destinations/:id',
+      withAuth,
+      savedDestinationController.remove
+    )
+
+    router.post('/orders', withOptionalAuth, orderController.create)
+    router.post(
+      '/orders/instant-buy',
+      withOptionalAuth,
+      orderController.instantBuy
+    )
     router.post('/orders/setup-one-click', orderController.setup)
-    router.post('/orders/setup-one-click/finish', orderController.setupFinish)
+    router.post(
+      '/orders/setup-one-click/finish',
+      withOptionalAuth,
+      orderController.setupFinish
+    )
     router.patch('/orders/:id', orderController.finish)
     router.get('/orders/:id', orderController.get)
 

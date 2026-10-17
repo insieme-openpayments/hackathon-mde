@@ -7,11 +7,7 @@ import { z } from 'zod'
 import { brebResolveSchema, efectyQuoteSchema, REF_REGEX } from './validation'
 import type { BrebKeyType } from './types'
 
-const noControlChars = (s: string) =>
-  ![...s].some((c) => {
-    const code = c.charCodeAt(0)
-    return code < 32 || code === 127
-  })
+const noControlChars = (s: string) => !/[\p{Cc}\p{Cf}]/u.test(s)
 const CONTROL_MSG = { message: 'Caracteres no permitidos' }
 
 export const accountEmailSchema = z
@@ -19,6 +15,9 @@ export const accountEmailSchema = z
   .trim()
   .toLowerCase()
   .refine(noControlChars, CONTROL_MSG)
+  .refine((v) => v.length <= 254, {
+    message: 'El correo no puede superar 254 caracteres'
+  })
   .pipe(z.string().email({ message: 'Ingresa un correo válido' }))
 
 export const PASSWORD_MIN = 8
@@ -58,7 +57,7 @@ export const registerSchema = z
       .string()
       .trim()
       .min(2, { message: 'Escribe tu nombre completo' })
-      .max(80)
+      .max(80, 'El nombre no puede superar 80 caracteres')
       .refine(noControlChars, CONTROL_MSG),
     document: documentSchema,
     email: accountEmailSchema,
@@ -106,7 +105,7 @@ export const saveBillSchema = z.object({
     .string()
     .trim()
     .min(3, { message: 'El nombre debe tener al menos 3 caracteres' })
-    .max(30)
+    .max(30, 'El nombre no puede superar 30 caracteres')
     .refine(noControlChars, CONTROL_MSG),
   ref1: z.string().regex(REF_REGEX, {
     message: 'La referencia debe tener entre 6 y 20 dígitos'
@@ -158,13 +157,13 @@ const labelSchema = z
   .string()
   .trim()
   .min(1, { message: 'Escribe un nombre para este destino' })
-  .max(40)
+  .max(40, 'El nombre del destino no puede superar 40 caracteres')
   .refine(noControlChars, CONTROL_MSG)
 
 const shortText = z
   .string()
   .trim()
-  .max(80)
+  .max(80, 'El texto no puede superar 80 caracteres')
   .refine(noControlChars, CONTROL_MSG)
   .optional()
 

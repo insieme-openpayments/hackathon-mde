@@ -1,6 +1,6 @@
 // Giro Efecty: beneficiary -> amount -> quote + confirmation.
 import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
   Actions,
   BackButton,
@@ -12,14 +12,25 @@ import {
   TitleBox,
   type KvRow
 } from '@/components/insieme'
+import { SavedDestinationsPicker } from '@/components/account/saved-destinations-picker.tsx'
+import { SaveDestinationCheckbox } from '@/components/account/save-destination-checkbox.tsx'
 import { ConfirmPanel } from '@/components/payment/confirm-panel.tsx'
 import { Button } from '@/components/ui/button.tsx'
 import { Shimmer } from '@/components/ui/shimmer.tsx'
 import { useMoneyProduct } from '@/hooks/use-money-products-query.ts'
 import { useEfectyQuoteMutation } from '@/hooks/use-efecty-quote-mutation.ts'
+import { useSession } from '@/hooks/use-auth.ts'
+import {
+  useSavedDestinations,
+  useSaveDestinationMutation,
+  useUpdateDestinationMutation
+} from '@/hooks/use-saved-destinations.ts'
+import { useZodSearchParams } from '@/hooks/use-zod-search-params.ts'
+import { destinoSearchParamsSchema } from '@/app/route-schemas.ts'
 import { useProfileStore } from '@/hooks/use-profile-store.ts'
 import { toast } from '@/hooks/use-toast.tsx'
 import type { EfectyDetails, EfectyQuote } from '@/lib/api-types.ts'
+import type { SavedDestination } from '@insieme/shared'
 import { digits, money, num } from '@/lib/money.ts'
 import { emailSchema } from '@/lib/schemas.ts'
 import { cn } from '@/lib/utils.ts'
@@ -37,8 +48,8 @@ interface Errors {
   amount?: string
 }
 
-const hasControl = (s: string) =>
-  [...s].some((c) => c.charCodeAt(0) < 32 || c.charCodeAt(0) === 127)
+// Mismo criterio que noControlChars de @insieme/shared (controles y formato, p. ej. U+200B).
+const hasControl = (s: string) => /[\p{Cc}\p{Cf}]/u.test(s)
 
 function validateBeneficiary(
   document: string,
@@ -62,6 +73,12 @@ function validateBeneficiary(
 
 export function Component() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const { isLoggedIn } = useSession()
+  const [{ destino }] = useZodSearchParams(destinoSearchParamsSchema)
+  const savedDestinations = useSavedDestinations()
+  const saveDestination = useSaveDestinationMutation()
+  const updateDestination = useUpdateDestinationMutation()
   const profile = useProfileStore()
   const { product, limits, enabled, isLoading } = useMoneyProduct(
     'efecty',
@@ -77,7 +94,9 @@ export function Component() {
   const [quote, setQuote] = useState<EfectyQuote | null>(null)
   const [errors, setErrors] = useState<Errors>({})
   const [tried, setTried] = useState(false)
+  const [saveIt, setSaveIt] = useState(true)
   const rehydrated = useRef(false)
+  const appliedDestino = useRef<string | null>(null)
 
   const quoteMutation = useEfectyQuoteMutation()
   const loading = quoteMutation.isPending
@@ -131,6 +150,9 @@ export function Component() {
     if (rehydrated.current || !product) return
     rehydrated.current = true
     const draft = paymentDraftStore
+    // With ?destino, only the draft of that very round trip wins (stale drafts don't).
+    if (destino && draft.returnTo !== location.pathname + location.search)
+      return
     if (
       draft.kind !== 'efecty' ||
       draft.productId !== product.id ||
@@ -145,6 +167,7 @@ export function Component() {
       setName(d.recipientName)
       setPhone(d.recipientPhone ?? '')
       setEmail(d.email ?? '')
+      appliedDestino.current = destino ?? null
       setAmount(draft.baseAmount)
       setStep(2)
       runQuote(draft.baseAmount, d)
@@ -153,6 +176,43 @@ export function Component() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product])
+
+  const fromDestino =
+    savedDestinations.data?.result.find(
+      (d): d is Extract<SavedDestination, { kind: 'efecty' }> =>
+        d.id === destino && d.kind === 'efecty'
+    ) ?? null
+
+  // "Enviar de nuevo": prefill from the saved destination and reuse the
+  // rehydration path (re-quote with the last amount, or ask for the amount).
+  useEffect(() => {
+    if (!product || !fromDestino) return
+    if (appliedDestino.current === fromDestino.id) return
+    // Wait for the draft effect (same render pass) before deciding.
+    if (!rehydrated.current) return
+    appliedDestino.current = fromDestino.id
+    const d = fromDestino.details
+    setQuote(null)
+    setErrors({})
+    setDocument(d.recipientDocument)
+    setName(d.recipientName)
+    setPhone(d.recipientPhone ?? '')
+    setEmail(profile.email)
+    if (fromDestino.lastAmount) {
+      setAmount(fromDestino.lastAmount)
+      setStep(2)
+      runQuote(fromDestino.lastAmount, {
+        recipientDocument: d.recipientDocument,
+        recipientName: d.recipientName,
+        ...(d.recipientPhone ? { recipientPhone: d.recipientPhone } : {}),
+        ...(profile.email ? { email: profile.email } : {})
+      })
+    } else {
+      setAmount(null)
+      setStep(2)
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product, fromDestino])
 
   const onBeneficiary = (e: FormEvent) => {
     e.preventDefault()
@@ -221,6 +281,40 @@ export function Component() {
       { label: 'Comisión', value: money(quote.fee) },
       { label: 'Total', value: money(quote.total) }
     ]
+    const baseAmount = quote.amount
+    const sameDest =
+      fromDestino &&
+      fromDestino.details.recipientDocument === details.recipientDocument
+        ? fromDestino
+        : null
+    const onCreated = async () => {
+      if (!isLoggedIn) return
+      try {
+        if (saveIt) {
+          await saveDestination.mutateAsync({
+            kind: 'efecty',
+            label:
+              sameDest?.label ??
+              (details.recipientName.slice(0, 40) || 'Giro Efecty'),
+            details: {
+              recipientDocument: details.recipientDocument,
+              recipientName: details.recipientName,
+              ...(details.recipientPhone
+                ? { recipientPhone: details.recipientPhone }
+                : {})
+            },
+            lastAmount: baseAmount
+          })
+        } else if (sameDest) {
+          await updateDestination.mutateAsync({
+            id: sameDest.id,
+            lastUsedAt: new Date().toISOString()
+          })
+        }
+      } catch {
+        // saving the destination is best-effort; the payment goes on
+      }
+    }
     return (
       <Screen>
         <TitleBox>Giro Efecty</TitleBox>
@@ -236,6 +330,9 @@ export function Component() {
             {quote.message}
           </p>
         ) : null}
+        {isLoggedIn ? (
+          <SaveDestinationCheckbox checked={saveIt} onChange={setSaveIt} />
+        ) : null}
         <BrandFooter />
         <ConfirmPanel
           rows={rows}
@@ -245,6 +342,7 @@ export function Component() {
           kind="efecty"
           details={details}
           enabled
+          onCreated={onCreated}
           onBack={() => setQuote(null)}
         />
       </Screen>
@@ -265,6 +363,7 @@ export function Component() {
             text="¿Quién recibe el giro?"
             tip="Debe presentar su cédula para reclamarlo en Efecty."
           />
+          <SavedDestinationsPicker kind="efecty" selectedId={destino} />
           <FloatingInput
             label="Cédula del beneficiario"
             name="recipientDocument"

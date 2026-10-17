@@ -44,3 +44,10 @@ export function extractUuidFromUrl(url: string): string | null {
   const match = url.match(regex)
   return match ? match[0] : null
 }
+
+/** True when a DB error is a Postgres unique violation (SQLSTATE 23505). */
+export function isUniqueViolation(err: unknown): boolean {
+  if (!isObject(err)) return false
+  const code = err.code ?? err.nativeError?.code
+  return code === '23505' || err.name === 'UniqueViolationError'
+}

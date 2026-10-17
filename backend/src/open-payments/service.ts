@@ -94,6 +94,8 @@ export interface IOpenPayments {
   continueGrant(params: ContinueGrantParams): Promise<TokenInfo>
   instantBuy(params: InstantBuyParams): Promise<TokenInfo>
   getShopAsset(): Promise<ShopAsset>
+  /** Best-effort: revokes a stored grant token; never throws. */
+  revokeToken(params: TokenInfo): Promise<void>
 }
 
 export class OpenPayments implements IOpenPayments {
@@ -363,6 +365,17 @@ export class OpenPayments implements IOpenPayments {
     access_token: NonNullable<Grant['access_token']>
   } {
     return (continuation as Grant).access_token !== undefined
+  }
+
+  public async revokeToken(params: TokenInfo): Promise<void> {
+    try {
+      await this.opClient.token.revoke({
+        url: params.manageUrl,
+        accessToken: params.accessToken
+      })
+    } catch {
+      this.logger.warn('Could not revoke the stored grant token.')
+    }
   }
 
   public async instantBuy(params: InstantBuyParams): Promise<TokenInfo> {

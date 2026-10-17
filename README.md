@@ -20,6 +20,22 @@ Los giros y las transferencias no aparecen en la grilla de Servicios: viven en l
 
 **Precio = total de la cotización.** En un giro Efecty el total de la orden es el de la cotización (monto + comisión) en el momento de crear la orden; el servidor lo guarda y lo cobra tal cual. El cliente no envía el total.
 
+## Cuenta Insieme (opcional)
+
+El pago no exige cuenta. Si la persona se registra, la cuenta habilita:
+
+- **Facturas conocidas**: guarda las facturas de Pago de servicios y reúsalas desde «Mis facturas» (`/pay/facturas`).
+- **Destinos frecuentes**: guarda los destinatarios de Giro Efecty y Transferencia Bre-B para enviar de nuevo con un clic.
+- **Pago en un clic**: si ya concedió el grant de Interledger, la cuenta lo guarda para los envíos a un destino guardado. El backend solo usa el grant guardado cuando la billetera del pago es la misma del grant; la API nunca devuelve sus tokens.
+
+El registro pide nombre completo, documento de identidad (cédula o pasaporte), correo, celular y una contraseña nueva con su confirmación (mínimo 8 caracteres).
+
+**Qué no se verifica.** Es una versión de prueba sobre la testnet de Interledger: no se valida el correo ni el celular (sin código de confirmación), no hay KYC sobre el documento y ningún dato se contrasta con una fuente externa. Sí se exigen presencia, formato básico y un correo único, porque el correo es el identificador de ingreso.
+
+**Cómo probar.** Abre http://localhost:4004/pay/cuenta/registro, crea una cuenta con datos de prueba y haz un giro o una factura. Al confirmar, deja marcado «Guardar este destino para la próxima vez». Para cerrar la sesión usa el botón «Cerrar sesión» en `/pay/cuenta`.
+
+La sesión viaja en `Authorization: Bearer <token>`, dura 30 días y en la base de datos se guarda solo su hash.
+
 ## Qué es real y qué es simulado
 
 | Pieza                                                                                                                               | Estado                                                                                                                                                                                                                                                                                                                                                              |
@@ -32,6 +48,9 @@ Los giros y las transferencias no aparecen en la grilla de Servicios: viven en l
 | Transferencia Bre-B: resolución de llave y liquidación                                                                              | **Mock** del integration-backend. Si no responde, el backend resuelve la llave en local con la misma regla del mock y marca la resolución con `simulated: true`                                                                                                                                                                                                     |
 | Liquidación de servicios                                                                                                            | Con integration-backend configurado: `POST /v1/services/pay` (PuntoRed preprod con `CATALOG_SOURCE=puntored`). Sin integration-backend (tests y modo local): cadena simulada (`puntored`, `recaudo-b`, `breb`) tras la interfaz `PaymentProvider`                                                                                                                   |
 | Detalle de la factura consultada en Pago de servicios (titular, concepto y vencimiento)                                             | Titular y concepto **simulados** (deterministas por convenio y referencia); vencimiento del integration-backend, simulado solo en el fallback local                                                                                                                                                                                                                 |
+| Cuenta Insieme: registro, ingreso y sesión                                                                                          | **Real** en formato y unicidad del correo; **sin verificación** de correo, celular, documento ni identidad (versión de prueba). Contraseñas con scrypt; sesión Bearer de 30 días con hash en la base                                                                                                                                                                |
+| Facturas y destinos guardados en la cuenta                                                                                          | **Real**: se guardan en Postgres por usuario; solo el dueño los lee o los cambia                                                                                                                                                                                                                                                                                    |
+| Pago en un clic guardado en la cuenta                                                                                               | **Real** frente a Open Payments. El grant se guarda en la base **sin cifrar** (riesgo aceptado para la demo; cifrado pendiente)                                                                                                                                                                                                                                     |
 
 **Errores reales no se disfrazan.** Si el integration-backend responde con un rechazo (409, 422, 502 o 504) o no responde durante una liquidación, el backend **no** cambia a un proveedor simulado: registra la liquidación como `FAILED` con el motivo. Un 504 o una caída pueden significar que la operación sí se ejecutó, por eso el mensaje pide consultar el estado antes de reintentar.
 
@@ -119,7 +138,8 @@ Historia: el prototipo estático `customer-frontend` se retiró del repo en el c
 
 ## Límites conocidos
 
-- Sin autenticación de usuarios: cualquiera puede consultar y crear órdenes, y consultar llaves Bre-B (`POST /breb/resolve`).
+- Autenticación opcional: sin sesión, cualquiera puede consultar y crear órdenes, y consultar llaves Bre-B (`POST /breb/resolve`).
+- La cuenta no tiene verificación de identidad, código de confirmación ni límite de intentos de ingreso (ver [Cuenta Insieme](#cuenta-insieme-opcional)).
 - `GET /admin/orders` no tiene autenticación; está pensado como vista interna.
 - Sin reembolso automático: si la liquidación falla, la orden queda `SETTLEMENT_FAILED` y el dinero queda registrado para reintento o reembolso manual.
 - Sin reintento automático de una liquidación con error real (409, 422, 502, 504): la confirmación queda para revisión manual.

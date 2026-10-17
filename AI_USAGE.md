@@ -16,6 +16,7 @@ La IA se usó en todo el proyecto:
 - **Fork y rename** del proyecto upstream a `insieme` (paquetes, Docker, configuración, cadenas).
 - **Backend** (`backend/src/`): catálogo y categorías (`product/`, `category/`), facturas (`bill/`), órdenes (`order/`, `order-item/`), integración con integration-backend (`integration/client.ts`, `catalog/sync.ts`), liquidación con router de proveedores (`settlement/`) y `shared/src/` (esquemas y tipos del contrato).
 - **Frontend** (`frontend/src/`): migración de las pantallas del prototipo a React (`app/`, `components/insieme/`, `hooks/`, `lib/stores/`), tracker de estados y comprobante.
+- **Cuenta Insieme** (`backend/src/auth/`, `backend/src/account/`, `backend/src/middleware/auth.ts`, `frontend/src/app/cuenta/`, `frontend/src/lib/stores/auth-store.ts`): registro, sesiones, facturas y destinos guardados, y pago en un clic desde la cuenta.
 - **Documentación**: `README.md`, `backend/README.md`, `frontend/README.md`, `docs/` y este archivo.
 - **Pruebas** (`backend/tests/`): pruebas de catálogo, facturas, órdenes, liquidación e idempotencia.
 
@@ -35,11 +36,18 @@ La IA se usó en todo el proyecto:
 - **Configuración en la testnet**: creación de billeteras de prueba y Developer Keys.
 - **Aprobación de grants**: cada consentimiento de pago lo dio una persona.
 - **Verificación manual**: cada pago real en la testnet se verificó a mano hasta el estado final.
+- **Decisiones de producto de la cuenta**: el registro es opcional y no verifica datos (correo, celular, documento), porque es una versión de prueba sobre la testnet. Las tomó el equipo; quedaron en los prompts 16 y 17 de [prompts/sesion-claude-code.md](prompts/sesion-claude-code.md).
 - **Revisión de código**: el equipo revisó todos los cambios antes de integrarlos a `main`.
 
 ## Registro de prompts · Prompt log
 
 - [prompts/](prompts/README.md): los prompts reales de la sesión con Claude Code, transcritos sin cambios en [prompts/sesion-claude-code.md](prompts/sesion-claude-code.md), y los scripts de los workflows con cada prompt de subagente en `prompts/workflows/`.
+
+| Workflow | Qué hizo                                                                                                                                                             | Script                                   |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| 06       | Cuenta Insieme (registro opcional, sesiones, facturas y destinos guardados, pago en un clic desde la cuenta) y su documentación, con subagentes Sonnet, Haiku y Opus | `prompts/workflows/06-insieme-cuenta.js` |
+
+Los workflows 01 a 05 están descritos en [prompts/README.md](prompts/README.md).
 
 ## Preparación en Open Payments · Open Payments preparation
 

@@ -84,16 +84,17 @@ El timeout de `payService`, `efectySend` y `brebSend` es de 30 s; el resto de ll
 
 ## Componentes
 
-| Capa          | Ubicación                                                                                          | Responsabilidad                                                                                                 |
-| ------------- | -------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| Frontend      | `frontend/src/app/`, `frontend/src/components/insieme/`, `frontend/src/hooks/`                     | Pantallas de servicios, giros, Bre-B y facturas; tracker de estados y comprobante                               |
-| Catálogo      | `backend/src/product/`, `backend/src/category/`, `backend/src/catalog/sync.ts`                     | Convenios, giros y transferencias en Postgres, sincronizados desde integration-backend                          |
-| Dinero        | `backend/src/money/`                                                                               | Cotización de Efecty (`POST /efecty/quote`) y resolución de llaves Bre-B (`POST /breb/resolve`), con mock local |
-| Facturas      | `backend/src/bill/service.ts`, `backend/src/bill/simulate.ts`, `backend/src/integration/client.ts` | Validación de referencia, snapshot del monto, fallback local                                                    |
-| Órdenes       | `backend/src/order/`, `backend/src/order-item/`                                                    | Precio autoritativo, estados y eventos                                                                          |
-| Open Payments | `backend/src/open-payments/service.ts`, `backend/src/payment/service.ts`                           | Incoming y outgoing payments, grants, verificación del hash, poller                                             |
-| Liquidación   | `backend/src/settlement/`, `backend/src/settlement/providers/integration.ts`                       | Liquidación por `kind` contra integration-backend; cadena simulada solo sin integración                         |
-| Cliente HTTP  | `backend/src/integration/client.ts`                                                                | axios con `X-API-Key`; errores `HttpError {status, detail}` e `IntegrationUnavailable`                          |
+| Capa          | Ubicación                                                                                                 | Responsabilidad                                                                                                     |
+| ------------- | --------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| Frontend      | `frontend/src/app/`, `frontend/src/components/insieme/`, `frontend/src/hooks/`                            | Pantallas de servicios, giros, Bre-B y facturas; tracker de estados y comprobante                                   |
+| Catálogo      | `backend/src/product/`, `backend/src/category/`, `backend/src/catalog/sync.ts`                            | Convenios, giros y transferencias en Postgres, sincronizados desde integration-backend                              |
+| Dinero        | `backend/src/money/`                                                                                      | Cotización de Efecty (`POST /efecty/quote`) y resolución de llaves Bre-B (`POST /breb/resolve`), con mock local     |
+| Facturas      | `backend/src/bill/service.ts`, `backend/src/bill/simulate.ts`, `backend/src/integration/client.ts`        | Validación de referencia, snapshot del monto, fallback local                                                        |
+| Órdenes       | `backend/src/order/`, `backend/src/order-item/`                                                           | Precio autoritativo, estados y eventos                                                                              |
+| Open Payments | `backend/src/open-payments/service.ts`, `backend/src/payment/service.ts`                                  | Incoming y outgoing payments, grants, verificación del hash, poller                                                 |
+| Liquidación   | `backend/src/settlement/`, `backend/src/settlement/providers/integration.ts`                              | Liquidación por `kind` contra integration-backend; cadena simulada solo sin integración                             |
+| Cliente HTTP  | `backend/src/integration/client.ts`                                                                       | axios con `X-API-Key`; errores `HttpError {status, detail}` e `IntegrationUnavailable`                              |
+| Cuenta        | `backend/src/auth/`, `backend/src/account/`, `backend/src/middleware/auth.ts`, `frontend/src/app/cuenta/` | Registro, sesiones Bearer, facturas y destinos guardados, grant de pago en un clic; la propiedad sale de `req.user` |
 
 ## Decisiones
 
@@ -107,3 +108,49 @@ El timeout de `payService`, `efectySend` y `brebSend` es de 30 s; el resto de ll
 - **Catálogo con respaldo.** El catálogo de servicios se sincroniza desde integration-backend cada 10 min. Un convenio ausente del catálogo upstream más reciente se marca `metadata.active = false` y no se borra (las órdenes lo referencian). Si el integration-backend falla, se mantiene la semilla de `backend/data/catalog.json`. Los productos `giro` y `transferencia` no entran en esa regla.
 - **Grilla solo de servicios.** `GET /catalog` devuelve solo `type = servicio` por defecto. Los giros y transferencias se piden con `GET /products?type=`.
 - **Rutas de retorno fijas.** Open Payments vuelve a `/checkout/confirmation?orderId=` y, en el one-click, a `/cart/finish`. Las rutas se conservan del upstream.
+
+## Cuenta Insieme
+
+La cuenta es opcional y no cambia el flujo de pago: sin sesión todo funciona como antes. Con sesión, el backend asocia órdenes, facturas y destinos al usuario, y guarda el grant de Open Payments para el pago en un clic.
+
+- **Sesiones.** `POST /auth/register` y `POST /auth/login` devuelven un token de 32 bytes aleatorios en base64url. El cliente lo envía en `Authorization: Bearer <token>`; la base guarda solo su hash sha256 y la sesión expira a los 30 días. `POST /auth/logout` borra la sesión.
+- **Contraseñas.** `crypto.scrypt` de Node (N=16384, r=8, p=1, sal de 16 bytes) con formato `scrypt$<saltB64>$<hashB64>` y comparación con `timingSafeEqual`. No hay dependencias nuevas.
+- **Módulos.** `backend/src/auth` (registro, ingreso, cierre de sesión y `authenticate(token)`) y `backend/src/account` (facturas guardadas, destinos guardados y `GET /me`). `requireAuth` responde 401 si falta el token o expiró; `optionalAuth` solo deja `req.user` cuando hay una sesión válida.
+- **Propiedad.** El `userId` sale siempre de `req.user.id`, nunca del body. Un recurso de otro usuario responde 404, no 403, para no revelar si existe.
+- **Grant guardado.** `users.oneClickGrant` guarda `{accessToken, manageUrl, walletAddressUrl, createdAt}`. `GET /me` expone solo `walletAddressUrl` y `createdAt`; los tokens nunca salen del servidor. `User.$formatJson` omite `passwordHash`, `oneClickGrant` y `walletAddress`. Si Open Payments responde 401 con el grant guardado, el backend lo borra.
+- **Frontend.** El token vive en `auth-store` (valtio persistido en localStorage). `fetcher` limpia la sesión solo ante un 401 de `/auth/` o `/me`, nunca ante un 401 de `/orders/*`: allí el 401 significa que caducó el token de Open Payments y `ConfirmPanel` depende de atraparlo.
+
+### Pago en un clic desde la cuenta
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor U as Pagador
+  participant F as Frontend React
+  participant B as Backend Node
+  participant W as Billetera pagadora (Open Payments)
+
+  U->>F: Registro (nombre, documento, correo, celular, contraseña)
+  F->>B: POST /auth/register
+  B-->>F: 201 SessionResponse (token Bearer)
+  F->>F: setSession en auth-store
+
+  U->>F: Configura el pago en un clic (primer pago con redirección)
+  F->>B: POST /orders/setup-one-click/finish (Bearer)
+  B->>B: Guarda oneClickGrant en users
+  B-->>F: SetupFinishResponse {walletAddressUrl, storedInAccount: true}
+
+  U->>F: Envío a un destino guardado (un clic)
+  F->>B: POST /orders/instant-buy (Bearer, sin tokens)
+  B->>B: Usa el grant guardado y asigna userId a la orden
+  B->>W: Pago saliente con el accessToken guardado
+  alt Open Payments acepta el grant
+    B->>B: Persiste el tokenInfo rotado en la cuenta
+    B-->>F: {walletAddressUrl, orderId} sin tokens
+  else Open Payments responde 401
+    B->>B: Borra oneClickGrant
+    B-->>F: 401 (el frontend invalida ['me'] y usa el flujo con redirección)
+  end
+```
+
+Sin sesión, `setup-one-click/finish` responde como antes con `storedInAccount: false` y `instant-buy` exige `accessToken` y `manageUrl` en el body; sin ninguno de los dos responde 400 con `errors.accessToken`.

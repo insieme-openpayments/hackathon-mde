@@ -205,3 +205,17 @@ export interface OrderReceipt {
   /** Timeline for the status tracker. */
   events: Array<{ at: string; message: string }>
 }
+
+// Cuenta Insieme: tipos del contrato compartido.
+export type {
+  AccountUser,
+  SessionResponse,
+  MeResponse,
+  SavedBill,
+  SavedDestination,
+  DestinationKind,
+  EfectyDestinationDetails,
+  BrebDestinationDetails,
+  SetupFinishResponse,
+  InstantBuyAccountResponse
+} from '@insieme/shared'

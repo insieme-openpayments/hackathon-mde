@@ -1,6 +1,9 @@
 import { publicUrl } from '@/lib/assets.ts'
 import type { KeyboardEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { QuickDestinations } from '@/components/account/quick-destinations.tsx'
+import { Button } from '@/components/ui/button.tsx'
+import { useSession } from '@/hooks/use-auth.ts'
 import { BrandFooter, Isotipo, Screen, Tip } from '@/components/insieme'
 import { useMoneyProductsQuery } from '@/hooks/use-money-products-query.ts'
 import { cn } from '@/lib/utils.ts'
@@ -60,6 +63,8 @@ const PRODUCTS: HomeProduct[] = [
 
 export function Component() {
   const navigate = useNavigate()
+  const { isLoggedIn, user } = useSession()
+  const firstName = user?.name.trim().split(/\s+/)[0]
   const money = useMoneyProductsQuery()
   // A failed query shows every card; only an explicit enabled=false hides one.
   const hidden = new Set(
@@ -108,6 +113,42 @@ export function Component() {
           </div>
         </div>
       </section>
+
+      {isLoggedIn ? (
+        <>
+          <p className="text-lg font-bold text-neutral-darker [overflow-wrap:anywhere]">
+            Hola, {firstName ?? 'bienvenido'}
+          </p>
+          <QuickDestinations />
+        </>
+      ) : (
+        <section className="flex flex-col gap-3 rounded-2xl border border-brand-soft-active bg-brand-soft p-4">
+          <p className="text-sm font-semibold text-brand">
+            Crea tu cuenta para guardar tus facturas y destinos frecuentes
+          </p>
+          <div className="flex w-full items-center gap-3">
+            <Button
+              type="button"
+              size="sm"
+              grow
+              aria-label="Crear cuenta"
+              onClick={() => navigate('/cuenta/registro')}
+            >
+              Crear cuenta
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              grow
+              variant="outline"
+              aria-label="Ingresar"
+              onClick={() => navigate('/cuenta/ingresar')}
+            >
+              Ingresar
+            </Button>
+          </div>
+        </section>
+      )}
 
       <div className="flex flex-col gap-3">
         <h2 className="text-base font-bold text-neutral-darker">

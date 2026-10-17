@@ -16,6 +16,7 @@ import { checkoutRoutes } from './checkout/routes.tsx'
 import { cartRoutes } from './cart/routes.tsx'
 import { girosRoutes } from './giros/routes.tsx'
 import { brebRoutes } from './breb/routes.tsx'
+import { cuentaRoutes } from './cuenta/routes.tsx'
 
 export const routes = [
   {
@@ -41,6 +42,10 @@ export const routes = [
       {
         path: '/facturas',
         children: facturasRoutes
+      },
+      {
+        path: '/cuenta',
+        children: cuentaRoutes
       },
       {
         // Fixed by the backend return URL: /checkout/confirmation?orderId=

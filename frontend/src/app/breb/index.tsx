@@ -1,6 +1,6 @@
 // Transferencia Bre-B: key lookup -> amount -> confirmation.
 import { useEffect, useRef, useState, type FormEvent } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import {
   Actions,
   BackButton,
@@ -12,11 +12,21 @@ import {
   TitleBox,
   type KvRow
 } from '@/components/insieme'
+import { SavedDestinationsPicker } from '@/components/account/saved-destinations-picker.tsx'
+import { SaveDestinationCheckbox } from '@/components/account/save-destination-checkbox.tsx'
 import { ConfirmPanel } from '@/components/payment/confirm-panel.tsx'
 import { Button } from '@/components/ui/button.tsx'
 import { Shimmer } from '@/components/ui/shimmer.tsx'
 import { useMoneyProduct } from '@/hooks/use-money-products-query.ts'
 import { useBrebResolveMutation } from '@/hooks/use-breb-resolve-mutation.ts'
+import { useSession } from '@/hooks/use-auth.ts'
+import {
+  useSavedDestinations,
+  useSaveDestinationMutation,
+  useUpdateDestinationMutation
+} from '@/hooks/use-saved-destinations.ts'
+import { useZodSearchParams } from '@/hooks/use-zod-search-params.ts'
+import { destinoSearchParamsSchema } from '@/app/route-schemas.ts'
 import { useProfileStore } from '@/hooks/use-profile-store.ts'
 import { toast } from '@/hooks/use-toast.tsx'
 import type {
@@ -24,6 +34,7 @@ import type {
   BrebKeyResolution,
   BrebKeyType
 } from '@/lib/api-types.ts'
+import type { SavedDestination } from '@insieme/shared'
 import { money } from '@/lib/money.ts'
 import { emailSchema } from '@/lib/schemas.ts'
 import { paymentDraftStore } from '@/lib/stores/payment-draft-store.ts'
@@ -31,8 +42,8 @@ import { paymentDraftStore } from '@/lib/stores/payment-draft-store.ts'
 const FALLBACK = { min: 1_000, max: 5_000_000 }
 const DESCRIPTION_MAX = 100
 const KEY_MAX = 64
-const hasControl = (s: string) =>
-  [...s].some((c) => c.charCodeAt(0) < 32 || c.charCodeAt(0) === 127)
+// Mismo criterio que noControlChars de @insieme/shared (controles y formato, p. ej. U+200B).
+const hasControl = (s: string) => /[\p{Cc}\p{Cf}]/u.test(s)
 
 const KEY_TYPE_LABEL: Record<BrebKeyType, string> = {
   phone: 'Celular',
@@ -52,6 +63,12 @@ export function maskHolder(name: string): string {
 
 export function Component() {
   const navigate = useNavigate()
+  const location = useLocation()
+  const { isLoggedIn } = useSession()
+  const [{ destino }] = useZodSearchParams(destinoSearchParamsSchema)
+  const savedDestinations = useSavedDestinations()
+  const saveDestination = useSaveDestinationMutation()
+  const updateDestination = useUpdateDestinationMutation()
   const profile = useProfileStore()
   const { product, limits, enabled, isLoading } = useMoneyProduct(
     'breb',
@@ -66,7 +83,9 @@ export function Component() {
   const [description, setDescription] = useState('')
   const [email, setEmail] = useState(profile.email)
   const [tried, setTried] = useState(false)
+  const [saveIt, setSaveIt] = useState(true)
   const rehydrated = useRef(false)
+  const appliedDestino = useRef<string | null>(null)
 
   const resolve = useBrebResolveMutation()
   const loading = resolve.isPending
@@ -100,6 +119,9 @@ export function Component() {
     if (rehydrated.current || !product) return
     rehydrated.current = true
     const draft = paymentDraftStore
+    // With ?destino, only the draft of that very round trip wins (stale drafts don't).
+    if (destino && draft.returnTo !== location.pathname + location.search)
+      return
     if (
       draft.kind !== 'breb' ||
       draft.productId !== product.id ||
@@ -113,6 +135,7 @@ export function Component() {
       setKey(d.key)
       setDescription(d.description ?? '')
       setEmail(d.email ?? '')
+      appliedDestino.current = destino ?? null
       setAmount(draft.baseAmount)
       setStep(2)
       runResolve(d.key, () => setStep(3))
@@ -121,6 +144,36 @@ export function Component() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [product])
+
+  const fromDestino =
+    savedDestinations.data?.result.find(
+      (d): d is Extract<SavedDestination, { kind: 'breb' }> =>
+        d.id === destino && d.kind === 'breb'
+    ) ?? null
+
+  // "Enviar de nuevo": prefill from the saved destination and reuse the
+  // rehydration path (re-resolve the key: holder/bank may have changed).
+  useEffect(() => {
+    if (!product || !fromDestino) return
+    if (appliedDestino.current === fromDestino.id) return
+    if (!rehydrated.current) return
+    appliedDestino.current = fromDestino.id
+    const k = fromDestino.details.key
+    setResolution(null)
+    setKey(k)
+    setDescription('')
+    setEmail(profile.email)
+    if (fromDestino.lastAmount) {
+      setAmount(fromDestino.lastAmount)
+      setStep(2)
+      runResolve(k, () => setStep(3))
+    } else {
+      setAmount(null)
+      setStep(1)
+      runResolve(k, () => setStep(2))
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [product, fromDestino])
 
   const onKey = (e: FormEvent) => {
     e.preventDefault()
@@ -197,11 +250,48 @@ export function Component() {
         ? [{ label: 'Descripción', value: details.description }]
         : [])
     ]
+    const sameDest =
+      fromDestino &&
+      fromDestino.details.key.trim().toLowerCase() === details.key.toLowerCase()
+        ? fromDestino
+        : null
+    const baseAmount = amount ?? 0
+    const onCreated = async () => {
+      if (!isLoggedIn) return
+      try {
+        if (saveIt) {
+          await saveDestination.mutateAsync({
+            kind: 'breb',
+            label:
+              sameDest?.label ??
+              (maskHolder(resolution.holderName).slice(0, 40) ||
+                details.key.slice(0, 40)),
+            details: {
+              key: details.key,
+              keyType: resolution.keyType,
+              holderName: maskHolder(resolution.holderName),
+              bank: resolution.bank
+            },
+            lastAmount: baseAmount > 0 ? baseAmount : undefined
+          })
+        } else if (sameDest) {
+          await updateDestination.mutateAsync({
+            id: sameDest.id,
+            lastUsedAt: new Date().toISOString()
+          })
+        }
+      } catch {
+        // saving the destination is best-effort; the payment goes on
+      }
+    }
     return (
       <Screen>
         <TitleBox>Transferencia Bre-B</TitleBox>
         <StepTitle n={3} text="Revisa y confirma" />
         <KeyCard resolution={resolution} />
+        {isLoggedIn ? (
+          <SaveDestinationCheckbox checked={saveIt} onChange={setSaveIt} />
+        ) : null}
         <BrandFooter />
         <ConfirmPanel
           rows={rows}
@@ -210,6 +300,7 @@ export function Component() {
           kind="breb"
           details={details}
           enabled={amountOk}
+          onCreated={onCreated}
           onBack={() => setStep(2)}
         />
       </Screen>
@@ -283,6 +374,7 @@ export function Component() {
           text="¿A qué llave Bre-B envías?"
           tip="La llave puede ser un celular, un correo, un documento o una llave alfanumérica."
         />
+        <SavedDestinationsPicker kind="breb" selectedId={destino} />
         <FloatingInput
           label="Llave Bre-B"
           name="key"

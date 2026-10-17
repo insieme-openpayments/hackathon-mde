@@ -9,6 +9,7 @@ Esta carpeta guarda los prompts reales que se usaron para construir Insieme Paym
   - `03-customer-frontend-productos.js`: Giro Efecty, Bre-B y pago real de servicios en el prototipo `customer-frontend/` (ejecutores Sonnet por archivo, verificación Opus con gsd-browser, fixers Sonnet). El prototipo se retiró del repo después (commit `ef76b86` lo contiene).
   - `04-insieme-productos-efecty-breb.js`: los mismos productos y la liquidación real de servicios en la app React (contrato Sonnet, implementación paralela Sonnet/Haiku, verificación Opus con pagos reales en la testnet, fixers Sonnet).
   - `05-pay-base-y-landing.js`: portal bajo `/pay` (compuerta Opus con pago real) y landing informativa en la raíz según `landing-brief.md`.
+  - `06-insieme-cuenta.js`: Cuenta Insieme (registro opcional, sesiones, facturas y destinos guardados, pago en un clic desde la cuenta) y su documentación, incluida la política de IA.
 - `landing-brief.md`: brief de la landing pegado por el equipo (sección 15 de `sesion-claude-code.md`); los agentes del workflow 05 lo leen verbatim.
 - `integration-backend-productos.md`: contrato de la API de `integration-backend` que el equipo pegó como prompt (sección 13 de `sesion-claude-code.md`); se pasó verbatim a los agentes del workflow 03.
 

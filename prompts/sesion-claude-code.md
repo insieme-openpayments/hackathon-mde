@@ -1,7 +1,7 @@
 # Prompts de la sesión con Claude Code (Claude Fable 5.1)
 
 Registro literal de los mensajes enviados por el equipo a Claude Code para construir este
-repositorio, en orden cronológico (16 de octubre de 2026). Los prompts que Claude Code generó
+repositorio, en orden cronológico (16 y 17 de octubre de 2026). Los prompts que Claude Code generó
 para sus subagentes (workflows) están en `prompts/workflows/`.
 
 ## 1. Fork inicial
@@ -144,3 +144,17 @@ estructura de 8 secciones, los dos botones, seis personajes e historias, identid
 requisitos técnicos, entregables y criterios de aceptación). Texto íntegro en
 `prompts/landing-brief.md`; se pasó tal cual a los agentes del workflow
 `prompts/workflows/05-pay-base-y-landing.js`.]
+
+## 16. Cuenta opcional y destinos guardados (17 oct 2026)
+
+> El registro del usuario es opcional y al hacerlo se habilita el registro de facturas conocidas, además se debe poder guardar los datos de envíos a Bre-B o Giros en efectivo, haciendo que futuros envíos sean a un clic seleccionando un destino ya conocido y, de estar configurado, el grant ya concedido de Interledger. Para el registro se requieren datos básicos como nombre, ID, correo, y número celular.
+
+## 17. Registro sin validación de datos (17 oct 2026)
+
+> Al ser una versión sobre wallet test y en el marco del hackathon, el registro finaliza con el usuario ingresando un pasword nuevo y su confirmación, pero ningún dato se valida (no se valida email, teléfono, o KYC sobre el national ID/passport).
+
+## 18. Chunk obsoleto tras un deploy (17 oct 2026)
+
+> durante tests, al visitar http://localhost:4004/pay/servicios/categoria/gas obtuve un error que requiere identificar la causa para hacer un fix: Unexpected Application Error! Failed to fetch dynamically imported module: http://localhost:4004/pay/assets/categoria-CeM0q_UA.js
+
+Corregido en el commit `0a84884`: `errorElement` con recarga única y `Cache-Control: no-cache` para `index.html`, `immutable` para `/pay/assets/`.

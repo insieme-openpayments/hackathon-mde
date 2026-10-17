@@ -10,10 +10,14 @@ import {
   TitleBox
 } from '@/components/insieme'
 import { useCatalogQuery } from '@/hooks/use-catalog-query.ts'
-import { useFacturasStore } from '@/hooks/use-facturas-store.ts'
-import { removeFactura } from '@/lib/stores/facturas-store.ts'
+import {
+  useFacturaActions,
+  useFacturasStore
+} from '@/hooks/use-facturas-store.ts'
+import { toast } from '@/hooks/use-toast.tsx'
 import { cn } from '@/lib/utils.ts'
 import { ActionButton } from './components/buttons.tsx'
+import { useQueryClient } from '@tanstack/react-query'
 import { FacturaCard } from './components/factura-card.tsx'
 
 type Tab = 'on' | 'off'
@@ -21,7 +25,9 @@ type Tab = 'on' | 'off'
 export function Component() {
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
-  const { items } = useFacturasStore()
+  const { items, isLoading: loadingBills, isError } = useFacturasStore()
+  const queryClient = useQueryClient()
+  const { removeFactura, removing } = useFacturaActions()
   const { data, isLoading } = useCatalogQuery()
   const [delId, setDelId] = useState<string | null>(null)
   const [delDone, setDelDone] = useState(false)
@@ -62,9 +68,20 @@ export function Component() {
             <ActionButton
               tone="yes"
               onClick={() => {
+                if (removing) return
                 removeFactura(delId)
-                setDelId(null)
-                setDelDone(true)
+                  .then(() => {
+                    setDelId(null)
+                    setDelDone(true)
+                  })
+                  .catch(() => {
+                    setDelId(null)
+                    toast({
+                      variant: 'error',
+                      description:
+                        'No pudimos eliminar la factura. Inténtalo de nuevo.'
+                    })
+                  })
               }}
             >
               Si
@@ -79,10 +96,51 @@ export function Component() {
     )
   }
 
+  if (loadingBills) {
+    return (
+      <Screen>
+        <TitleBox>Mis facturas</TitleBox>
+        <div className="h-28 w-full animate-pulse rounded-2xl bg-brand-soft" />
+        <BrandFooter />
+      </Screen>
+    )
+  }
+
+  if (isError && items.length === 0) {
+    return (
+      <Screen>
+        <TitleBox>Mis facturas</TitleBox>
+        <div
+          role="alert"
+          className="flex w-full flex-col items-start gap-3 rounded-2xl border border-magenta bg-white p-4 text-sm text-neutral-darker"
+        >
+          <p>
+            No pudimos cargar tus facturas guardadas. Revisa tu conexión e
+            intenta de nuevo.
+          </p>
+          <ActionButton
+            tone="active"
+            onClick={() =>
+              void queryClient.invalidateQueries({
+                queryKey: ['me', 'bills']
+              })
+            }
+          >
+            Reintentar
+          </ActionButton>
+        </div>
+        <Actions>
+          <BackButton onClick={() => navigate('/')} />
+        </Actions>
+        <BrandFooter />
+      </Screen>
+    )
+  }
+
   if (items.length === 0) {
     return (
       <Screen>
-        <TitleBox>Facturas guardadas</TitleBox>
+        <TitleBox>Mis facturas</TitleBox>
         <div className="flex w-full flex-col items-center gap-3 rounded-2xl border border-brand-soft-active bg-white p-6 text-center shadow-soft">
           <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-soft">
             <img
@@ -127,7 +185,7 @@ export function Component() {
 
   return (
     <Screen>
-      <TitleBox>Facturas guardadas</TitleBox>
+      <TitleBox>Mis facturas</TitleBox>
       <div role="tablist" className="flex w-full flex-col">
         <div className="flex w-full">
           {(

@@ -21,11 +21,7 @@ export const catalogQuerySchema = z.object({
   category: z.string().min(1).optional()
 })
 
-const noControlChars = (s: string) =>
-  ![...s].some((c) => {
-    const code = c.charCodeAt(0)
-    return code < 32 || code === 127
-  })
+const noControlChars = (s: string) => !/[\p{Cc}\p{Cf}]/u.test(s)
 const CONTROL_MSG = { message: 'Caracteres no permitidos' }
 
 export const orderDetailsSchema = z.object({
@@ -63,7 +59,7 @@ export const efectyQuoteSchema = z.object({
     .string()
     .trim()
     .min(1, { message: 'Ingresa el nombre del beneficiario' })
-    .max(80)
+    .max(80, 'El nombre no puede superar 80 caracteres')
     .refine(noControlChars, CONTROL_MSG),
   recipientPhone: z
     .string()
@@ -80,7 +76,7 @@ export const brebResolveSchema = z.object({
     .string()
     .trim()
     .min(1, { message: 'Ingresa la llave Bre-B' })
-    .max(64)
+    .max(64, 'La llave no puede superar 64 caracteres')
     .refine(noControlChars, CONTROL_MSG)
 })
 

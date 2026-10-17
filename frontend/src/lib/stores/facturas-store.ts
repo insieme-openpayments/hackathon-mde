@@ -1,5 +1,6 @@
 // Saved invoices ("Facturas guardadas"), persisted under 'mb-facturas'.
-// Owner: P2 (data-stores).
+// Since accounts, the source of truth is the server (GET /me/bills); this
+// local store only holds legacy items waiting for the one-time import.
 import { z } from 'zod'
 import { valtioPersist } from '../valtio-persist'
 import { loadGuard } from './load-guard'
@@ -42,40 +43,13 @@ export const facturasStore = valtioPersist<FacturasState>(KEY, {
   items: []
 })
 
-export function getFactura(id: string): FacturaItem | undefined {
-  return facturasStore.items.find((item) => item.id === id)
+/**
+ * Legacy local items (before accounts). With a session the server is the
+ * source of truth; these are only imported once and then cleared.
+ */
+export function clearLocalFacturas(): void {
+  facturasStore.items = []
 }
-
-export function addFactura(item: Omit<FacturaItem, 'id'>): FacturaItem {
-  const created: FacturaItem = {
-    ...item,
-    id: crypto.randomUUID()
-  }
-  facturasStore.items.push(created)
-  return created
-}
-
-export function updateFactura(id: string, patch: Partial<FacturaItem>): void {
-  const item = facturasStore.items.find((i) => i.id === id)
-  if (item) Object.assign(item, patch)
-}
-
-export function removeFactura(id: string): void {
-  facturasStore.items = facturasStore.items.filter((i) => i.id !== id)
-}
-
-/** Records the last payment date/amount on a saved invoice. */
-export function markPaid(id: string, amount: number, date: string): void {
-  updateFactura(id, { lastPay: date, amount })
-}
-
-/** Alias of `updateFactura(id, { name })`. */
-export function renameFactura(id: string, name: string): void {
-  updateFactura(id, { name })
-}
-
-/** Alias of `removeFactura`. */
-export const deleteFactura = removeFactura
 
 /** A saved invoice is payable only while its convenio exists in the catalog. */
 export function isFacturaAvailable(

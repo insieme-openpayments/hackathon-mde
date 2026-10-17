@@ -36,6 +36,24 @@ import {
   type ISettlementService
 } from './settlement/service'
 import { CatalogSyncService, type ICatalogSyncService } from './catalog/sync'
+import { AuthService, type IAuthService } from './auth/service'
+import { AuthController, type IAuthController } from './auth/controller'
+import {
+  SavedBillService,
+  type ISavedBillService
+} from './account/bill-service'
+import {
+  SavedDestinationService,
+  type ISavedDestinationService
+} from './account/destination-service'
+import {
+  MeController,
+  SavedBillController,
+  SavedDestinationController,
+  type IMeController,
+  type ISavedBillController,
+  type ISavedDestinationController
+} from './account/controllers'
 import { generateLogger } from '@/config/logger'
 import { generateKnex } from '@/config/knex'
 import { asClassSingletonWithLogger, InMemoryCache } from '@/lib'
@@ -62,6 +80,13 @@ export interface Cradle {
   moneyController: IMoneyController
   catalogSyncService: ICatalogSyncService
   settlementService: ISettlementService
+  authService: IAuthService
+  authController: IAuthController
+  savedBillService: ISavedBillService
+  savedBillController: ISavedBillController
+  savedDestinationService: ISavedDestinationService
+  savedDestinationController: ISavedDestinationController
+  meController: IMeController
 }
 
 export async function createContainer(
@@ -108,7 +133,14 @@ export async function createContainer(
     moneyService: asClassSingletonWithLogger(MoneyService, logger),
     moneyController: asClassSingletonWithLogger(MoneyController, logger),
     catalogSyncService: asClassSingletonWithLogger(CatalogSyncService, logger),
-    settlementService: asClassSingletonWithLogger(SettlementService, logger)
+    settlementService: asClassSingletonWithLogger(SettlementService, logger),
+    authService: asClassSingletonWithLogger(AuthService, logger),
+    authController: asClass(AuthController).singleton(),
+    savedBillService: asClass(SavedBillService).singleton(),
+    savedBillController: asClass(SavedBillController).singleton(),
+    savedDestinationService: asClass(SavedDestinationService).singleton(),
+    savedDestinationController: asClass(SavedDestinationController).singleton(),
+    meController: asClass(MeController).singleton()
   })
 
   return container

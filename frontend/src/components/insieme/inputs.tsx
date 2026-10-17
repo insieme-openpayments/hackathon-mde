@@ -44,6 +44,7 @@ export const FloatingInput = forwardRef<HTMLInputElement, FloatingInputProps>(
     const contextError = useContextError(name)
     const message = error ?? contextError
     const errorId = `${inputId}-error`
+    const labelId = `${inputId}-label`
 
     return (
       <div className={cn('flex w-full flex-col gap-1', className)}>
@@ -64,6 +65,7 @@ export const FloatingInput = forwardRef<HTMLInputElement, FloatingInputProps>(
               id={inputId}
               name={name}
               readOnly={readOnly}
+              aria-labelledby={labelId}
               aria-invalid={message ? true : undefined}
               aria-describedby={message ? errorId : undefined}
               className={cn(
@@ -75,6 +77,7 @@ export const FloatingInput = forwardRef<HTMLInputElement, FloatingInputProps>(
             {trailing}
           </label>
           <span
+            id={labelId}
             className={cn(
               'pointer-events-none absolute -top-2 left-3 flex h-4 items-center whitespace-nowrap rounded px-1 text-2xs font-semibold leading-none',
               message ? 'text-magenta' : 'text-brand',

@@ -3,8 +3,7 @@ import { SuccessResponse } from '@/lib/types.ts'
 import { UseMutationOptions } from '@tanstack/react-query'
 import { z } from 'zod'
 import { useCustomMutation } from './use-custom-mutation.ts'
-import { TokenState } from '@/lib/stores/token-store.ts'
-import { finishOrderSchema } from '@insieme/shared'
+import { finishOrderSchema, type SetupFinishResponse } from '@insieme/shared'
 
 type FinishSetupMutationParams = z.infer<typeof finishSetupSchema>
 
@@ -14,7 +13,7 @@ export const finishSetupSchema = finishOrderSchema.extend({
 
 export function useFinishSetupMutation(
   options?: UseMutationOptions<
-    SuccessResponse<TokenState>,
+    SuccessResponse<SetupFinishResponse>,
     APIError<z.infer<typeof finishSetupSchema>>,
     FinishSetupMutationParams
   >
