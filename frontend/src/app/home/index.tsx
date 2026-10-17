@@ -99,11 +99,11 @@ export function Component() {
               Paga los servicios de tu familia en Colombia
             </h1>
             <p className="mt-2 text-2xs leading-relaxed text-white/85">
-              Desde cualquier lugar, con tu billetera Interledger. Sin registro:
-              solo ingresa tu billetera al pagar.
+              Desde cualquier lugar, con tu billetera Interledger.
             </p>
             <p className="mt-3 text-3xs font-medium text-accent">
-              Insieme significa “juntos”: tú &amp; tu familia, siempre unidos.
+              Insieme significa “juntos”: tú &amp; tu familia sintiéndose unidos
+              a la distancia.
             </p>
           </div>
         </div>
