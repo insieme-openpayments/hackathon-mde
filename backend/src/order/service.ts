@@ -30,6 +30,11 @@ export interface IOrderService {
   complete: (id: string, trx?: TransactionOrKnex) => Promise<Order | undefined>
   reject: (id: string, trx?: TransactionOrKnex) => Promise<Order | undefined>
   fail: (id: string, trx?: TransactionOrKnex) => Promise<Order | undefined>
+  addEvent: (
+    id: string,
+    message: string,
+    trx?: TransactionOrKnex
+  ) => Promise<void>
 }
 
 export class OrderService implements IOrderService {
@@ -56,7 +61,9 @@ export class OrderService implements IOrderService {
   public async get(id: string, userId?: string): Promise<Order> {
     const row = Order.query()
       .findById(id)
-      .withGraphFetched('[orderItems.product, payments(publicColumns)]')
+      .withGraphFetched(
+        '[orderItems.product, payments(publicColumns), settlement]'
+      )
       .modifiers({
         publicColumns: (builder) => {
           builder.select(PUBLIC_PAYMENT_COLUMNS)
@@ -106,6 +113,23 @@ export class OrderService implements IOrderService {
     trx?: TransactionOrKnex
   ): Promise<Order | undefined> {
     return await this.updateOrderStatus(id, OrderStatus.FAILED, trx)
+  }
+
+  /** Appends {at, message} to orders.events atomically (safe under concurrency). */
+  public async addEvent(
+    id: string,
+    message: string,
+    trx?: TransactionOrKnex
+  ): Promise<void> {
+    const db = trx ?? Order.knex()
+    const event = { at: new Date().toISOString(), message }
+    await db('orders')
+      .where({ id })
+      .update({
+        events: db.raw(`COALESCE("events", '[]'::jsonb) || ?::jsonb`, [
+          JSON.stringify([event])
+        ])
+      })
   }
 
   private async updateOrderStatus(

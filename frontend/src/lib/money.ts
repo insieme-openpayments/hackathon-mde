@@ -12,12 +12,12 @@ export const digits = (s: string | null | undefined): string =>
 
 const pad = (n: number) => String(n).padStart(2, '0')
 
-/** "DD/MM/YYYY HH:mm:ss" (prototype `now()` format). */
+/** "dd/mm/yyyy H:mm" (prototype `now()` format). */
 export function formatDateTime(value?: string | Date | null): string {
   const d = value ? new Date(value) : new Date()
   if (Number.isNaN(d.getTime())) return '—'
-  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`
+  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()} ${d.getHours()}:${pad(d.getMinutes())}`
 }
 
-/** "DD/MM/YYYY". */
+/** "dd/mm/yyyy". */
 export const today = (): string => formatDateTime().split(' ')[0]

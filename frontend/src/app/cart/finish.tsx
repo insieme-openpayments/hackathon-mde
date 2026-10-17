@@ -30,7 +30,7 @@ export function Component() {
       }
     )
     const redirectTimer = setTimeout(
-      () => navigate(paymentDraftStore.returnTo || '/'),
+      () => navigate(paymentDraftStore.returnTo || '/servicios'),
       3000
     )
     return () => {
@@ -41,11 +41,11 @@ export function Component() {
 
   if (data) {
     let color: string = 'text-success'
-    let text: string = 'Pago en un clic configurado con éxito'
+    let text: string = '¡Pago en un clic configurado!'
 
     if (result === 'grant_rejected') {
       color = 'text-magenta'
-      text = 'Se canceló la configuración del pago en un clic.'
+      text = 'La configuración de pago en un clic fue cancelada.'
     }
 
     return (
@@ -56,13 +56,13 @@ export function Component() {
         )}
       >
         <h1 className={`${color} text-lg font-semibold`}>{text}</h1>
-        <p className="font-semibold">Volviendo a tu pago ...</p>
+        <p className="font-semibold">Volviendo a tu pago…</p>
       </div>
     )
   }
 
   if (error) {
-    return <Navigate to={paymentDraftStore.returnTo || '/'} />
+    return <Navigate to="/" />
   }
 
   return <Loader />

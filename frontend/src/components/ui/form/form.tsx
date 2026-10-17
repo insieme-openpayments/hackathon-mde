@@ -53,11 +53,11 @@ const FormError = () => {
   }
 
   return (
-    <div className="mb-4 flex space-x-4 rounded-lg bg-red-100 px-4 py-3 shadow-md">
+    <div className="mb-4 flex space-x-4 rounded-lg bg-magenta/10 px-4 py-3">
       <div className="flex-shrink-0">
-        <XCircle className="h-6 w-6 text-red-400" />
+        <XCircle className="h-6 w-6 text-magenta" />
       </div>
-      <p className="font-medium text-red-400">{message}</p>
+      <p className="text-sm font-medium text-magenta">{message}</p>
     </div>
   )
 }

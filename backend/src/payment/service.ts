@@ -5,6 +5,7 @@ import { IOpenPayments } from '@/open-payments/service'
 import { IncomingPayment } from '@interledger/open-payments'
 import { TransactionOrKnex } from 'objection'
 import { IOrderService } from '@/order/service'
+import { ISettlementService } from '@/settlement/service'
 import { InternalServerError } from '@/lib'
 
 export interface IPaymentService {
@@ -22,7 +23,8 @@ export class PaymentService implements IPaymentService {
     private logger: Logger,
     private knex: Knex,
     private openPayments: IOpenPayments,
-    private orderService: IOrderService
+    private orderService: IOrderService,
+    private settlementService: ISettlementService
   ) {}
 
   public async get(id: string) {
@@ -37,8 +39,31 @@ export class PaymentService implements IPaymentService {
   public async complete(payment: Payment, trx?: TransactionOrKnex) {
     await Promise.all([
       this.updatePaymentStatus(payment.id, PaymentStatus.COMPLETED, trx),
-      this.orderService.complete(payment.orderId, trx)
+      this.orderService.complete(payment.orderId, trx),
+      this.orderService.addEvent(
+        payment.orderId,
+        'Fondos recibidos en la billetera de recaudo (incoming payment completado)',
+        trx
+      )
     ])
+    this.settleAfterCommit(payment.orderId, trx)
+  }
+
+  /** Settlement runs outside the transaction: only after it has committed. */
+  private settleAfterCommit(orderId: string, trx?: TransactionOrKnex) {
+    const run = () =>
+      this.settlementService.settle({ id: orderId }).catch((err) => {
+        this.logger.error(`Settlement of order ${orderId} failed`)
+        this.logger.error(err)
+      })
+    const executionPromise = (
+      trx as { executionPromise?: Promise<unknown> } | undefined
+    )?.executionPromise
+    if (executionPromise) {
+      executionPromise.then(run, () => undefined)
+    } else {
+      void run()
+    }
   }
 
   public async fail(payment: Payment, trx?: TransactionOrKnex): Promise<void> {

@@ -111,6 +111,9 @@ export class App {
     router.patch('/orders/:id', orderController.finish)
     router.get('/orders/:id', orderController.get)
 
+    // Internal only (no auth): exposes the provider that executed each payment
+    router.get('/admin/orders', orderController.admin)
+
     router.use('*', (req: Request, res: TypedResponse) => {
       const e = Error(`Requested path ${req.path} was not found.`)
 
@@ -153,8 +156,19 @@ export class App {
     setTimeout(() => this.processOneClickCache(), 5000).unref()
   }
 
+  private async processSettlements() {
+    const settlementService = this.container.resolve('settlementService')
+    const logger = this.container.resolve('logger')
+    await settlementService.retryPending().catch((err) => {
+      logger.error('Error while retrying pending settlements')
+      logger.error(err)
+    })
+    setTimeout(() => this.processSettlements(), 10000).unref()
+  }
+
   async processResources() {
     process.nextTick(() => this.processPendingPayments())
     process.nextTick(() => this.processOneClickCache())
+    process.nextTick(() => this.processSettlements())
   }
 }

@@ -1,1 +1,51 @@
 # Insieme Frontend
+
+SPA React 18 + Vite + Tailwind + react-query + valtio. Paquete `@insieme/frontend`.
+
+Migra las pantallas del prototipo `customer-frontend/` (Pago de servicios y Facturas guardadas) a React. La especificación de contratos está en [src/CONTRACTS.md](src/CONTRACTS.md).
+
+## Scripts
+
+Desde la raíz del repo (`pnpm --filter @insieme/frontend <script>`):
+
+| Script    | Qué hace                                                                 |
+| --------- | ------------------------------------------------------------------------ |
+| `dev`     | Servidor de desarrollo de Vite (puerto 4004)                             |
+| `build`   | Compila `shared`, comprueba tipos con `tsc` y construye con `vite build` |
+| `preview` | Sirve el build de producción                                             |
+
+## Variables de entorno
+
+Van en `frontend/.env.local` (en `.gitignore`). Plantilla: `frontend/.env.example`.
+
+| Variable            | Descripción                                                                 |
+| ------------------- | --------------------------------------------------------------------------- |
+| `VITE_API_BASE_URL` | URL del backend (por defecto `http://localhost:3004`)                       |
+| `VITE_THEME`        | Tema (por defecto `light`; el diseño solo tiene tema claro)                 |
+| `VITE_CURRENCY`     | Moneda de respaldo si `GET /config` falla; la moneda real viene del backend |
+
+En despliegue, `window.__env__` (`API_BASE_URL`, `THEME`, `CURRENCY`) tiene prioridad sobre las variables de build.
+
+## Rutas
+
+| Ruta                                                                                                | Pantalla                                                       |
+| --------------------------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| `/`                                                                                                 | Home (solo "Pago de servicios" activo; el resto dice "Pronto") |
+| `/servicios`                                                                                        | Buscador, 12 categorías y tarjeta de Facturas                  |
+| `/servicios/categoria/:categoryId`                                                                  | Convenios de una categoría                                     |
+| `/servicios/pagar/:productId?ref1=`                                                                 | Pagar un servicio: consulta de referencia y confirmación       |
+| `/facturas`, `/facturas/nueva`, `/facturas/guardada`, `/facturas/:id/editar`, `/facturas/:id/pagar` | Facturas guardadas                                             |
+| `/checkout/confirmation`                                                                            | Vuelta de Open Payments: tracker del estado y comprobante      |
+| `/cart/finish`                                                                                      | Vuelta de la configuración de pago en un clic                  |
+
+Las rutas `/checkout/confirmation` y `/cart/finish` son fijas: el backend las envía a Open Payments.
+
+## Estructura
+
+- `src/app/`: pantallas por ruta.
+- `src/components/insieme/`: componentes del diseño (espejo de `App.ui` del prototipo).
+- `src/components/payment/`: panel de confirmación y configuración de pago en un clic.
+- `src/components/ui/`: primitivas (Radix + Tailwind).
+- `src/hooks/`: consultas y mutaciones de react-query contra el backend.
+- `src/lib/stores/`: estado persistido (borrador de pago, facturas guardadas, perfil, token).
+- `src/lib/money.ts`, `src/lib/assets.ts`: formato de montos y recursos.

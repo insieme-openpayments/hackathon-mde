@@ -1,6 +1,7 @@
 import { NextFunction, Request } from 'express'
 import { IOrderService } from './service'
-import { Order } from './model'
+import { Order, type OrderEvent } from './model'
+import type { ProviderAttempt } from '@/settlement/providers'
 import {
   BadRequest,
   Unauthorized,
@@ -24,6 +25,17 @@ import {
 import { OpenPaymentsClientError } from '@interledger/open-payments'
 import type { OrderItemInput } from '@insieme/shared'
 import { IBillService, type PricedOrderItem } from '@/bill/service'
+
+export interface AdminOrder {
+  id: string
+  status: string
+  settlement: {
+    provider: string | null
+    authCode: string | null
+    attempts: ProviderAttempt[]
+  } | null
+  events: OrderEvent[]
+}
 
 interface GetParams {
   id?: string
@@ -49,6 +61,7 @@ export interface IOrderController {
   setup: Controller<CreateResponse>
   setupFinish: Controller<TokenInfo>
   instantBuy: Controller<InstantBuyResponse>
+  admin: Controller<AdminOrder[]>
 }
 
 export class OrderController implements IOrderController {
@@ -70,6 +83,11 @@ export class OrderController implements IOrderController {
     }
     return await Order.transaction(async (trx) => {
       const newOrder = await this.orderService.create({ orderItems }, trx)
+      await this.orderService.addEvent(
+        newOrder.id,
+        'Cobro creado; esperando autorización del pagador',
+        trx
+      )
       return await newOrder.calculateTotalAmount(trx)
     })
   }
@@ -156,9 +174,42 @@ export class OrderController implements IOrderController {
         interactNonce: order.payments.interactNonce,
         walletAddressUrl: order.payments.walletAddress
       })
+      await this.orderService.addEvent(
+        orderId,
+        'Pagador autorizó; ejecutando pago saliente'
+      )
       await this.openPayments.createOutgoingPayment(order, interactRef)
 
       res.status(200).json({ success: true, message: 'SUCCESS' })
+    } catch (err) {
+      next(err)
+    }
+  }
+
+  /** Internal, unauthenticated view of settlements (provider, attempts, events). */
+  admin = async (
+    _req: Request,
+    res: TypedResponse<AdminOrder[]>,
+    next: NextFunction
+  ) => {
+    try {
+      const orders = await Order.query()
+        .withGraphFetched('settlement')
+        .orderBy('createdAt', 'desc')
+        .limit(100)
+      const result: AdminOrder[] = orders.reverse().map((o) => ({
+        id: o.id,
+        status: o.status,
+        settlement: o.settlement
+          ? {
+              provider: o.settlement.provider,
+              authCode: o.settlement.authCode,
+              attempts: o.settlement.attempts
+            }
+          : null,
+        events: o.events
+      }))
+      res.status(200).json(toSuccessResponse(result))
     } catch (err) {
       next(err)
     }

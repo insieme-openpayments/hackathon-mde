@@ -1,3 +1,4 @@
+import { useState, type ReactNode } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -13,16 +14,35 @@ import { getObjectKeys } from '@/lib/utils'
 import { useSetupOneClickMutation } from '@/hooks/use-setup-one-click-mutation'
 import { oneClickSetupSchema } from '@insieme/shared'
 
-export const OneClickSetupDialog = ({
-  buttonClassName
-}: {
+export interface OneClickSetupDialogProps {
+  /** Classes for the default trigger button. */
   buttonClassName?: string
-}) => {
+  /** Custom trigger element (rendered with `asChild`). */
+  trigger?: ReactNode
+  /** Prefills the "Billetera" field. */
+  defaultWalletAddressUrl?: string
+  /** Runs right before redirecting to the wallet (write the payment draft). */
+  onBeforeRedirect?: () => void
+}
+
+export const OneClickSetupDialog = ({
+  buttonClassName,
+  trigger,
+  defaultWalletAddressUrl,
+  onBeforeRedirect
+}: OneClickSetupDialogProps) => {
+  const [redirecting, setRedirecting] = useState(false)
   const form = useZodForm({
-    schema: oneClickSetupSchema
+    schema: oneClickSetupSchema,
+    defaultValues: { walletAddressUrl: defaultWalletAddressUrl ?? '' }
   })
 
-  const { mutate, data, isPending, isSuccess } = useSetupOneClickMutation({
+  const { mutate, isPending } = useSetupOneClickMutation({
+    onSuccess: function ({ result }) {
+      setRedirecting(true)
+      onBeforeRedirect?.()
+      window.location.href = result.redirectUrl
+    },
     onError: function ({ message, errors }) {
       if (errors) {
         getObjectKeys(errors).map((field) =>
@@ -36,23 +56,25 @@ export const OneClickSetupDialog = ({
     }
   })
 
-  if (data?.result.redirectUrl) {
-    window.location.href = data.result.redirectUrl
-  }
-
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button aria-label="setup one click buy" className={buttonClassName}>
-          Setup One Click Buy
-        </Button>
+        {trigger ?? (
+          <Button
+            type="button"
+            aria-label="Configurar pago en un clic"
+            className={buttonClassName}
+          >
+            Configurar pago en un clic
+          </Button>
+        )}
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>One Click Buy Setup</DialogTitle>
+          <DialogTitle>Pago en un clic</DialogTitle>
           <Form
             form={form}
-            disabled={form.formState.isSubmitting || isPending || isSuccess}
+            disabled={form.formState.isSubmitting || isPending || redirecting}
             onSubmit={form.handleSubmit(({ walletAddressUrl, amount }) => {
               mutate({
                 walletAddressUrl,
@@ -62,24 +84,24 @@ export const OneClickSetupDialog = ({
             className="py-4"
           >
             <InputField
-              label="Wallet address"
+              label="Billetera"
               {...form.register('walletAddressUrl')}
               className="w-full"
             />
             <InputField
               inputMode="numeric"
-              label="Amount"
-              step="0.01"
+              label="Monto máximo"
+              step="any"
               type="number"
               {...form.register('amount')}
-              placeholder="0.00"
+              placeholder="0"
             />
             <Button
-              aria-label="submit"
+              aria-label="Configurar"
               className="mt-5 w-full"
-              disabled={isPending}
+              disabled={isPending || redirecting}
             >
-              Setup
+              Configurar
             </Button>
           </Form>
         </DialogHeader>

@@ -36,6 +36,7 @@ const envSchema = z.object({
   PRIVATE_KEY: base64String,
   USE_HTTP_FOR_OPEN_PAYMENTS: z.boolean().optional(),
   INTEGRATION_API_URL: z.string().trim().url().optional(),
+  SIM_FAIL_PROVIDER: z.string().trim().optional(),
   INTEGRATION_API_KEY: z.string().trim().min(1).default('insieme-dev-key')
 })
 

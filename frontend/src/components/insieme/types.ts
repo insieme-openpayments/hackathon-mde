@@ -36,11 +36,19 @@ export interface TipProps extends ClassNameProp {
 }
 
 export interface FloatingInputProps
-  extends Omit<InputHTMLAttributes<HTMLInputElement>, 'placeholder'> {
+  extends InputHTMLAttributes<HTMLInputElement> {
   label: string
+  /**
+   * Error message. When omitted, the message is read from the surrounding
+   * react-hook-form context (`formState.errors[name]`), if any.
+   */
   error?: string
+  /** Element shown at the start of the field (icon). */
+  leading?: ReactNode
   /** Element shown at the end of the field (icon, button). */
   trailing?: ReactNode
+  /** Dimmed (50% opacity) look, used for locked fields. */
+  dim?: boolean
 }
 
 export interface MoneyInputProps extends ClassNameProp {
@@ -51,8 +59,11 @@ export interface MoneyInputProps extends ClassNameProp {
   error?: string
   disabled?: boolean
   readOnly?: boolean
+  dim?: boolean
+  trailing?: ReactNode
   name?: string
   id?: string
+  onBlur?: () => void
 }
 
 export interface SearchInputProps extends ClassNameProp {
@@ -63,18 +74,24 @@ export interface SearchInputProps extends ClassNameProp {
 
 export interface CategoryCardProps extends ClassNameProp {
   category: Category
-  onSelect: (categoryId: string) => void
+  /** Omit (or use variant "plain") for a non-interactive card. */
+  onSelect?: (categoryId: string) => void
+  /** plain: centered, borderless header card. selected: highlighted. */
+  variant?: 'default' | 'plain' | 'selected'
 }
 
 export interface CategoryGridProps extends ClassNameProp {
   categories: Category[]
   onSelect: (categoryId: string) => void
+  selectedId?: string | null
 }
 
 export interface CompanyLogoProps extends ClassNameProp {
   name: string
   /** Catalog `logo` path (relative to GET /images/) or null for initials. */
   logo: string | null
+  /** metadata.logoFit of the product: contain, cover, icetex, ... */
+  fit?: string | null
 }
 
 export interface CompanyRowProps extends ClassNameProp {
@@ -100,6 +117,8 @@ export interface KvRow {
   label: string
   value: ReactNode
   className?: string
+  /** success: value in green (e.g. approved status). */
+  tone?: 'success'
 }
 
 export interface KvRowsProps extends ClassNameProp {
@@ -107,7 +126,16 @@ export interface KvRowsProps extends ClassNameProp {
 }
 
 export type ProcessedByProps = ClassNameProp
-export type BankBlockProps = ClassNameProp
+export interface BankBlockProps extends ClassNameProp {
+  /** servicios: toggle is interactive. facturas: static arrow. */
+  variant?: 'servicios' | 'facturas'
+  /** Controlled open state (the grey "Entidad financiera" block). */
+  open?: boolean
+  defaultOpen?: boolean
+  onOpenChange?: (open: boolean) => void
+  /** Centers the fine print (receipt). */
+  center?: boolean
+}
 
 export interface ReceiptProps extends ClassNameProp {
   /** e.g. "¡Transacción exitosa!" */

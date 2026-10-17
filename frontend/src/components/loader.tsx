@@ -2,17 +2,15 @@ import { motion } from 'framer-motion'
 
 export function Loader() {
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center gap-y-10">
+    <div className="absolute inset-0 flex flex-col items-center justify-center gap-y-4">
       <motion.div
-        className="h-24 w-24 rounded-full border-[16px] border-gray-200 border-t-turqoise"
+        role="status"
+        aria-label="Procesando"
+        className="h-[22px] w-[22px] rounded-full border-2 border-blue-light-hover border-t-blue-normal"
         animate={{ rotate: 360 }}
-        transition={{
-          repeat: Infinity,
-          ease: 'linear',
-          duration: 1
-        }}
+        transition={{ repeat: Infinity, ease: 'linear', duration: 0.8 }}
       />
-      <h2 className="text-2xl uppercase">Processing...</h2>
+      <h2 className="text-sm text-neutral-darker">Procesando...</h2>
     </div>
   )
 }

@@ -120,3 +120,15 @@ export interface InstantBuyResponse {
   walletAddressUrl: string
   orderId: string
 }
+
+/** GET /admin/orders (internal, unauthenticated): the only place the executing provider is exposed */
+export interface AdminOrder {
+  id: string
+  status: OrderStatus
+  settlement: {
+    provider: string | null
+    authCode: string | null
+    attempts: Array<{ provider: string; error: string }>
+  } | null
+  events: Array<{ at: string; message: string }>
+}

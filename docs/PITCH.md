@@ -1,0 +1,14 @@
+# Guion de pitch (5 minutos)
+
+**Objetivo:** que el jurado entienda el problema, vea un pago real de extremo a extremo y sepa qué es real y qué es simulado.
+
+| Minuto    | Qué se dice                                                                                                                                                                                   | Qué se muestra                                                                      |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
+| 0:00–0:45 | "Un colombiano en el exterior paga la luz de su mamá con una remesa. Ella recibe efectivo y tiene que ir a pagar. Insieme manda el dinero directo a la obligación."                           | Home con "Pago de servicios"                                                        |
+| 0:45–1:30 | Cómo funciona: autorizas con tu billetera Open Payments un monto exacto. Insieme cobra en COP y libera el pago solo cuando el dinero llegó.                                                   | Servicios, categoría, Vanti                                                         |
+| 1:30–2:30 | La factura se consulta en vivo: titular, concepto y vencimiento. El monto lo fija el servidor, no el formulario.                                                                              | Referencia `123456`, Consultar, panel con titular y vence                           |
+| 2:30–3:30 | Confirmas con tu billetera, el grant aparece en el consentimiento de Open Payments y vuelves a Insieme.                                                                                       | Billetera `$ilp.interledger-test.dev/91b7c20f`, consentimiento                      |
+| 3:30–4:15 | El tracker avanza: autoriza, mueve el dinero, fondos recibidos, factura pagada en Colombia.                                                                                                   | Tracker hasta "Factura pagada en Colombia"                                          |
+| 4:15–5:00 | Comprobante con autorización del recaudo. Lo honesto: el catálogo, las facturas y las redes de recaudo son simulados tras interfaces reales. Lo real es Open Payments y la condición de pago. | Comprobante con Estado "Aprobada"; cierre con la tabla de [README.md](../README.md) |
+
+**Preguntas probables.** ¿Qué pasa si la liquidación falla? La orden queda `SETTLEMENT_FAILED` y el dinero queda registrado; no hay reembolso automático todavía. ¿Quién puede pagar en nombre de otro? Cualquiera con la referencia y una billetera; no hay autenticación en esta versión. ¿Por qué el monto es aleatorio? Lo simula el integration-backend del equipo; el backend lo fija y lo cobra tal cual.

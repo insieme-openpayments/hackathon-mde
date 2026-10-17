@@ -10,7 +10,10 @@ const TabsList = forwardRef<
 >(({ className, ...props }, ref) => (
   <TabsPrimitive.List
     ref={ref}
-    className={cn('flex gap-4 flex-wrap', className)}
+    className={cn(
+      'flex w-full border-b-4 border-neutral-light-active py-0',
+      className
+    )}
     {...props}
   />
 ))
@@ -23,7 +26,7 @@ const TabsTrigger = forwardRef<
   <TabsPrimitive.Trigger
     ref={ref}
     className={cn(
-      'inline-flex flex-none w-40 items-center justify-center whitespace-nowrap rounded-md border p-1 text-sm transition-all focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-80 bg-white',
+      '-mb-1 inline-flex flex-1 items-center justify-center whitespace-nowrap border-b-4 border-transparent pb-2 text-xs leading-[1.1] text-neutral-darker transition-colors focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-80 data-[state=active]:border-blue-normal data-[state=active]:font-semibold data-[state=active]:text-blue-darker',
       className
     )}
     {...props}
@@ -38,7 +41,7 @@ const TabsContent = forwardRef<
   <TabsPrimitive.Content
     ref={ref}
     className={cn(
-      'mt-2 rounded-md p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-green dark:focus-visible:ring-green-neon',
+      'mt-2 rounded-md p-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-normal',
       className
     )}
     {...props}

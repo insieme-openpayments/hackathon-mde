@@ -38,7 +38,7 @@ export const FormFieldError = ({
   }
 
   return (
-    <p className={cn('mt-2 text-sm text-red-600', className)} {...props}>
+    <p className={cn('mt-2 text-[10px] text-magenta', className)} {...props}>
       {message}
     </p>
   )

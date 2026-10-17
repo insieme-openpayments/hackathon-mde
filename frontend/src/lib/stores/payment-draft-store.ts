@@ -2,6 +2,8 @@
 // Owner: P5 (payment+confirmation) refines; shape is the contract.
 import { resetStore, valtioPersist } from '../valtio-persist'
 import type { OrderItemKind } from '../api-types'
+import { loadGuard } from './load-guard'
+import { z } from 'zod'
 
 export interface PaymentDraftState {
   productId: string
@@ -25,6 +27,20 @@ const defaults: PaymentDraftState = {
   facturaId: '',
   returnTo: ''
 }
+
+loadGuard(
+  'payment-draft-store',
+  z.object({
+    productId: z.string(),
+    ref1: z.string(),
+    ref2: z.string(),
+    amount: z.number().nullable(),
+    email: z.string(),
+    kind: z.enum(['servicio', 'factura']),
+    facturaId: z.string(),
+    returnTo: z.string()
+  })
+)
 
 export const paymentDraftStore = valtioPersist<PaymentDraftState>(
   'payment-draft-store',

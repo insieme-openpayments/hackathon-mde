@@ -30,7 +30,7 @@ export const SheetOverlay = forwardRef<
 >(({ className, ...props }, ref) => (
   <SheetPrimitive.Overlay
     className={cn(
-      'fixed inset-0 z-50 bg-green-3/60 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+      'fixed inset-0 z-50 bg-blue-light-hover/80 backdrop-blur-sm data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
       className
     )}
     {...props}
@@ -40,7 +40,7 @@ export const SheetOverlay = forwardRef<
 SheetOverlay.displayName = SheetPrimitive.Overlay.displayName
 
 const sheetVariants = cva(
-  'fixed z-50 gap-4 bg-white dark:bg-grey-light p-6 shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500',
+  'fixed z-50 gap-4 bg-sheet p-6 shadow-lg transition ease-in-out data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:duration-300 data-[state=open]:duration-500',
   {
     variants: {
       side: {
@@ -74,7 +74,7 @@ export const SheetContent = forwardRef<
       {...props}
     >
       {children}
-      <SheetClose className="absolute bg-green-light dark:bg-pink-light right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-pink disabled:pointer-events-none">
+      <SheetClose className="absolute bg-blue-light-hover right-4 top-4 rounded-sm opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-blue-normal disabled:pointer-events-none">
         <X strokeWidth={2.5} className="h-8 w-8 text-base" />
         <span className="sr-only">Close</span>
       </SheetClose>
@@ -111,10 +111,7 @@ export const SheetTitle = forwardRef<
 >(({ className, ...props }, ref) => (
   <SheetPrimitive.Title
     ref={ref}
-    className={cn(
-      'text-lg font-semibold text-green dark:text-pink-neon',
-      className
-    )}
+    className={cn('text-lg font-semibold text-blue-normal', className)}
     {...props}
   />
 ))
@@ -126,7 +123,7 @@ export const SheetDescription = forwardRef<
 >(({ className, ...props }, ref) => (
   <SheetPrimitive.Description
     ref={ref}
-    className={cn('text-sm text-green dark:text-pink-neon', className)}
+    className={cn('text-sm text-neutral-darker', className)}
     {...props}
   />
 ))

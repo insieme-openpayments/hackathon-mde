@@ -29,6 +29,10 @@ import {
   IntegrationClient,
   type IIntegrationClient
 } from './integration/client'
+import {
+  SettlementService,
+  type ISettlementService
+} from './settlement/service'
 import { CatalogSyncService, type ICatalogSyncService } from './catalog/sync'
 import { generateLogger } from '@/config/logger'
 import { generateKnex } from '@/config/knex'
@@ -53,6 +57,7 @@ export interface Cradle {
   billService: IBillService
   billController: IBillController
   catalogSyncService: ICatalogSyncService
+  settlementService: ISettlementService
 }
 
 export async function createContainer(
@@ -96,7 +101,8 @@ export async function createContainer(
     paymentService: asClassSingletonWithLogger(PaymentService, logger),
     billService: asClassSingletonWithLogger(BillService, logger),
     billController: asClassSingletonWithLogger(BillController, logger),
-    catalogSyncService: asClassSingletonWithLogger(CatalogSyncService, logger)
+    catalogSyncService: asClassSingletonWithLogger(CatalogSyncService, logger),
+    settlementService: asClassSingletonWithLogger(SettlementService, logger)
   })
 
   return container

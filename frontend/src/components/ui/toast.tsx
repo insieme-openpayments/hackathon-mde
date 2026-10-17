@@ -27,15 +27,14 @@ export const ToastViewport = forwardRef<
 ToastViewport.displayName = ToastPrimitives.Viewport.displayName
 
 export const toastVariants = cva(
-  'pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-md border p-6 pr-8 shadow-lg transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-bottom-full focus:outline-none',
+  'pointer-events-auto relative flex w-full items-center justify-between space-x-4 overflow-hidden rounded-lg border p-4 pr-8 shadow-medium transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-bottom-full focus:outline-none',
   {
     variants: {
       variant: {
-        default: 'border bg-white text-green focus:ring-green',
-        success:
-          'bg-white border-green text-green focus:ring-green dark:bg-purple dark:border-green-neon dark:focus:ring-green-neon dark:text-green-neon',
-        error:
-          'bg-white dark:bg-purple-dark border-pink-dark focus:ring-pink-dark text-pink-dark dark:border-pink-neon dark:focus:ring-pink-neon dark:text-pink-neon'
+        default:
+          'border-blue-light-active bg-white text-neutral-darker focus:ring-blue-normal',
+        success: 'border-success bg-white text-success focus:ring-success',
+        error: 'border-magenta bg-white text-magenta focus:ring-magenta'
       }
     },
     defaultVariants: {
@@ -66,7 +65,7 @@ export const ToastAction = forwardRef<
   <ToastPrimitives.Action
     ref={ref}
     className={cn(
-      'inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-green disabled:pointer-events-none disabled:opacity-50',
+      'inline-flex h-8 shrink-0 items-center justify-center rounded-md border bg-transparent px-3 text-sm transition-colors focus:outline-none focus:ring-2 focus:ring-blue-normal disabled:pointer-events-none disabled:opacity-50',
       className
     )}
     {...props}
@@ -81,7 +80,7 @@ export const ToastClose = forwardRef<
   <ToastPrimitives.Close
     ref={ref}
     className={cn(
-      'absolute right-2 top-2 rounded-md p-1 focus:outline-none focus:ring-2 focus:ring-green',
+      'absolute right-2 top-2 rounded-md p-1 focus:outline-none focus:ring-2 focus:ring-blue-normal',
       className
     )}
     {...props}
