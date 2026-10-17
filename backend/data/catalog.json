@@ -1,0 +1,654 @@
+{
+  "categories": [
+    {
+      "id": "agua",
+      "label": "Agua",
+      "icon": "assets/servicios/cat-agua.svg",
+      "sortOrder": 1
+    },
+    {
+      "id": "energia",
+      "label": "Energía",
+      "icon": "assets/servicios/cat-energia.svg",
+      "sortOrder": 2
+    },
+    {
+      "id": "gas",
+      "label": "Gas",
+      "icon": "assets/servicios/cat-gas.svg",
+      "sortOrder": 3
+    },
+    {
+      "id": "telefonia",
+      "label": "Telefonía celular-Internet -tv",
+      "icon": "assets/servicios/cat-telefonia.svg",
+      "sortOrder": 4
+    },
+    {
+      "id": "salud",
+      "label": "Salud y seguridad social",
+      "icon": "assets/servicios/cat-salud.svg",
+      "sortOrder": 5
+    },
+    {
+      "id": "catalogo",
+      "label": "Ventas por catálogo",
+      "icon": "assets/servicios/cat-catalogo.svg",
+      "sortOrder": 6
+    },
+    {
+      "id": "financieras",
+      "label": "Pagos obligaciones financieras",
+      "icon": "assets/servicios/cat-financieras.svg",
+      "sortOrder": 7
+    },
+    {
+      "id": "impuestos",
+      "label": "Impuestos",
+      "icon": "assets/servicios/cat-impuestos.svg",
+      "sortOrder": 8
+    },
+    {
+      "id": "educacion",
+      "label": "Educación",
+      "icon": "assets/servicios/cat-educacion.svg",
+      "sortOrder": 9
+    },
+    {
+      "id": "administracion",
+      "label": "Pago administración conjuntos",
+      "icon": "assets/servicios/cat-administracion.svg",
+      "sortOrder": 10
+    },
+    {
+      "id": "movilidad",
+      "label": "Movilidad y transporte",
+      "icon": "assets/servicios/cat-movilidad.svg",
+      "sortOrder": 11
+    },
+    {
+      "id": "otros",
+      "label": "Otros",
+      "icon": "assets/servicios/cat-otros.svg",
+      "sortOrder": 12
+    }
+  ],
+  "products": [
+    {
+      "id": "336fd351-39f2-49fc-a37b-fa9f0fc818dd",
+      "type": "servicio",
+      "slug": "acueducto-bogota",
+      "name": "Acueducto de Bogotá EAAB",
+      "category": "agua",
+      "requiresManualAmount": false,
+      "fixedAmount": null,
+      "minAmount": 1000,
+      "maxAmount": null,
+      "logo": null,
+      "sortOrder": 1,
+      "metadata": {
+        "logoFit": "generic"
+      }
+    },
+    {
+      "id": "641e511d-0138-4a28-9e93-0294b625d374",
+      "type": "servicio",
+      "slug": "aguas-cartagena",
+      "name": "Aguas de Cartagena",
+      "category": "agua",
+      "requiresManualAmount": false,
+      "fixedAmount": null,
+      "minAmount": 1000,
+      "maxAmount": null,
+      "logo": null,
+      "sortOrder": 2,
+      "metadata": {
+        "logoFit": "generic"
+      }
+    },
+    {
+      "id": "36b226f3-f689-4bc6-af12-c7bd1e3c39d3",
+      "type": "servicio",
+      "slug": "epm-agua",
+      "name": "EPM Aguas Medellín",
+      "category": "agua",
+      "requiresManualAmount": true,
+      "fixedAmount": null,
+      "minAmount": 1000,
+      "maxAmount": null,
+      "logo": null,
+      "sortOrder": 3,
+      "metadata": {
+        "logoFit": "generic"
+      }
+    },
+    {
+      "id": "a3a45578-695e-4a91-9a78-90e746ab52c1",
+      "type": "servicio",
+      "slug": "aguas-kpital",
+      "name": "Aguas Kpital Cúcuta",
+      "category": "agua",
+      "requiresManualAmount": false,
+      "fixedAmount": null,
+      "minAmount": 1000,
+      "maxAmount": null,
+      "logo": null,
+      "sortOrder": 4,
+      "metadata": {
+        "logoFit": "generic"
+      }
+    },
+    {
+      "id": "3c7f7712-ab6b-469d-a9f6-89941ec47351",
+      "type": "servicio",
+      "slug": "afinia",
+      "name": "Afinia",
+      "category": "energia",
+      "requiresManualAmount": true,
+      "fixedAmount": null,
+      "minAmount": 1000,
+      "maxAmount": null,
+      "logo": "convenios/logo-afinia.png",
+      "sortOrder": 5,
+      "metadata": {
+        "logoFit": "cover"
+      }
+    },
+    {
+      "id": "34a260dd-4f01-4902-8798-f8f777a89481",
+      "type": "servicio",
+      "slug": "enel",
+      "name": "Enel Colombia",
+      "category": "energia",
+      "requiresManualAmount": false,
+      "fixedAmount": null,
+      "minAmount": 1000,
+      "maxAmount": null,
+      "logo": null,
+      "sortOrder": 6,
+      "metadata": {
+        "logoFit": "generic"
+      }
+    },
+    {
+      "id": "2a47d165-b079-4917-b803-0dbb1e57ab4d",
+      "type": "servicio",
+      "slug": "air-e",
+      "name": "Air-e",
+      "category": "energia",
+      "requiresManualAmount": false,
+      "fixedAmount": null,
+      "minAmount": 1000,
+      "maxAmount": null,
+      "logo": null,
+      "sortOrder": 7,
+      "metadata": {
+        "logoFit": "generic"
+      }
+    },
+    {
+      "id": "456a7197-9a1e-4a0c-896d-c3f0ca27d475",
+      "type": "servicio",
+      "slug": "celsia",
+      "name": "Celsia",
+      "category": "energia",
+      "requiresManualAmount": false,
+      "fixedAmount": null,
+      "minAmount": 1000,
+      "maxAmount": null,
+      "logo": null,
+      "sortOrder": 8,
+      "metadata": {
+        "logoFit": "generic"
+      }
+    },
+    {
+      "id": "1211b1be-a168-40d6-907d-2ecd62244236",
+      "type": "servicio",
+      "slug": "gas-natural",
+      "name": "Gas Natural",
+      "category": "gas",
+      "requiresManualAmount": false,
+      "fixedAmount": null,
+      "minAmount": 1000,
+      "maxAmount": null,
+      "logo": "convenios/logo-gasnatural.png",
+      "sortOrder": 9,
+      "metadata": {
+        "logoFit": "gasnatural"
+      }
+    },
+    {
+      "id": "f1b38eb3-bc30-443c-8785-74ae59f465c3",
+      "type": "servicio",
+      "slug": "gases-occidente",
+      "name": "Gases de occidente",
+      "category": "gas",
+      "requiresManualAmount": false,
+      "fixedAmount": null,
+      "minAmount": 1000,
+      "maxAmount": null,
+      "logo": "convenios/logo-vanti.png",
+      "sortOrder": 10,
+      "metadata": {
+        "logoFit": "vanti"
+      }
+    },
+    {
+      "id": "827d2014-cb94-4298-8141-5c8ec5140051",
+      "type": "servicio",
+      "slug": "gas-natural-cundi",
+      "name": "Gas natural cundiboyacense",
+      "category": "gas",
+      "requiresManualAmount": true,
+      "fixedAmount": 10000,
+      "minAmount": 1000,
+      "maxAmount": null,
+      "logo": "convenios/logo-gasnatural.png",
+      "sortOrder": 11,
+      "metadata": {
+        "logoFit": "gasnatural"
+      }
+    },
+    {
+      "id": "9946b45a-d5ba-48ed-b909-eca2329e24e8",
+      "type": "servicio",
+      "slug": "vanti",
+      "name": "Vanti S.A. ESP",
+      "category": "gas",
+      "requiresManualAmount": true,
+      "fixedAmount": null,
+      "minAmount": 1000,
+      "maxAmount": null,
+      "logo": "convenios/logo-vanti.png",
+      "sortOrder": 12,
+      "metadata": {
+        "logoFit": "vanti"
+      }
+    },
+    {
+      "id": "57a86923-bb92-47fa-8cc8-f44b52fb3967",
+      "type": "servicio",
+      "slug": "efigas",
+      "name": "Efigas",
+      "category": "gas",
+      "requiresManualAmount": false,
+      "fixedAmount": null,
+      "minAmount": 1000,
+      "maxAmount": null,
+      "logo": null,
+      "sortOrder": 13,
+      "metadata": {
+        "logoFit": "generic"
+      }
+    },
+    {
+      "id": "20ab88c2-7ecd-42df-ad0e-3af15d56dddd",
+      "type": "servicio",
+      "slug": "claro-hogar",
+      "name": "Claro soluciones Hogar - Pago Parcial",
+      "category": "telefonia",
+      "requiresManualAmount": true,
+      "fixedAmount": null,
+      "minAmount": 1000,
+      "maxAmount": null,
+      "logo": "convenios/logo-claro.png",
+      "sortOrder": 14,
+      "metadata": {
+        "logoFit": "contain"
+      }
+    },
+    {
+      "id": "e11236ef-bc2a-4678-9430-1c110d3db079",
+      "type": "servicio",
+      "slug": "claro-movil",
+      "name": "Claro Móvil Postpago",
+      "category": "telefonia",
+      "requiresManualAmount": false,
+      "fixedAmount": null,
+      "minAmount": 1000,
+      "maxAmount": null,
+      "logo": "convenios/logo-claro.png",
+      "sortOrder": 15,
+      "metadata": {
+        "logoFit": "contain"
+      }
+    },
+    {
+      "id": "e05de55c-91ba-4191-8f92-81b9a7df7044",
+      "type": "servicio",
+      "slug": "movistar-hogar",
+      "name": "Movistar Hogar",
+      "category": "telefonia",
+      "requiresManualAmount": false,
+      "fixedAmount": null,
+      "minAmount": 1000,
+      "maxAmount": null,
+      "logo": "convenios/op-movistar.svg",
+      "sortOrder": 16,
+      "metadata": {
+        "logoFit": "contain"
+      }
+    },
+    {
+      "id": "17d00e6b-4e88-4235-a261-2c1d12624b68",
+      "type": "servicio",
+      "slug": "etb",
+      "name": "ETB Internet y TV",
+      "category": "telefonia",
+      "requiresManualAmount": false,
+      "fixedAmount": null,
+      "minAmount": 1000,
+      "maxAmount": null,
+      "logo": "convenios/op-etb.png",
+      "sortOrder": 17,
+      "metadata": {
+        "logoFit": "contain"
+      }
+    },
+    {
+      "id": "bebb52e8-b09b-4ffc-85a3-3a852ff2d089",
+      "type": "servicio",
+      "slug": "compensar",
+      "name": "Compensar medicina prepagada",
+      "category": "salud",
+      "requiresManualAmount": false,
+      "fixedAmount": null,
+      "minAmount": 1000,
+      "maxAmount": null,
+      "logo": "convenios/logo-compensar.png",
+      "sortOrder": 18,
+      "metadata": {
+        "logoFit": "cover"
+      }
+    },
+    {
+      "id": "9c9e43b0-fe2f-45b5-95d4-a5df0bc9d3a8",
+      "type": "servicio",
+      "slug": "los-olivos",
+      "name": "Los olivos",
+      "category": "salud",
+      "requiresManualAmount": true,
+      "fixedAmount": null,
+      "minAmount": 1000,
+      "maxAmount": null,
+      "logo": "convenios/logo-olivos.png",
+      "sortOrder": 19,
+      "metadata": {
+        "logoFit": "cover"
+      }
+    },
+    {
+      "id": "c53508db-c6fa-48c4-a690-f07b0625a843",
+      "type": "servicio",
+      "slug": "colsanitas",
+      "name": "Colsanitas",
+      "category": "salud",
+      "requiresManualAmount": false,
+      "fixedAmount": null,
+      "minAmount": 1000,
+      "maxAmount": null,
+      "logo": null,
+      "sortOrder": 20,
+      "metadata": {
+        "logoFit": "generic"
+      }
+    },
+    {
+      "id": "021c1201-56ab-4879-a168-fbbcc42d6373",
+      "type": "servicio",
+      "slug": "superricas",
+      "name": "Comestibles Ricos-superricas distribuidor",
+      "category": "catalogo",
+      "requiresManualAmount": true,
+      "fixedAmount": null,
+      "minAmount": 1000,
+      "maxAmount": null,
+      "logo": "convenios/logo-superricas.png",
+      "sortOrder": 21,
+      "metadata": {
+        "logoFit": "ricas"
+      }
+    },
+    {
+      "id": "cb73bfac-81ca-4b27-b5bf-64062d3d50d5",
+      "type": "servicio",
+      "slug": "yanbal",
+      "name": "Yanbal Colombia",
+      "category": "catalogo",
+      "requiresManualAmount": true,
+      "fixedAmount": null,
+      "minAmount": 1000,
+      "maxAmount": null,
+      "logo": null,
+      "sortOrder": 22,
+      "metadata": {
+        "logoFit": "generic"
+      }
+    },
+    {
+      "id": "3b840d8c-8c2d-4f9b-8f8b-7664a6df0a78",
+      "type": "servicio",
+      "slug": "natura",
+      "name": "Natura Cosméticos",
+      "category": "catalogo",
+      "requiresManualAmount": false,
+      "fixedAmount": null,
+      "minAmount": 1000,
+      "maxAmount": null,
+      "logo": null,
+      "sortOrder": 23,
+      "metadata": {
+        "logoFit": "generic"
+      }
+    },
+    {
+      "id": "3ba7ff85-66bd-4c47-a006-47df5acd5d1d",
+      "type": "servicio",
+      "slug": "banco-contactar",
+      "name": "Banco Contactar",
+      "category": "financieras",
+      "requiresManualAmount": true,
+      "fixedAmount": null,
+      "minAmount": 1000,
+      "maxAmount": null,
+      "logo": null,
+      "sortOrder": 24,
+      "metadata": {
+        "logoFit": "generic"
+      }
+    },
+    {
+      "id": "826cb574-83e7-475b-97a2-40296faf5081",
+      "type": "servicio",
+      "slug": "bancamia",
+      "name": "Bancamía",
+      "category": "financieras",
+      "requiresManualAmount": true,
+      "fixedAmount": null,
+      "minAmount": 1000,
+      "maxAmount": null,
+      "logo": null,
+      "sortOrder": 25,
+      "metadata": {
+        "logoFit": "generic"
+      }
+    },
+    {
+      "id": "f2ad1b67-2d55-4e3b-8c25-7f8a99622468",
+      "type": "servicio",
+      "slug": "crediservir",
+      "name": "Crediservir",
+      "category": "financieras",
+      "requiresManualAmount": false,
+      "fixedAmount": null,
+      "minAmount": 1000,
+      "maxAmount": null,
+      "logo": null,
+      "sortOrder": 26,
+      "metadata": {
+        "logoFit": "generic"
+      }
+    },
+    {
+      "id": "b9c37e1b-71f3-47b0-8cb2-c863e06e61db",
+      "type": "servicio",
+      "slug": "predial-bogota",
+      "name": "Impuesto predial Bogotá",
+      "category": "impuestos",
+      "requiresManualAmount": false,
+      "fixedAmount": null,
+      "minAmount": 1000,
+      "maxAmount": null,
+      "logo": null,
+      "sortOrder": 27,
+      "metadata": {
+        "logoFit": "generic"
+      }
+    },
+    {
+      "id": "b711cba7-73cf-45a7-948b-1216457e7c61",
+      "type": "servicio",
+      "slug": "vehicular-cundinamarca",
+      "name": "Impuesto vehicular Cundinamarca",
+      "category": "impuestos",
+      "requiresManualAmount": false,
+      "fixedAmount": null,
+      "minAmount": 1000,
+      "maxAmount": null,
+      "logo": null,
+      "sortOrder": 28,
+      "metadata": {
+        "logoFit": "generic"
+      }
+    },
+    {
+      "id": "f2d77e22-ceb2-4d10-a761-82278c8a9579",
+      "type": "servicio",
+      "slug": "icetex",
+      "name": "Cartera ICETEX",
+      "category": "educacion",
+      "requiresManualAmount": true,
+      "fixedAmount": null,
+      "minAmount": 1000,
+      "maxAmount": null,
+      "logo": "convenios/logo-icetex.png",
+      "sortOrder": 29,
+      "metadata": {
+        "logoFit": "icetex"
+      }
+    },
+    {
+      "id": "00e9a0e3-faad-44df-9573-7b764b739a61",
+      "type": "servicio",
+      "slug": "unal",
+      "name": "Universidad Nacional de Colombia",
+      "category": "educacion",
+      "requiresManualAmount": false,
+      "fixedAmount": null,
+      "minAmount": 1000,
+      "maxAmount": null,
+      "logo": null,
+      "sortOrder": 30,
+      "metadata": {
+        "logoFit": "generic"
+      }
+    },
+    {
+      "id": "70cf6913-7c82-45ff-ac7d-cefb9d8e9d50",
+      "type": "servicio",
+      "slug": "conjunto-pinos",
+      "name": "Conjunto residencial Los Pinos",
+      "category": "administracion",
+      "requiresManualAmount": true,
+      "fixedAmount": null,
+      "minAmount": 1000,
+      "maxAmount": null,
+      "logo": null,
+      "sortOrder": 31,
+      "metadata": {
+        "logoFit": "generic"
+      }
+    },
+    {
+      "id": "50be32b7-37b9-4d44-b3ca-2fb1a4618853",
+      "type": "servicio",
+      "slug": "torres-parque",
+      "name": "Edificio Torres del Parque",
+      "category": "administracion",
+      "requiresManualAmount": false,
+      "fixedAmount": null,
+      "minAmount": 1000,
+      "maxAmount": null,
+      "logo": null,
+      "sortOrder": 32,
+      "metadata": {
+        "logoFit": "generic"
+      }
+    },
+    {
+      "id": "31cab08d-b397-4665-b0de-99496abb98e7",
+      "type": "servicio",
+      "slug": "cabify",
+      "name": "Cabify Transportes SAS",
+      "category": "movilidad",
+      "requiresManualAmount": false,
+      "fixedAmount": null,
+      "minAmount": 1000,
+      "maxAmount": null,
+      "logo": "convenios/logo-cabify.png",
+      "sortOrder": 33,
+      "metadata": {
+        "logoFit": "cover"
+      }
+    },
+    {
+      "id": "075f171d-ec27-4c0d-9da3-1a5a2ee5eaba",
+      "type": "servicio",
+      "slug": "flypass",
+      "name": "Flypass peajes",
+      "category": "movilidad",
+      "requiresManualAmount": true,
+      "fixedAmount": null,
+      "minAmount": 1000,
+      "maxAmount": null,
+      "logo": null,
+      "sortOrder": 34,
+      "metadata": {
+        "logoFit": "generic"
+      }
+    },
+    {
+      "id": "de6cd7c1-4d94-43d1-8109-bb83d8a31ce9",
+      "type": "servicio",
+      "slug": "ceal",
+      "name": "Ceal servicios SAS f/tativa",
+      "category": "otros",
+      "requiresManualAmount": false,
+      "fixedAmount": null,
+      "minAmount": 1000,
+      "maxAmount": null,
+      "logo": null,
+      "sortOrder": 35,
+      "metadata": {
+        "logoFit": "generic"
+      }
+    },
+    {
+      "id": "68110736-66b1-4a9d-8ecb-7eb2242a0e9a",
+      "type": "servicio",
+      "slug": "fundacion-cardioinfantil",
+      "name": "Fundación Cardioinfantil donaciones",
+      "category": "otros",
+      "requiresManualAmount": true,
+      "fixedAmount": null,
+      "minAmount": 1000,
+      "maxAmount": null,
+      "logo": null,
+      "sortOrder": 36,
+      "metadata": {
+        "logoFit": "generic"
+      }
+    }
+  ]
+}

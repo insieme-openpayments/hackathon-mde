@@ -1,46 +1,48 @@
-import { BaseLayout } from '@/components/layouts/base.tsx'
+import { AppShell } from '@/components/layouts/app-shell.tsx'
 import {
   Navigate,
   RouterProvider,
   createBrowserRouter,
   type RouteObject
 } from 'react-router-dom'
-import { ordersRoutes } from './orders/routes.tsx'
-import { productsRoutes } from './products/routes.tsx'
 import { QueryClientProvider } from '@tanstack/react-query'
 import { queryClient } from './query-client.ts'
 import { Toaster } from '@/components/ui/toaster.tsx'
-import { cartRoutes } from './cart/routes.tsx'
-import { ThemeProvider } from '@/components/theme-provider.tsx'
+import { homeRoutes } from './home/routes.tsx'
+import { serviciosRoutes } from './servicios/routes.tsx'
+import { facturasRoutes } from './facturas/routes.tsx'
 import { checkoutRoutes } from './checkout/routes.tsx'
-
-const Index = () => {
-  return <Navigate to={`/products`} replace />
-}
+import { cartRoutes } from './cart/routes.tsx'
 
 export const routes = [
   {
-    element: <BaseLayout />,
+    element: <AppShell />,
     children: [
       {
-        index: true,
-        element: <Index />
+        path: '/',
+        children: homeRoutes
       },
       {
-        path: '/products',
-        children: productsRoutes
+        path: '/servicios',
+        children: serviciosRoutes
       },
       {
-        path: '/orders',
-        children: ordersRoutes
+        path: '/facturas',
+        children: facturasRoutes
       },
       {
+        // Fixed by the backend return URL: /checkout/confirmation?orderId=
+        path: '/checkout',
+        children: checkoutRoutes
+      },
+      {
+        // Fixed by the backend return URL: /cart/finish?identifier=
         path: '/cart',
         children: cartRoutes
       },
       {
-        path: '/checkout',
-        children: checkoutRoutes
+        path: '*',
+        element: <Navigate to="/" replace />
       }
     ]
   }
@@ -50,11 +52,9 @@ const router = createBrowserRouter(routes)
 
 export function App() {
   return (
-    <ThemeProvider>
-      <QueryClientProvider client={queryClient}>
-        <RouterProvider router={router} />
-        <Toaster />
-      </QueryClientProvider>
-    </ThemeProvider>
+    <QueryClientProvider client={queryClient}>
+      <RouterProvider router={router} />
+      <Toaster />
+    </QueryClientProvider>
   )
 }

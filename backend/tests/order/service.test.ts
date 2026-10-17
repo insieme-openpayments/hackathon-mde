@@ -11,6 +11,7 @@ import { OrderStatus, type Order } from '@/order/model'
 import { IUserService } from '@/user/service'
 import { deleteProperty, NotFound } from '@/lib'
 import { truncateTables } from '@/tests/tables'
+import { Payment } from '@/payment/model'
 
 describe('Order Service', (): void => {
   let container: AwilixContainer<Cradle>
@@ -106,7 +107,32 @@ describe('Order Service', (): void => {
     })
 
     it('should return the order with the given id', async (): Promise<void> => {
-      await expect(orderService.get(order.id)).resolves.toStrictEqual(order)
+      await expect(orderService.get(order.id)).resolves.toMatchObject(order)
+    })
+
+    it('should include the products and never expose payment secrets', async (): Promise<void> => {
+      await Payment.query().insert({
+        orderId: order.id,
+        walletAddress: walletAddress,
+        incomingPaymentUrl: 'https://ilp.example.com/incoming-payments/1',
+        quoteId: 'quote-1',
+        continueUri: 'https://auth.example.com/continue/1',
+        continueToken: 'secret-token',
+        interactUrl: 'https://auth.example.com/interact/1',
+        interactNonce: 'interact-nonce',
+        clientNonce: 'client-nonce'
+      })
+
+      const fetched = await orderService.get(order.id)
+      expect(fetched.orderItems[0].product).toBeDefined()
+      expect(fetched.payments).toMatchObject({
+        quoteId: 'quote-1',
+        incomingPaymentUrl: 'https://ilp.example.com/incoming-payments/1'
+      })
+      expect(fetched.payments).not.toHaveProperty('continueToken')
+      expect(fetched.payments).not.toHaveProperty('continueUri')
+      expect(fetched.payments).not.toHaveProperty('clientNonce')
+      expect(fetched.payments).not.toHaveProperty('interactNonce')
     })
 
     it('should return the order that belongs tot the current user', async (): Promise<void> => {

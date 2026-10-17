@@ -9,5 +9,14 @@ export const mockProduct = (overrides?: Partial<Product>) => ({
   image: 'Image',
   imageDark: 'ImageDark',
   price: 10.0,
+  type: 'servicio',
+  category: 'gas',
+  requiresManualAmount: false,
+  minAmount: 1000,
+  maxAmount: null,
+  fixedAmount: null,
+  logo: null,
+  sortOrder: 0,
+  metadata: null,
   ...overrides
 })

@@ -22,6 +22,8 @@ import {
   oneClickSetupSchema
 } from '@insieme/shared'
 import { OpenPaymentsClientError } from '@interledger/open-payments'
+import type { OrderItemInput } from '@insieme/shared'
+import { IBillService, type PricedOrderItem } from '@/bill/service'
 
 interface GetParams {
   id?: string
@@ -31,13 +33,22 @@ interface CreateResponse {
   redirectUrl: string
 }
 
+interface CreateOrderResponse extends CreateResponse {
+  orderId: string
+}
+
+interface InstantBuyResponse extends TokenInfo {
+  walletAddressUrl: string
+  orderId: string
+}
+
 export interface IOrderController {
   get: Controller<Order>
-  create: Controller<CreateResponse>
+  create: Controller<CreateOrderResponse>
   finish: Controller
   setup: Controller<CreateResponse>
   setupFinish: Controller<TokenInfo>
-  instantBuy: Controller
+  instantBuy: Controller<InstantBuyResponse>
 }
 
 export class OrderController implements IOrderController {
@@ -47,8 +58,21 @@ export class OrderController implements IOrderController {
     private openPayments: IOpenPayments,
     private orderService: IOrderService,
     private paymentService: IPaymentService,
+    private billService: IBillService,
     private oneClickCache: OneClickCache
   ) {}
+
+  /** Prices every item server-side and persists the order with its total. */
+  private async createPricedOrder(items: OrderItemInput[]): Promise<Order> {
+    const orderItems: PricedOrderItem[] = []
+    for (const item of items) {
+      orderItems.push(await this.billService.priceOrderItem(item))
+    }
+    return await Order.transaction(async (trx) => {
+      const newOrder = await this.orderService.create({ orderItems }, trx)
+      return await newOrder.calculateTotalAmount(trx)
+    })
+  }
 
   get = async (
     req: Request<GetParams>,
@@ -72,7 +96,7 @@ export class OrderController implements IOrderController {
 
   create = async (
     req: Request,
-    res: TypedResponse<CreateResponse>,
+    res: TypedResponse<CreateOrderResponse>,
     next: NextFunction
   ) => {
     try {
@@ -81,13 +105,7 @@ export class OrderController implements IOrderController {
         req.body
       )
 
-      const order = await Order.transaction(async (trx) => {
-        const newOrder = await this.orderService.create(
-          { orderItems: products },
-          trx
-        )
-        return await newOrder.calculateTotalAmount(trx)
-      })
+      const order = await this.createPricedOrder(products)
 
       const grant = await this.openPayments.preparePayment({
         order,
@@ -95,9 +113,12 @@ export class OrderController implements IOrderController {
       })
 
       this.logger.debug(JSON.stringify(grant, null, 2))
-      res
-        .status(201)
-        .json(toSuccessResponse({ redirectUrl: grant.interact.redirect }))
+      res.status(201).json(
+        toSuccessResponse({
+          redirectUrl: grant.interact.redirect,
+          orderId: order.id
+        })
+      )
     } catch (err) {
       next(err)
     }
@@ -219,35 +240,35 @@ export class OrderController implements IOrderController {
 
   instantBuy = async (
     req: Request,
-    res: TypedResponse<CreateResponse>,
+    res: TypedResponse<InstantBuyResponse>,
     next: NextFunction
   ) => {
-    let order: Order
+    let order: Order | undefined
     try {
       const args = await validate(instantBuySchema, req.body)
 
-      order = await Order.transaction(async (trx) => {
-        const newOrder = await this.orderService.create(
-          { orderItems: args.products },
-          trx
-        )
-        return await newOrder.calculateTotalAmount(trx)
-      })
+      order = await this.createPricedOrder(args.products)
       const tokenInfo = await this.openPayments.instantBuy({ order, ...args })
 
       res.status(200).json(
         toSuccessResponse({
           ...tokenInfo,
-          walletAddressUrl: args.walletAddressUrl
+          walletAddressUrl: args.walletAddressUrl,
+          orderId: order.id
         })
       )
     } catch (err) {
-      if (err instanceof OpenPaymentsClientError && err.status === 401) {
+      if (
+        order &&
+        err instanceof OpenPaymentsClientError &&
+        err.status === 401
+      ) {
         next(
           new Unauthorized('Instant-buy is not valid please initiate it again')
         )
+        const orderId = order.id
         await Order.transaction(async (trx) => {
-          return await this.orderService.delete(order!.id, trx)
+          return await this.orderService.delete(orderId, trx)
         })
       } else next(err)
     }

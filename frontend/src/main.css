@@ -4,70 +4,58 @@
 
 @layer base {
   :root {
-    --white: 255 255 255;
-    --black: 34 34 34;
+    --blue-normal: 61 75 102; /* #3d4b66 */
+    --blue-hover: 55 68 92; /* #37445c */
+    --blue-btn: 52 64 97; /* #344061 */
+    --blue-darker: 21 26 36; /* #151a24 */
+    --blue-light-hover: 226 228 232; /* #e2e4e8 */
+    --blue-light-active: 195 199 208; /* #c3c7d0 */
+    --neutral-darker: 53 58 61; /* #353a3d */
+    --neutral-normal: 150 165 175; /* #96a5af */
+    --neutral-light-active: 222 227 230; /* #dee3e6 */
+    --text-01: 51 51 51; /* #333 */
+    --lime: 230 255 0; /* #e6ff00 */
+    --lime-hover: 217 240 0; /* #d9f000 */
+    --lime-text: 26 32 48; /* #1a2030 */
+    --magenta: 227 18 126; /* #e3127e */
+    --success: 18 161 80; /* #12a150 */
+    --success-dark: 14 123 62;
+    --sheet-bg: 245 245 245; /* #f5f5f5 */
+    --page-bg: 233 235 239; /* #e9ebef */
+    --panel-bg: 239 242 243; /* #eff2f3 */
+  }
 
-    --grey-light: 178 178 178;
-    --grey-dark: 85 85 85;
+  html,
+  body,
+  #root {
+    min-height: 100%;
+  }
 
-    --purple: 71 12 110;
-    --purple-dark: 42 15 73;
-    --purple-bright: 126 26 192;
+  body {
+    @apply bg-page font-sans text-neutral-darker antialiased;
+  }
 
-    --pink-neon: 218 53 186;
-    --pink-light: 255 194 243;
-    --pink-dark: 192 17 160;
-
-    --teal-neon: 8 255 255;
-    --teal-light: 146 255 255;
-
-    --green: 2 187 62;
-    --green-dark: 14 123 49;
-    --green-neon: 0 255 157;
-    --green-bright: 148 255 214;
-    --green-light: 238 254 229;
-    --green-modal: 19 135 55;
-
-    --yellow-neon: 255 234 0;
-    --yellow-light: 255 248 172;
-
-    --orange-dark: 193 57 0;
+  button {
+    cursor: pointer;
   }
 }
 
-html.dark *:focus-visible {
-  outline: none;
+@layer utilities {
+  .no-scrollbar {
+    scrollbar-width: none;
+  }
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
 }
 
-#__next {
-  @apply relative h-full md:grid md:grid-cols-[max-content_1fr];
-}
-
-#nprogress {
-  @apply pointer-events-none;
-}
-
-#nprogress .bar {
-  @apply fixed right-0 top-0 z-[1000] h-1.5 w-full bg-pink-light;
-}
-
-@font-face {
-  font-family: 'DejaVuSansMono';
-  src:
-    local('DejaVuSansMono'),
-    url(./fonts/DejaVuSansMono.ttf) format('truetype');
-}
-
-@font-face {
-  font-family: 'DejaVuSansMonoBold';
-  src:
-    local('DejaVuSansMono-Bold'),
-    url(./fonts/DejaVuSansMono-Bold.ttf) format('truetype');
-}
-
-@font-face {
-  font-family: 'DejaVuSansMonoOblique';
-  src:
-    local('DejaVuSansMono-Oblique'),
-    url(./fonts/DejaVuSansMono-Oblique.ttf) format('truetype');
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

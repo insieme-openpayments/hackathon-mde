@@ -34,7 +34,9 @@ const envSchema = z.object({
   PAYMENT_POINTER: httpsUrlString,
   KEY_ID: requiredString,
   PRIVATE_KEY: base64String,
-  USE_HTTP_FOR_OPEN_PAYMENTS: z.boolean().optional()
+  USE_HTTP_FOR_OPEN_PAYMENTS: z.boolean().optional(),
+  INTEGRATION_API_URL: z.string().trim().url().optional(),
+  INTEGRATION_API_KEY: z.string().trim().min(1).default('insieme-dev-key')
 })
 
 export type Env = z.infer<typeof envSchema>

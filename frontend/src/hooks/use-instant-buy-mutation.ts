@@ -1,27 +1,28 @@
 import { APIError } from '@/lib/fetcher.ts'
 import { SuccessResponse } from '@/lib/types.ts'
 import { UseMutationOptions } from '@tanstack/react-query'
-import { z } from 'zod'
 import { useCustomMutation } from './use-custom-mutation.ts'
-import { type OrderItem } from '@/hooks/use-create-order-mutation.ts'
-import { instantBuySchema } from '@insieme/shared'
+import type {
+  CreateOrderErrors,
+  CreateOrderMutationParams
+} from '@/hooks/use-create-order-mutation.ts'
 
-interface InstantBuyMutationParams {
+export interface InstantBuyMutationParams extends CreateOrderMutationParams {
+  accessToken: string
+  manageUrl: string
+}
+
+export interface InstantBuyMutationResponse {
   accessToken: string
   manageUrl: string
   walletAddressUrl: string
-  products: OrderItem[]
+  orderId: string
 }
 
-interface InstantBuyMutationResponse {
-  accessToken: string
-  manageUrl: string
-  walletAddressUrl: string
-}
 export function useInstantBuyMutation(
   options?: UseMutationOptions<
     SuccessResponse<InstantBuyMutationResponse>,
-    APIError<z.infer<typeof instantBuySchema>>,
+    APIError<CreateOrderErrors>,
     InstantBuyMutationParams
   >
 ) {

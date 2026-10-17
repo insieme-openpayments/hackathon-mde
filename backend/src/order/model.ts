@@ -16,11 +16,7 @@ export class Order extends BaseModel {
 
   public id!: string
   public userId!: string
-  public quoteId!: string
   public total!: number
-  public walletAddressUrl?: string
-  public continueToken?: string
-  public continueUri?: string
   public status!: OrderStatus
   public orderItems!: OrderItem[]
   public payments!: Payment
@@ -47,7 +43,7 @@ export class Order extends BaseModel {
       modelClass: User,
       join: {
         from: 'orders.userId',
-        to: 'user.id'
+        to: 'users.id'
       }
     },
 

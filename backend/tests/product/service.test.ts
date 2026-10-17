@@ -7,7 +7,7 @@ import { IProductService } from '@/product/service'
 import { truncateTables } from '@/tests/tables'
 import { randomUUID } from 'crypto'
 import { mockProduct } from '../mocks'
-import { createProducts } from '../helpers'
+import { createProducts, seedCatalog } from '../helpers'
 import { NotFound } from '@/lib'
 
 describe('Product Service', (): void => {
@@ -79,7 +79,37 @@ describe('Product Service', (): void => {
       const products = [mockProduct(), mockProduct(), mockProduct()]
       await createProducts(products)
 
-      await expect(productService.list()).resolves.toMatchObject(products)
+      const list = await productService.list()
+      expect(list).toHaveLength(3)
+      expect(list).toEqual(
+        expect.arrayContaining(products.map((p) => expect.objectContaining(p)))
+      )
+    })
+
+    it('should filter by type and category and order by sortOrder', async (): Promise<void> => {
+      await seedCatalog(knex)
+      const gas = await productService.list({
+        type: 'servicio',
+        category: 'gas'
+      })
+      expect(gas.map((p) => p.slug)).toEqual([
+        'gas-natural',
+        'gases-occidente',
+        'gas-natural-cundi',
+        'vanti',
+        'efigas'
+      ])
+      await expect(productService.list({ type: 'otro' })).resolves.toEqual([])
+    })
+  })
+
+  describe('listCategories', (): void => {
+    it('should return the categories ordered by sortOrder', async (): Promise<void> => {
+      await seedCatalog(knex)
+      const categories = await productService.listCategories()
+      expect(categories).toHaveLength(12)
+      expect(categories[0].id).toBe('agua')
+      expect(categories[11].id).toBe('otros')
     })
   })
 })

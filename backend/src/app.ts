@@ -30,6 +30,8 @@ export class App {
 
     Model.knex(knex)
 
+    this.container.resolve('catalogSyncService').start()
+
     this.server = express.listen(env.PORT)
     logger.info(`Insieme server started on port ${env.PORT}`)
   }
@@ -54,6 +56,8 @@ export class App {
     const logger = this.container.resolve('logger')
     const productController = this.container.resolve('productController')
     const orderController = this.container.resolve('orderController')
+    const billController = this.container.resolve('billController')
+    const catalogSync = this.container.resolve('catalogSyncService')
     const openPayments = this.container.resolve('openPayments')
     const frontendOrigin = new URL(env.FRONTEND_URL).origin
 
@@ -82,15 +86,23 @@ export class App {
       '/config',
       async (_req: Request, res: TypedResponse, next: NextFunction) => {
         try {
-          res.json(toSuccessResponse(await openPayments.getShopAsset()))
+          res.json(
+            toSuccessResponse({
+              ...(await openPayments.getShopAsset()),
+              ...catalogSync.getStatus()
+            })
+          )
         } catch (e) {
           next(e)
         }
       }
     )
 
+    router.get('/catalog', productController.catalog)
     router.get('/products', productController.list)
     router.get('/products/:slug', productController.get)
+
+    router.post('/bills/lookup', billController.lookup)
 
     router.post('/orders', orderController.create)
     router.post('/orders/instant-buy', orderController.instantBuy)

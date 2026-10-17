@@ -1,91 +1,84 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
-const twColors = require('tailwindcss/colors')
-
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode: 'class',
-  content: ['./src/**/*.{ts,tsx}'],
+  content: ['./src/**/*.{ts,tsx}', './index.html'],
   theme: {
-    colors: {
-      transparent: twColors.transparent,
-      white: 'rgb(var(--white) / <alpha-value>)',
-      black: 'rgb(var(--black) / <alpha-value>)',
-      grey: {
-        light: 'rgb(var(--grey-light) / <alpha-value>)',
-        dark: 'rgb(var(--grey-dark) / <alpha-value>)'
-      },
-      purple: {
-        DEFAULT: 'rgb(var(--purple) / <alpha-value>)',
-        bright: 'rgb(var(--purple-bright) / <alpha-value>)',
-        dark: 'rgb(var(--purple-dark) / <alpha-value>)'
-      },
-      pink: {
-        light: 'rgb(var(--pink-light) / <alpha-value>)',
-        dark: 'rgb(var(--pink-dark) / <alpha-value>)',
-        neon: 'rgb(var(--pink-neon) / <alpha-value>)'
-      },
-      teal: {
-        light: 'rgb(var(--teal-light) / <alpha-value>)',
-        neon: 'rgb(var(--teal-neon) / <alpha-value>)'
-      },
-      green: {
-        DEFAULT: 'rgb(var(--green) / <alpha-value>)',
-        light: 'rgb(var(--green-light) / <alpha-value>)',
-        bright: 'rgb(var(--green-bright) / <alpha-value>)',
-        dark: 'rgb(var(--green-dark) / <alpha-value>)',
-        neon: 'rgb(var(--green-neon) / <alpha-value>)',
-        modal: 'rgb(var(--green-modal) / <alpha-value>)'
-      },
-      yellow: {
-        light: 'rgb(var(--yellow-light) / <alpha-value>)',
-        neon: 'rgb(var(--yellow-neon) / <alpha-value>)'
-      },
-      orange: {
-        dark: 'rgb(var(--orange-dark) / <alpha-value>)'
-      }
-    },
     extend: {
+      colors: {
+        blue: {
+          'normal': 'rgb(var(--blue-normal) / <alpha-value>)',
+          'hover': 'rgb(var(--blue-hover) / <alpha-value>)',
+          'btn': 'rgb(var(--blue-btn) / <alpha-value>)',
+          'darker': 'rgb(var(--blue-darker) / <alpha-value>)',
+          'light-hover': 'rgb(var(--blue-light-hover) / <alpha-value>)',
+          'light-active': 'rgb(var(--blue-light-active) / <alpha-value>)'
+        },
+        neutral: {
+          'darker': 'rgb(var(--neutral-darker) / <alpha-value>)',
+          'normal': 'rgb(var(--neutral-normal) / <alpha-value>)',
+          'light-active': 'rgb(var(--neutral-light-active) / <alpha-value>)'
+        },
+        lime: {
+          DEFAULT: 'rgb(var(--lime) / <alpha-value>)',
+          hover: 'rgb(var(--lime-hover) / <alpha-value>)',
+          text: 'rgb(var(--lime-text) / <alpha-value>)'
+        },
+        magenta: 'rgb(var(--magenta) / <alpha-value>)',
+        success: {
+          DEFAULT: 'rgb(var(--success) / <alpha-value>)',
+          dark: 'rgb(var(--success-dark) / <alpha-value>)'
+        },
+        sheet: 'rgb(var(--sheet-bg) / <alpha-value>)',
+        page: 'rgb(var(--page-bg) / <alpha-value>)',
+        panel: 'rgb(var(--panel-bg) / <alpha-value>)',
+        text01: 'rgb(var(--text-01) / <alpha-value>)'
+      },
+      fontFamily: {
+        sans: [
+          'Roboto',
+          'system-ui',
+          '-apple-system',
+          'Segoe UI',
+          'sans-serif'
+        ],
+        btn: ['Figtree', 'Roboto', 'sans-serif']
+      },
+      fontSize: {
+        '3xs': ['8px', '1.1'],
+        '2xs': ['10px', '1.1']
+      },
       boxShadow: {
-        'glow-button': [
-          '0 0 0.2rem #ffffff',
-          '0 0 0.4rem #ffffff',
-          '0 0 1rem #da35ba',
-          '0 0 0.4rem #da35ba',
-          '0 0 1.4rem #da35ba',
-          'inset 0 0 0.6rem #da35ba'
-        ],
-        'glow-link': [
-          '0 0 0.2rem #ffffff',
-          '0 0 0.2rem #ffffff',
-          '0 0 1rem #da35ba',
-          '0 0 0.4rem #da35ba',
-          'inset 0 0 0.6rem #da35ba'
-        ]
+        soft: '0 3px 3px rgba(2, 37, 62, 0.08)',
+        medium: '0 8px 10px rgba(2, 37, 62, 0.1)',
+        card: '0 20px 50px rgba(21, 26, 36, 0.18)',
+        sheet: '0 -3px 3px rgba(61, 75, 102, 0.05)'
       },
-      dropShadow: {
-        'glow-svg': [
-          '0 0 0.2rem #fff',
-          '0 0 1rem rgb(var(--pink-neon))',
-          '0 0 0.4rem rgb(var(--pink-neon))'
-        ],
-        'glow-svg-green': [
-          '0 0 0.2rem #fff',
-          '0 0 0.2rem rgb(var(--green-dark))',
-          '0 0 1rem rgb(var(--green-dark))'
-        ],
-        'glow-svg-orange': [
-          '0 0 0.2rem #fff',
-          '0 0 0.2rem rgb(var(--orange-dark))',
-          '0 0 1rem rgb(var(--orange-dark))'
-        ]
+      borderRadius: {
+        pill: '100px'
       },
-      screens: {
-        'h-sm': { raw: '(min-height: 600px)' }
+      keyframes: {
+        'screen-in': {
+          from: { opacity: '0', transform: 'translateX(8px)' },
+          to: { opacity: '1', transform: 'none' }
+        },
+        'sheet-up': {
+          from: { transform: 'translateY(30px)' },
+          to: { transform: 'none' }
+        },
+        'fc-pop': {
+          from: { opacity: '0', transform: 'scale(.96)' },
+          to: { opacity: '1', transform: 'none' }
+        }
+      },
+      animation: {
+        'screen-in': 'screen-in .22s ease-out',
+        'sheet-up': 'sheet-up .25s ease-out',
+        'fc-pop': 'fc-pop .18s ease-out'
       }
-    },
-    plugins: [
-      require('tailwindcss-animate'),
-      require('@tailwindcss/typography')
-    ]
-  }
+    }
+  },
+  plugins: [
+    require('tailwindcss-animate'),
+    require('@tailwindcss/forms')({ strategy: 'class' })
+  ]
 }

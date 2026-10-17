@@ -6,6 +6,7 @@ import { oneClickConfirmationSearchParamsSchema } from '../route-schemas.ts'
 import { Loader } from '@/components/loader.tsx'
 import { useFinishSetupMutation } from '@/hooks/use-finish-setup-mutation.ts'
 import { setToken } from '@/lib/stores/token-store.ts'
+import { paymentDraftStore } from '@/lib/stores/payment-draft-store.ts'
 
 export function Component() {
   const navigate = useNavigate()
@@ -28,7 +29,10 @@ export function Component() {
         }
       }
     )
-    const redirectTimer = setTimeout(() => navigate('/cart'), 3000)
+    const redirectTimer = setTimeout(
+      () => navigate(paymentDraftStore.returnTo || '/'),
+      3000
+    )
     return () => {
       clearTimeout(redirectTimer)
     }
@@ -36,12 +40,12 @@ export function Component() {
   }, [])
 
   if (data) {
-    let color: string = 'text-green dark:text-green-neon'
-    let text: string = 'One click buy was successfully set up!'
+    let color: string = 'text-success'
+    let text: string = 'Pago en un clic configurado con éxito'
 
     if (result === 'grant_rejected') {
-      color = 'text-orange-dark dark:text-pink-neon'
-      text = 'One click buy setup was canceled.'
+      color = 'text-magenta'
+      text = 'Se canceló la configuración del pago en un clic.'
     }
 
     return (
@@ -52,13 +56,13 @@ export function Component() {
         )}
       >
         <h1 className={`${color} text-lg font-semibold`}>{text}</h1>
-        <p className="font-semibold">Redirecting you back to cart ...</p>
+        <p className="font-semibold">Volviendo a tu pago ...</p>
       </div>
     )
   }
 
   if (error) {
-    return <Navigate to="/cart" />
+    return <Navigate to={paymentDraftStore.returnTo || '/'} />
   }
 
   return <Loader />

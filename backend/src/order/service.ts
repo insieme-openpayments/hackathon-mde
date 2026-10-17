@@ -4,7 +4,17 @@ import { TransactionOrKnex } from 'objection'
 import { Logger } from 'winston'
 import { InternalServerError, NotFound } from '@/lib'
 
-type OrderItemParams = Pick<OrderItem, 'productId' | 'quantity'>
+type OrderItemParams = Pick<OrderItem, 'productId' | 'quantity'> &
+  Partial<Pick<OrderItem, 'price' | 'details'>>
+
+const PUBLIC_PAYMENT_COLUMNS = [
+  'id',
+  'status',
+  'quoteId',
+  'incomingPaymentUrl',
+  'createdAt',
+  'updatedAt'
+]
 
 interface CreateParams {
   userId?: string
@@ -44,7 +54,14 @@ export class OrderService implements IOrderService {
   }
 
   public async get(id: string, userId?: string): Promise<Order> {
-    const row = Order.query().findById(id).withGraphFetched('orderItems')
+    const row = Order.query()
+      .findById(id)
+      .withGraphFetched('[orderItems.product, payments(publicColumns)]')
+      .modifiers({
+        publicColumns: (builder) => {
+          builder.select(PUBLIC_PAYMENT_COLUMNS)
+        }
+      })
     if (userId) row.where('userId', '=', userId)
 
     const order = await row

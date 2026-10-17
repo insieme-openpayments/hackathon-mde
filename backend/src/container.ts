@@ -22,6 +22,14 @@ import { IOpenPayments, OpenPayments } from './open-payments/service'
 import { TokenCache } from './cache/token'
 import { IPaymentService, PaymentService } from './payment/service'
 import { type OneClickCache, OneClickCacheData } from './cache/one-click'
+import { BillService, type IBillService } from './bill/service'
+import { BillController, type IBillController } from './bill/controller'
+import type { BillSnapshot, BillSnapshotCache } from './cache/bill-snapshot'
+import {
+  IntegrationClient,
+  type IIntegrationClient
+} from './integration/client'
+import { CatalogSyncService, type ICatalogSyncService } from './catalog/sync'
 import { generateLogger } from '@/config/logger'
 import { generateKnex } from '@/config/knex'
 import { asClassSingletonWithLogger, InMemoryCache } from '@/lib'
@@ -32,6 +40,8 @@ export interface Cradle {
   knex: Knex
   opClient: AuthenticatedClient
   oneClickCache: OneClickCache
+  billSnapshotCache: BillSnapshotCache
+  integrationClient: IIntegrationClient | null
   tokenCache: TokenCache
   openPayments: IOpenPayments
   userService: IUserService
@@ -40,6 +50,9 @@ export interface Cradle {
   productController: IProductController
   orderController: IOrderController
   paymentService: IPaymentService
+  billService: IBillService
+  billController: IBillController
+  catalogSyncService: ICatalogSyncService
 }
 
 export async function createContainer(
@@ -65,13 +78,25 @@ export async function createContainer(
     openPayments: asClassSingletonWithLogger(OpenPayments, logger),
     tokenCache: asClassSingletonWithLogger(TokenCache, logger),
     oneClickCache: asClass(InMemoryCache<OneClickCacheData>).singleton(),
+    billSnapshotCache: asClass(InMemoryCache<BillSnapshot>).singleton(),
+    integrationClient: asValue(
+      env.INTEGRATION_API_URL
+        ? new IntegrationClient(
+            env.INTEGRATION_API_URL,
+            env.INTEGRATION_API_KEY
+          )
+        : null
+    ),
     knex: asFunction(generateKnex).singleton(),
     userService: asClass(UserService).singleton(),
     productService: asClassSingletonWithLogger(ProductService, logger),
     orderService: asClassSingletonWithLogger(OrderService, logger),
     productController: asClassSingletonWithLogger(ProductController, logger),
     orderController: asClassSingletonWithLogger(OrderController, logger),
-    paymentService: asClassSingletonWithLogger(PaymentService, logger)
+    paymentService: asClassSingletonWithLogger(PaymentService, logger),
+    billService: asClassSingletonWithLogger(BillService, logger),
+    billController: asClassSingletonWithLogger(BillController, logger),
+    catalogSyncService: asClassSingletonWithLogger(CatalogSyncService, logger)
   })
 
   return container

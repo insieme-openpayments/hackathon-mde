@@ -1,14 +1,7 @@
 import ReactDOM from 'react-dom/client'
 import { App } from './app/index.tsx'
 import './main.css'
-import {
-  API_BASE_URL,
-  CURRENCY,
-  THEME,
-  setCurrencyConfig
-} from '@/lib/constants'
-
-document.documentElement.classList.add(THEME)
+import { API_BASE_URL, CURRENCY, setCurrencyConfig } from '@/lib/constants'
 
 // Prices are charged in the asset of the shop wallet; ask the backend which
 // one before rendering so the UI never shows a different currency.
@@ -26,11 +19,6 @@ async function loadShopCurrency() {
     )
   }
 }
-
-// fonts
-import './fonts/DejaVuSansMono.ttf'
-import './fonts/DejaVuSansMono-Bold.ttf'
-import './fonts/DejaVuSansMono-Oblique.ttf'
 
 loadShopCurrency().then(() => {
   ReactDOM.createRoot(document.getElementById('root')!).render(<App />)
