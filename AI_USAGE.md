@@ -21,7 +21,7 @@ La IA se usó en todo el proyecto:
 
 ## Archivos con mínima o nula IA · Files with minimal or no AI
 
-- `customer-frontend/**`: prototipo exportado del Figma "Marca Blanca" del equipo. Es la referencia de comportamiento y copy; no lo escribió la IA.
+- `customer-frontend/**` (retirado del repo tras el commit `ef76b86`; sigue en el historial): prototipo exportado del Figma "Marca Blanca" del equipo. Fue la referencia de comportamiento y copy; no lo escribió la IA.
 - `frontend/public/assets/**` y los logos de `backend/images/`: assets exportados del Figma o de fuentes públicas (la IA solo recortó el espacio en blanco de los logos de convenios y recoloreó los iconos SVG al morado de marca).
 - `frontend/public/brand/**` (logo horizontal e isotipo de Insieme) y el manual de identidad (morado #7A1FA2, amarillo #FFC20E, aliados #137766): los aportó el equipo; la IA solo generó el favicon y los recortes para el encabezado.
 - `LICENSE`: texto de Apache-2.0 heredado del upstream.

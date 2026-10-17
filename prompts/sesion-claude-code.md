@@ -121,3 +121,14 @@ los logos de convenios en `backend/images/convenios/`.
 > `prompts/integration-backend-productos.md` (copia verbatim de `docs/prompts/frontend-productos.md`
 > de `integration-backend`, commit 4ff9b65, que fue lo que se pegó en la sesión) y se pasó tal cual a
 > los agentes como argumento `spec` del workflow `prompts/workflows/03-customer-frontend-productos.js`.]
+
+## 14. Cambio de destino y retiro del prototipo (17 oct 2026)
+
+> El contenedor ya tiene el fix, así que está disponible en el 8000 y los ajustes deberían estar en la
+> página que ya tiene el look n feel insieme que se presenta en el puerto 4004
+
+> Elimina el prototipo para evitar futuras confusiones
+
+Con esto, Giro Efecty, Transferencia Bre-B y el pago real de servicios se implementan en la app React
+(`frontend/` + `backend/`) y `customer-frontend/` se elimina del repo (su última versión está en el
+commit `ef76b86`).

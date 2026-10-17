@@ -8,5 +8,4 @@ Dockerfile
 .gitignore
 .prettierignore
 coverage
-customer-frontend
 prompts

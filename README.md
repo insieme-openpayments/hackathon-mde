@@ -63,7 +63,6 @@ backend/            API Express + Objection/Knex + Open Payments (@insieme/backe
 frontend/           SPA React + Vite + Tailwind (@insieme/frontend)
 shared/             esquemas zod y tipos del contrato, compartidos (@insieme/shared)
 local/              docker compose: Postgres y stack completo
-customer-frontend/  prototipo estático del Figma "Marca Blanca" (solo referencia de comportamiento y copy)
 docs/               arquitectura, modelo de amenazas y guion de pitch
 prompts/            prompts de la sesión con Claude Code y de los workflows
 AI_USAGE.md         uso de IA en el proyecto (política del hackatón)

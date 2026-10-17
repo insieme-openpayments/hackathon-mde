@@ -2,7 +2,7 @@
 
 SPA React 18 + Vite + Tailwind + react-query + valtio. Paquete `@insieme/frontend`.
 
-Migra las pantallas del prototipo `customer-frontend/` (Pago de servicios y Facturas guardadas) a React. La especificación de contratos está en [src/CONTRACTS.md](src/CONTRACTS.md).
+Pantallas de Pago de servicios y Facturas guardadas en React, migradas del prototipo Figma "Marca Blanca" (el prototipo estático se retiró del repo en el commit `ef76b86`; sigue en el historial). La especificación de contratos está en [src/CONTRACTS.md](src/CONTRACTS.md).
 
 ## Scripts
 
