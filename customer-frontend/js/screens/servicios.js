@@ -430,6 +430,16 @@
       // Arranque desde "Facturas guardadas": referencia precargada y consulta automática
       if (f.autoConsult && f.step !== 2 && !f.loading && refOk(f)) { f.autoConsult = false; startConsult(ctx); }
       if (f.focusMail) { f.focusMail = false; const m = root.querySelector('[data-key="email"]'); if (m) { m.focus(); m.select(); } }
+      // Enter en la referencia = "Consultar"
+      const refInput = f.step !== 2 && root.querySelector('[data-key="ref1"]');
+      if (refInput) {
+        refInput.setAttribute('enterkeyhint', 'search');
+        refInput.addEventListener('keydown', (e) => {
+          if (e.key !== 'Enter') return;
+          e.preventDefault();
+          if (refOk(f) && !f.loading) startConsult(App.ctx());
+        });
+      }
     },
     actions: {
       setRef: (ctx, el) => {
