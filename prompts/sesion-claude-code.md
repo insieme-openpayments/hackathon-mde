@@ -49,3 +49,29 @@ Respuestas del equipo:
 
 El plan completo generado por Claude Code se revisó y aprobó en la sesión; su contenido está
 resumido en `docs/ARCHITECTURE.md` y los prompts de ejecución en `prompts/workflows/`.
+
+## 9. Sincronización con los commits del equipo (durante la ejecución)
+
+> Haz pull de los mas recientes commits, ya esta el contrato en un commit
+
+> Haz nuevo pull, hay más cambios
+
+Tras cada pull, Claude Code analizó los cambios del prototipo (`customer-frontend`) y del
+repo `integration-backend` y ajustó el plan antes de lanzar los workflows (ver sección
+"Ajustes de contrato" en `prompts/workflows/01-insieme-migration.js`).
+
+## 10. Comandos ejecutados a mano por el equipo
+
+Los archivos `.env.local` están bajo una regla de permisos que impide a Claude Code leerlos
+o modificarlos. El rename de la base de datos lo ejecutó el equipo directamente en la terminal:
+
+```sh
+sed -i '' 's/boutique_backend/insieme_backend/g; s/Boutique/Insieme/g; s/boutique/insieme/g' backend/.env.example frontend/.env.example
+sed -i '' 's/boutique_backend/insieme_backend/g' backend/.env.local
+```
+
+## 11. Ejecución de los workflows
+
+Los dos workflows de `prompts/workflows/` se lanzaron desde esta misma sesión; sus scripts
+contienen literalmente los prompts de cada subagente (Sonnet, Haiku, Opus y Fable). El
+resultado de cada ronda se revisó en la sesión principal antes de hacer commit y push.
