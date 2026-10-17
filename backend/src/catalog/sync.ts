@@ -17,6 +17,11 @@ export interface ICatalogSyncService {
   getStatus: () => CatalogSyncStatus
 }
 
+const MONEY_PRODUCTS: Record<string, { type: string; name: string }> = {
+  efecty: { type: 'giro', name: 'Giro Efecty' },
+  breb: { type: 'transferencia', name: 'Transferencia Bre-B' }
+}
+
 export const SYNC_INTERVAL_MS = 10 * 60 * 1000
 
 export class CatalogSyncService implements ICatalogSyncService {
@@ -81,7 +86,8 @@ export class CatalogSyncService implements ICatalogSyncService {
               ...fields,
               metadata: {
                 ...(existing.metadata ?? {}),
-                ...(c.logo_key ? { logoKey: c.logo_key } : {})
+                ...(c.logo_key ? { logoKey: c.logo_key } : {}),
+                active: true
               }
             })
           } else {
@@ -93,12 +99,31 @@ export class CatalogSyncService implements ICatalogSyncService {
               maxAmount: null,
               logo: null,
               sortOrder: i + 1,
-              metadata: c.logo_key ? { logoKey: c.logo_key } : null,
+              metadata: {
+                ...(c.logo_key ? { logoKey: c.logo_key } : {}),
+                active: true
+              },
               ...fields
             })
           }
         }
+
+        // Convenios the upstream no longer lists are hidden, never deleted
+        // (orders reference them). An empty list is treated as a glitch.
+        if (catalog.companies.length > 0) {
+          const present = new Set(catalog.companies.map((c) => c.id))
+          const stale = await Product.query(trx).where('type', 'servicio')
+          for (const p of stale) {
+            if (!present.has(p.slug) && p.metadata?.active !== false) {
+              await p.$query(trx).patch({
+                metadata: { ...(p.metadata ?? {}), active: false }
+              })
+            }
+          }
+        }
       })
+
+      await this.syncMoneyProducts(this.integrationClient)
 
       this.catalogSource = 'integration-backend'
       this.lastSyncAt = new Date()
@@ -111,6 +136,48 @@ export class CatalogSyncService implements ICatalogSyncService {
         }`
       )
       return false
+    }
+  }
+
+  /** Syncs enabled/provider and min/max of the Efecty and Bre-B products. */
+  private async syncMoneyProducts(client: IIntegrationClient): Promise<void> {
+    try {
+      const { products } = await client.getProducts()
+      for (const up of products) {
+        const def = MONEY_PRODUCTS[up.id]
+        if (!def) continue // 'services' has no product of its own
+        const meta = { enabled: up.enabled, provider: up.provider }
+        const existing = await Product.query().where('slug', up.id).first()
+        if (existing) {
+          await existing.$query().patch({
+            minAmount: up.min_amount,
+            maxAmount: up.max_amount,
+            metadata: { ...(existing.metadata ?? {}), ...meta }
+          })
+        } else {
+          await Product.query().insert({
+            id: randomUUID(),
+            slug: up.id,
+            type: def.type,
+            name: def.name,
+            category: null,
+            price: 0,
+            requiresManualAmount: true,
+            fixedAmount: null,
+            minAmount: up.min_amount,
+            maxAmount: up.max_amount,
+            logo: null,
+            sortOrder: 0,
+            metadata: meta
+          })
+        }
+      }
+    } catch (err) {
+      this.logger.warn(
+        `Money products sync failed; keeping the current values. ${
+          err instanceof Error ? err.message : String(err)
+        }`
+      )
     }
   }
 }

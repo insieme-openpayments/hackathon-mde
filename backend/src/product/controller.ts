@@ -74,7 +74,7 @@ export class ProductController implements IProductController {
       const { type } = await validate(catalogQuerySchema, req.query)
       const [categories, products] = await Promise.all([
         this.productService.listCategories(),
-        this.productService.list({ type })
+        this.productService.list({ type: type ?? 'servicio' })
       ])
       res.status(200).json(toSuccessResponse({ categories, products }))
     } catch (err) {

@@ -23,6 +23,8 @@ import { TokenCache } from './cache/token'
 import { IPaymentService, PaymentService } from './payment/service'
 import { type OneClickCache, OneClickCacheData } from './cache/one-click'
 import { BillService, type IBillService } from './bill/service'
+import { MoneyService, type IMoneyService } from './money/service'
+import { MoneyController, type IMoneyController } from './money/controller'
 import { BillController, type IBillController } from './bill/controller'
 import type { BillSnapshot, BillSnapshotCache } from './cache/bill-snapshot'
 import {
@@ -56,6 +58,8 @@ export interface Cradle {
   paymentService: IPaymentService
   billService: IBillService
   billController: IBillController
+  moneyService: IMoneyService
+  moneyController: IMoneyController
   catalogSyncService: ICatalogSyncService
   settlementService: ISettlementService
 }
@@ -101,6 +105,8 @@ export async function createContainer(
     paymentService: asClassSingletonWithLogger(PaymentService, logger),
     billService: asClassSingletonWithLogger(BillService, logger),
     billController: asClassSingletonWithLogger(BillController, logger),
+    moneyService: asClassSingletonWithLogger(MoneyService, logger),
+    moneyController: asClassSingletonWithLogger(MoneyController, logger),
     catalogSyncService: asClassSingletonWithLogger(CatalogSyncService, logger),
     settlementService: asClassSingletonWithLogger(SettlementService, logger)
   })

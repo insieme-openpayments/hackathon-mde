@@ -1,4 +1,4 @@
-// Formatting helpers ported from customer-frontend/js/core.js (App.ui).
+// Formatting helpers ported from the retired prototype (ef76b86:customer-frontend/js/core.js, App.ui).
 // Owner: P2 (data-stores).
 
 export const money = (n: number | string | null | undefined): string =>

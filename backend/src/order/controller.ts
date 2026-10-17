@@ -3,6 +3,7 @@ import { IOrderService } from './service'
 import { Order, type OrderEvent } from './model'
 import { Payment, PaymentStatus } from '@/payment/model'
 import type { ProviderAttempt } from '@/settlement/providers'
+import type { SettlementReceipt } from '@insieme/shared'
 import {
   BadRequest,
   Conflict,
@@ -36,6 +37,7 @@ export interface AdminOrder {
     provider: string | null
     authCode: string | null
     attempts: ProviderAttempt[]
+    receipt: SettlementReceipt | null
   } | null
   events: OrderEvent[]
 }
@@ -275,7 +277,8 @@ export class OrderController implements IOrderController {
           ? {
               provider: o.settlement.provider,
               authCode: o.settlement.authCode,
-              attempts: o.settlement.attempts
+              attempts: o.settlement.attempts,
+              receipt: o.settlement.receipt ?? null
             }
           : null,
         events: o.events

@@ -132,3 +132,15 @@ los logos de convenios en `backend/images/convenios/`.
 Con esto, Giro Efecty, Transferencia Bre-B y el pago real de servicios se implementan en la app React
 (`frontend/` + `backend/`) y `customer-frontend/` se elimina del repo (su última versión está en el
 commit `ef76b86`).
+## 15. Traslado del portal a /pay y landing page (17 oct 2026)
+
+> Al terminar, revisa el veredicto, haz commit y push ff, luego prepara otro workflow porque se debe
+> crear una landing page, para eso todo el flujo se debe renderizar en el endpoint /pay de forma tal
+> que la raiz sea usada por el sitio informativo. Primero verifica que el producto es funcional al
+> moverlo fuera de la raiz y luego crea la landing page considerando:
+
+[Sigue el brief completo de la landing (contexto y objetivo, reglas de contenido no negociables,
+estructura de 8 secciones, los dos botones, seis personajes e historias, identidad visual y
+requisitos técnicos, entregables y criterios de aceptación). Texto íntegro en
+`prompts/landing-brief.md`; se pasó tal cual a los agentes del workflow
+`prompts/workflows/05-pay-base-y-landing.js`.]

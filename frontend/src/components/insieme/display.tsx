@@ -1,6 +1,6 @@
 // Read-only display blocks: KvRows, SupportNote, Receipt, Pasarela, StatusTracker.
 import { cn } from '@/lib/utils.ts'
-import { OrderStatus } from '@/lib/api-types.ts'
+import { OrderStatus, type OrderItemKind } from '@/lib/api-types.ts'
 import { formatDateTime } from '@/lib/money.ts'
 import type {
   KvRowsProps,
@@ -149,12 +149,25 @@ export function Pasarela({ icon, message, className }: PasarelaProps) {
   )
 }
 
-export const TRACKER_STEPS = [
-  'Autoriza el pago en tu billetera',
-  'Moviendo el dinero (Open Payments)',
-  'Fondos recibidos',
-  'Factura pagada en Colombia'
-] as const
+const FINAL_STEP: Record<OrderItemKind, string> = {
+  servicio: 'Factura pagada en Colombia',
+  factura: 'Factura pagada en Colombia',
+  efecty: 'Giro disponible para reclamar en Efecty',
+  breb: 'Transferencia Bre-B enviada'
+}
+
+/** Steps of the tracker; only the last one depends on the kind. */
+export function trackerSteps(kind: OrderItemKind = 'servicio'): string[] {
+  return [
+    'Autoriza el pago en tu billetera',
+    'Moviendo el dinero (Open Payments)',
+    'Fondos recibidos',
+    FINAL_STEP[kind]
+  ]
+}
+
+/** Default (servicio) steps. */
+export const TRACKER_STEPS = trackerSteps()
 
 type StepState = 'done' | 'active' | 'pending' | 'error'
 
@@ -195,8 +208,10 @@ function stepStates(status: OrderStatus, authorized: boolean): StepState[] {
 export function StatusTracker({
   status,
   events,
+  kind,
   className
 }: StatusTrackerProps) {
+  const steps = trackerSteps(kind)
   const authorized = events.some((e) =>
     e.message.startsWith('Pagador autorizó')
   )
@@ -209,7 +224,7 @@ export function StatusTracker({
       )}
     >
       <ol className="flex flex-col">
-        {TRACKER_STEPS.map((step, i) => {
+        {steps.map((step, i) => {
           const state = states[i]
           return (
             <li
@@ -217,7 +232,7 @@ export function StatusTracker({
               aria-current={state === 'active' ? 'step' : undefined}
               className="relative flex items-start gap-3 pb-5 last:pb-0"
             >
-              {i < TRACKER_STEPS.length - 1 ? (
+              {i < steps.length - 1 ? (
                 <span
                   aria-hidden="true"
                   className={cn(

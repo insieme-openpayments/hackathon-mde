@@ -43,6 +43,8 @@ export class ProductService implements IProductService {
       { column: 'sortOrder', order: 'asc' },
       { column: 'name', order: 'asc' }
     ])
+    // Products the upstream catalog dropped are hidden (rows are never deleted)
+    query.whereRaw("(metadata->>'active') is distinct from 'false'")
     if (filters.type) query.where('type', filters.type)
     if (filters.category) query.where('category', filters.category)
     return await query

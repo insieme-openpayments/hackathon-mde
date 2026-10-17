@@ -1,5 +1,6 @@
 import { BaseModel } from '@/lib'
 import type { Pojo } from 'objection'
+import type { SettlementReceipt } from '@insieme/shared'
 import type { ProviderAttempt } from './providers'
 
 export enum SettlementStatus {
@@ -9,7 +10,7 @@ export enum SettlementStatus {
 
 export class Settlement extends BaseModel {
   static tableName = 'settlements'
-  static jsonAttributes = ['attempts']
+  static jsonAttributes = ['attempts', 'receipt']
 
   public orderId!: string
   public idempotencyKey!: string
@@ -18,6 +19,7 @@ export class Settlement extends BaseModel {
   public amount!: number | null
   public paidAt!: Date | null
   public attempts!: ProviderAttempt[]
+  public receipt!: SettlementReceipt | null
   public status!: SettlementStatus
 
   /**
@@ -30,7 +32,8 @@ export class Settlement extends BaseModel {
       authCode: json.authCode,
       paidAt:
         json.paidAt instanceof Date ? json.paidAt.toISOString() : json.paidAt,
-      amount: json.amount
+      amount: json.amount,
+      receipt: json.receipt ?? null
     }
   }
 }

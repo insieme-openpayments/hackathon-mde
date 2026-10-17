@@ -1,6 +1,7 @@
 import type { KeyboardEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { BrandFooter, Isotipo, Screen, Tip } from '@/components/insieme'
+import { useMoneyProductsQuery } from '@/hooks/use-money-products-query.ts'
 import { cn } from '@/lib/utils.ts'
 
 interface HomeProduct {
@@ -18,6 +19,20 @@ const PRODUCTS: HomeProduct[] = [
     icon: 'cat-pago-servicios',
     tip: 'Paga facturas de servicios públicos, salud, educación y más',
     to: '/servicios'
+  },
+  {
+    id: 'efecty',
+    label: 'Giro Efecty',
+    icon: 'cat-efecty',
+    tip: 'Envía dinero a una persona en Colombia: reclama en efectivo en un punto Efecty',
+    to: '/giros'
+  },
+  {
+    id: 'breb',
+    label: 'Bre-B',
+    icon: 'cat-breb',
+    tip: 'Transfiere a una llave Bre-B: celular, correo o documento',
+    to: '/breb'
   },
   {
     id: 'recargas',
@@ -44,6 +59,14 @@ const PRODUCTS: HomeProduct[] = [
 
 export function Component() {
   const navigate = useNavigate()
+  const money = useMoneyProductsQuery()
+  // A failed query shows every card; only an explicit enabled=false hides one.
+  const hidden = new Set(
+    (money.data ?? [])
+      .filter((p) => p.metadata?.enabled === false)
+      .map((p) => p.slug)
+  )
+  const visible = PRODUCTS.filter((p) => !hidden.has(p.id))
 
   const open = (product: HomeProduct) => {
     if (product.to) navigate(product.to)
@@ -90,7 +113,7 @@ export function Component() {
           ¿Qué quieres pagar hoy?
         </h2>
         <div className="grid w-full grid-cols-2 gap-3">
-          {PRODUCTS.map((p) => {
+          {visible.map((p) => {
             const active = p.to !== null
             return (
               <div

@@ -1,9 +1,5 @@
 import { Logger } from 'winston'
-import type {
-  BillLookupResult,
-  OrderItemInput,
-  OrderReceiptItem
-} from '@insieme/shared'
+import type { BillLookupResult, OrderItemInput } from '@insieme/shared'
 import { BadRequest } from '@/lib'
 import { IProductService } from '@/product/service'
 import type { Product } from '@/product/model'
@@ -13,6 +9,7 @@ import {
   type IIntegrationClient,
   IntegrationUnavailable
 } from '@/integration/client'
+import { type IMoneyService, type PricedOrderItem } from '@/money/service'
 import { simulateBill, simulateInvoiceDetails } from './simulate'
 
 export const NO_BILL_MESSAGE =
@@ -21,16 +18,35 @@ export const SNAPSHOT_TTL_MS = 30 * 60 * 1000
 export const MIN_PAYMENT = 1000
 export const MAX_INVOICE_PAYMENT = 5_000_000
 
+export type { PricedOrderItem }
+
 export type ResolvedBill = Pick<
   BillSnapshot,
-  'amount' | 'partial' | 'minAmount' | 'maxAmount' | 'dueDate'
+  | 'amount'
+  | 'partial'
+  | 'minAmount'
+  | 'maxAmount'
+  | 'dueDate'
+  | 'trace'
+  | 'requiresAmount'
+  | 'source'
 >
 
-export interface PricedOrderItem {
-  productId: string
-  quantity: number
-  price: number
-  details: NonNullable<OrderReceiptItem['details']>
+/** Holder/concept/dueDate: simulated only when the bill itself is simulated. */
+const invoiceDetails = (
+  resolved: ResolvedBill,
+  slug: string,
+  ref1: string
+): Pick<BillSnapshot, 'holder' | 'concept' | 'dueDate'> => {
+  if (resolved.source === 'local') {
+    const sim = simulateInvoiceDetails(slug, ref1)
+    return {
+      holder: sim.holder,
+      concept: sim.concept,
+      dueDate: resolved.dueDate ?? sim.dueDate
+    }
+  }
+  return { holder: null, concept: null, dueDate: resolved.dueDate ?? null }
 }
 
 export interface IBillService {
@@ -47,7 +63,8 @@ export class BillService implements IBillService {
     private logger: Logger,
     private productService: IProductService,
     private integrationClient: IIntegrationClient | null,
-    private billSnapshotCache: BillSnapshotCache
+    private billSnapshotCache: BillSnapshotCache,
+    private moneyService: IMoneyService
   ) {}
 
   public async resolveBill(
@@ -60,6 +77,8 @@ export class BillService implements IBillService {
           product.slug,
           ref1
         )
+        const requiresAmount = res.requires_amount === true
+        const trace = res.trace ?? null
         // A fixed-amount convenio always bills its fixed amount (same rule
         // as the local simulation), whatever the upstream returned.
         if (product.fixedAmount != null) {
@@ -68,15 +87,26 @@ export class BillService implements IBillService {
             partial: res.partial_allowed,
             minAmount: Math.min(res.min_amount, product.fixedAmount),
             maxAmount: product.fixedAmount,
-            dueDate: res.due_date ?? null
+            dueDate: res.due_date ?? null,
+            trace,
+            requiresAmount,
+            source: 'integration-backend'
           }
         }
+        // requires_amount: the payer types the value, so it is editable
+        // within the same min/max even if the product is not partial.
         return {
           amount: res.amount,
-          partial: res.partial_allowed,
+          partial: res.partial_allowed || requiresAmount,
           minAmount: res.min_amount,
-          maxAmount: res.max_amount,
-          dueDate: res.due_date ?? null
+          maxAmount:
+            requiresAmount && res.max_amount <= 0
+              ? MAX_INVOICE_PAYMENT
+              : res.max_amount,
+          dueDate: res.due_date ?? null,
+          trace,
+          requiresAmount,
+          source: 'integration-backend'
         }
       } catch (err) {
         if (
@@ -110,7 +140,6 @@ export class BillService implements IBillService {
     ref1: string
   ): Promise<BillLookupResult> {
     const product = await this.productService.getById(productId)
-    const sim = simulateInvoiceDetails(product.slug, ref1)
     const key = snapshotKey(product.id, ref1)
 
     // Reuse a live snapshot so repeated lookups (other tabs, double click)
@@ -120,9 +149,7 @@ export class BillService implements IBillService {
       const resolved = await this.resolveBill(product, ref1)
       snapshot = {
         ...resolved,
-        dueDate: resolved.dueDate ?? sim.dueDate,
-        holder: sim.holder,
-        concept: sim.concept
+        ...invoiceDetails(resolved, product.slug, ref1)
       }
       this.billSnapshotCache.set(key, snapshot, SNAPSHOT_TTL_MS)
     }
@@ -140,13 +167,16 @@ export class BillService implements IBillService {
       minAmount: bill.minAmount,
       maxAmount: bill.maxAmount,
       fixedAmount: product.fixedAmount,
-      holder: sim.holder,
-      concept: sim.concept,
+      holder: bill.holder,
+      concept: bill.concept,
       dueDate
     }
   }
 
   public async priceOrderItem(item: OrderItemInput): Promise<PricedOrderItem> {
+    if (item.kind === 'efecty' || item.kind === 'breb') {
+      return await this.moneyService.priceMoneyItem(item)
+    }
     const product = await this.productService.getById(item.productId)
     const { ref1, ref2, email, document } = item.details
     const errors: Record<string, string> = {}
@@ -154,8 +184,9 @@ export class BillService implements IBillService {
       snapshotKey(product.id, ref1)
     )
     let price = 0
-    let extra: Partial<Pick<BillSnapshot, 'holder' | 'concept' | 'dueDate'>> =
-      {}
+    let extra: Partial<
+      Pick<BillSnapshot, 'holder' | 'concept' | 'dueDate' | 'trace'>
+    > = {}
 
     if (item.kind === 'servicio') {
       let bill: BillSnapshot
@@ -163,26 +194,25 @@ export class BillService implements IBillService {
         bill = snapshot
       } else {
         const resolved = await this.resolveBill(product, ref1)
-        const sim = simulateInvoiceDetails(product.slug, ref1)
         bill = {
           ...resolved,
-          dueDate: resolved.dueDate ?? sim.dueDate,
-          holder: sim.holder,
-          concept: sim.concept
+          ...invoiceDetails(resolved, product.slug, ref1)
         }
       }
       extra = {
         holder: bill.holder,
         concept: bill.concept,
-        dueDate: bill.dueDate
+        dueDate: bill.dueDate,
+        ...(bill.trace ? { trace: bill.trace } : {})
       }
 
       if (bill.partial) {
         const min = Math.max(MIN_PAYMENT, bill.minAmount)
+        const max = bill.requiresAmount ? bill.maxAmount : bill.amount
         if (item.amount === undefined) {
           errors.amount = 'Ingresa el valor a pagar'
-        } else if (item.amount < min || item.amount > bill.amount) {
-          errors.amount = `El valor debe estar entre ${min} y ${bill.amount}`
+        } else if (item.amount < min || item.amount > max) {
+          errors.amount = `El valor debe estar entre ${min} y ${max}`
         } else {
           price = item.amount
         }
@@ -207,7 +237,8 @@ export class BillService implements IBillService {
         extra = {
           holder: snapshot.holder,
           concept: snapshot.concept,
-          dueDate: snapshot.dueDate
+          dueDate: snapshot.dueDate,
+          ...(snapshot.trace ? { trace: snapshot.trace } : {})
         }
       }
     }
@@ -241,7 +272,8 @@ export class BillService implements IBillService {
         ? Math.max(MIN_PAYMENT, product.minAmount ?? MIN_PAYMENT)
         : amount,
       maxAmount: amount,
-      dueDate: null
+      dueDate: null,
+      source: 'local'
     }
   }
 }

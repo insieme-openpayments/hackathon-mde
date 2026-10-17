@@ -1,10 +1,16 @@
 import { randomBytes } from 'crypto'
+import type { OrderItemKind, SettlementReceipt } from '@insieme/shared'
 
 export interface ProviderPayRequest {
   convenio: string
   ref1: string
+  /** Amount to move through the network (for efecty: without the fee). */
   amount: number
   idempotencyKey: string
+  kind: OrderItemKind
+  slug: string
+  /** The order item's details object, as stored. */
+  details: Record<string, unknown>
 }
 
 export interface ProviderReceipt {
@@ -15,6 +21,8 @@ export interface ProviderReceipt {
   ref1: string
   amount: number
   paidAt: string
+  status?: string
+  receipt?: SettlementReceipt
 }
 
 /** Contract for any collection network in Colombia. The frontend never sees which one ran. */
@@ -30,6 +38,7 @@ interface SimulatedProviderOptions {
   categories: string[]
   priority: number
   latencyMs?: number
+  receipt?: (req: ProviderPayRequest, authCode: string) => SettlementReceipt
 }
 
 const sleep = (ms: number) =>
@@ -40,7 +49,8 @@ export function simulatedProvider({
   id,
   categories,
   priority,
-  latencyMs = 600
+  latencyMs = 600,
+  receipt: buildReceipt
 }: SimulatedProviderOptions): PaymentProvider {
   const seen = new Map<string, ProviderReceipt>()
   return {
@@ -59,9 +69,12 @@ export function simulatedProvider({
       }
       const previous = seen.get(req.idempotencyKey)
       if (previous) return previous
+      const authCode = randomBytes(4).toString('hex').toUpperCase()
       const receipt: ProviderReceipt = {
         provider: id,
-        authCode: randomBytes(4).toString('hex').toUpperCase(),
+        authCode,
+        status: 'approved',
+        receipt: buildReceipt?.(req, authCode),
         idempotencyKey: req.idempotencyKey,
         convenio: req.convenio,
         ref1: req.ref1,

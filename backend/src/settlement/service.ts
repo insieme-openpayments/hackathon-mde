@@ -1,12 +1,24 @@
 import { Logger } from 'winston'
 import { Order, OrderStatus } from '@/order/model'
 import { IOrderService } from '@/order/service'
+import type { SettlementReceipt } from '@insieme/shared'
+import type { IIntegrationClient } from '@/integration/client'
 import { Settlement, SettlementStatus } from './model'
 import {
   AllProvidersFailedError,
-  payInvoice,
+  SettlementRouter,
+  describeProviderError,
   type ProviderAttempt
 } from './providers'
+
+type Kind = 'servicio' | 'factura' | 'efecty' | 'breb'
+
+const FINAL_EVENT: Record<Kind, string> = {
+  servicio: 'Factura pagada en Colombia',
+  factura: 'Factura pagada en Colombia',
+  efecty: 'Giro disponible para reclamar en Efecty',
+  breb: 'Transferencia Bre-B enviada'
+}
 
 export interface ISettlementService {
   settle: (order: Pick<Order, 'id'>) => Promise<Settlement | undefined>
@@ -16,10 +28,15 @@ export interface ISettlementService {
 export class SettlementService implements ISettlementService {
   private inFlight = new Map<string, Promise<Settlement | undefined>>()
 
+  private router: SettlementRouter
+
   constructor(
     private logger: Logger,
-    private orderService: IOrderService
-  ) {}
+    private orderService: IOrderService,
+    integrationClient: IIntegrationClient | null
+  ) {
+    this.router = new SettlementRouter(integrationClient ?? null)
+  }
 
   /** Idempotent: concurrent calls share one promise; the DB key dedupes across restarts. */
   public settle(order: Pick<Order, 'id'>): Promise<Settlement | undefined> {
@@ -63,27 +80,42 @@ export class SettlementService implements ISettlementService {
     const item = order.orderItems[0]
     const idempotencyKey = order.payments.incomingPaymentUrl
 
+    const details = (item?.details ?? {}) as unknown as Record<string, unknown>
+    const kind = ((details.kind as Kind | undefined) ?? 'servicio') as Kind
+    // Efecty charges amount + fee to the payer but sends only the amount.
+    const fee = kind === 'efecty' ? Number(details.fee ?? 0) : 0
+
     try {
-      const { receipt, attempts } = await payInvoice(item?.product?.category, {
-        convenio: item?.product?.name ?? '',
-        ref1: String(item?.details?.ref1 ?? ''),
-        amount: order.total,
-        idempotencyKey
-      })
-      return await this.record(order, idempotencyKey, {
+      const { receipt, attempts } = await this.router.pay(
+        item?.product?.category,
+        {
+          convenio: item?.product?.name ?? '',
+          ref1: String(details.ref1 ?? ''),
+          amount: order.total - fee,
+          idempotencyKey,
+          kind,
+          slug: item?.product?.slug ?? '',
+          details
+        }
+      )
+      return await this.record(order, idempotencyKey, kind, {
         status: SettlementStatus.SETTLED,
         provider: receipt.provider,
         authCode: receipt.authCode,
         amount: order.total,
         paidAt: new Date(receipt.paidAt),
-        attempts
+        attempts,
+        receipt: receipt.receipt ?? null
       })
     } catch (err) {
       const attempts =
         err instanceof AllProvidersFailedError ? err.attempts : []
-      const message = err instanceof Error ? err.message : String(err)
+      const message =
+        err instanceof AllProvidersFailedError
+          ? err.message
+          : describeProviderError(err)
       this.logger.error(`Settlement failed for order ${orderId}: ${message}`)
-      return await this.record(order, idempotencyKey, {
+      return await this.record(order, idempotencyKey, kind, {
         status: SettlementStatus.FAILED,
         attempts,
         message
@@ -94,6 +126,7 @@ export class SettlementService implements ISettlementService {
   private async record(
     order: Order,
     idempotencyKey: string,
+    kind: Kind,
     data: {
       status: SettlementStatus
       attempts: ProviderAttempt[]
@@ -102,6 +135,7 @@ export class SettlementService implements ISettlementService {
       amount?: number
       paidAt?: Date
       message?: string
+      receipt?: SettlementReceipt | null
     }
   ): Promise<Settlement | undefined> {
     const { message, ...columns } = data
@@ -115,7 +149,9 @@ export class SettlementService implements ISettlementService {
         })
         // Public timeline: never name the provider (it stays in attempts,
         // visible only through GET /admin/orders).
-        for (let i = 0; i < data.attempts.length; i++) {
+        // (the last failed attempt of a failed settlement had no retry after it)
+        const retries = data.attempts.length - (ok ? 0 : 1)
+        for (let i = 0; i < retries; i++) {
           await this.orderService.addEvent(
             order.id,
             'Red de recaudo no disponible; reintentando con otra red',
@@ -125,7 +161,10 @@ export class SettlementService implements ISettlementService {
         await this.orderService.addEvent(
           order.id,
           ok
-            ? 'Factura pagada en Colombia'
+            ? data.receipt?.status === 'pending' &&
+              (kind === 'servicio' || kind === 'factura')
+              ? 'Pago en proceso en la red de recaudo'
+              : FINAL_EVENT[kind]
             : `Error de liquidación: ${message}`,
           trx
         )

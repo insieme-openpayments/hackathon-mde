@@ -19,6 +19,7 @@ import {
   useOrderQuery,
   type OrderReceipt
 } from '@/hooks/use-order-query.ts'
+import type { OrderItemKind } from '@/lib/api-types.ts'
 import {
   clearPaymentDraft,
   paymentDraftStore
@@ -31,27 +32,107 @@ const TIMEOUT_MS = 90_000
 const LINK_CLASS =
   'self-center text-sm font-medium text-brand underline underline-offset-2'
 
+type Kind = OrderItemKind
+
+const OPERATION: Record<Kind, string> = {
+  servicio: 'Pago de servicios',
+  factura: 'Pago de servicios',
+  efecty: 'Giro Efecty',
+  breb: 'Transferencia Bre-B'
+}
+
+function itemKind(order: OrderReceipt): Kind {
+  const item = order.orderItems[0]
+  const kind = item?.details?.kind
+  if (kind) return kind
+  const type = item?.product?.type
+  if (type === 'giro') return 'efecty'
+  if (type === 'transferencia') return 'breb'
+  return 'servicio'
+}
+
+/** dd/mm/aaaa */
+function formatDate(iso: string): string {
+  const d = new Date(iso)
+  if (Number.isNaN(d.getTime())) return iso
+  const pad = (n: number) => String(n).padStart(2, '0')
+  return `${pad(d.getDate())}/${pad(d.getMonth() + 1)}/${d.getFullYear()}`
+}
+
 function receiptRows(
   order: OrderReceipt,
   estado: { label: string; tone?: 'success' | 'error' }
 ): KvRow[] {
+  const kind = itemKind(order)
   const item = order.orderItems[0]
   const details = item?.details
-  const rows: KvRow[] = [
-    {
-      label: 'Fecha y hora',
-      value: formatDateTime(order.settlement?.paidAt ?? order.createdAt)
-    },
-    { label: 'Estado', value: estado.label, tone: estado.tone },
-    { label: 'Operación', value: 'Pago de servicios' },
-    {
-      label: 'Número de autorización',
-      value: order.settlement?.authCode ?? '—'
-    },
-    { label: 'ID transacción', value: order.id },
-    { label: 'Convenio', value: item?.product?.name ?? '' },
-    { label: 'Referencia de pago 1', value: details?.ref1 ?? '' }
-  ]
+  const settlement = order.settlement
+  const receipt = settlement?.receipt ?? null
+  const when = {
+    label: 'Fecha y hora',
+    value: formatDateTime(settlement?.paidAt ?? order.createdAt)
+  }
+  const estadoRow: KvRow = {
+    label: 'Estado',
+    value: estado.label,
+    tone: estado.tone
+  }
+  const rows: KvRow[] = []
+
+  if (kind === 'efecty') {
+    const fee = details?.fee ?? 0
+    const total = details?.total ?? order.total
+    rows.push(estadoRow)
+    rows.push({ label: 'ID del giro', value: settlement?.authCode ?? '—' })
+    rows.push({ label: 'Operación', value: OPERATION.efecty })
+    rows.push({ label: 'Beneficiario', value: details?.recipientName ?? '' })
+    if (details?.recipientDocument) {
+      rows.push({ label: 'Cédula', value: details.recipientDocument })
+    }
+    if (details?.recipientPhone) {
+      rows.push({ label: 'Celular', value: details.recipientPhone })
+    }
+    rows.push({ label: 'Valor del giro', value: money(total - fee) })
+    rows.push({ label: 'Comisión', value: money(fee) })
+    rows.push({ label: 'Total', value: money(total) })
+    rows.push(when)
+    if (receipt?.expiresAt) {
+      rows.push({ label: 'Vence el', value: formatDate(receipt.expiresAt) })
+    }
+    rows.push({ label: 'ID transacción', value: order.id })
+    return rows
+  }
+
+  if (kind === 'breb') {
+    rows.push(estadoRow)
+    rows.push({
+      label: 'ID transacción',
+      value: settlement?.authCode ?? order.id
+    })
+    rows.push({ label: 'Operación', value: OPERATION.breb })
+    rows.push({
+      label: 'Titular',
+      value: receipt?.holderName ?? details?.holderName ?? ''
+    })
+    rows.push({ label: 'Banco', value: receipt?.bank ?? details?.bank ?? '' })
+    rows.push({ label: 'Llave', value: details?.key ?? '' })
+    rows.push({ label: 'Valor', value: money(order.total) })
+    if (details?.description) {
+      rows.push({ label: 'Descripción', value: details.description })
+    }
+    rows.push(when)
+    return rows
+  }
+
+  rows.push(when, estadoRow)
+  rows.push({ label: 'Operación', value: OPERATION[kind] })
+  rows.push({
+    label: 'Número de autorización',
+    value: settlement?.authCode ?? '—'
+  })
+  rows.push({ label: 'ID transacción', value: order.id })
+  rows.push({ label: 'Convenio', value: item?.product?.name ?? '' })
+  rows.push({ label: 'Referencia de pago 1', value: details?.ref1 ?? '' })
   if (details?.ref2) {
     rows.push({ label: 'Referencia de pago 2', value: details.ref2 })
   }
@@ -153,17 +234,25 @@ export function Component() {
   }
 
   const firstItem = order.orderItems[0]
+  const kind = itemKind(order)
   const isFacturas =
     initialDraft.current.facturas || firstItem?.details?.kind === 'factura'
-  const retry =
-    initialDraft.current.returnTo ||
-    (isFacturas
-      ? '/facturas'
-      : firstItem?.productId
-        ? `/servicios/pagar/${firstItem.productId}${
-            firstItem.details?.ref1 ? `?ref1=${firstItem.details.ref1}` : ''
-          }`
-        : '/servicios')
+  const kindRoute =
+    kind === 'efecty'
+      ? '/giros'
+      : kind === 'breb'
+        ? '/breb'
+        : isFacturas
+          ? '/facturas'
+          : firstItem?.productId
+            ? `/servicios/pagar/${firstItem.productId}${
+                firstItem.details?.ref1 ? `?ref1=${firstItem.details.ref1}` : ''
+              }`
+            : '/servicios'
+  const retry = initialDraft.current.returnTo || kindRoute
+  const lastError = [...order.events]
+    .reverse()
+    .find((e) => e.message.startsWith('Error de liquidación'))
 
   const homeLink = (
     <Link to="/" className={LINK_CLASS}>
@@ -178,7 +267,7 @@ export function Component() {
         <p className="text-center text-sm text-neutral-normal">
           Esto puede tardar unos segundos. No cierres esta pantalla.
         </p>
-        <StatusTracker status={status} events={order.events} />
+        <StatusTracker status={status} kind={kind} events={order.events} />
         {timedOut ? (
           <p className="text-center text-sm text-neutral-normal" role="status">
             La confirmación está tardando más de lo normal. Puedes volver más
@@ -191,18 +280,45 @@ export function Component() {
   }
 
   if (status === OrderStatus.SETTLED) {
+    const receipt = order.settlement?.receipt ?? null
+    const pending = receipt?.status === 'pending'
+    const title =
+      kind === 'efecty'
+        ? '¡Giro creado!'
+        : kind === 'breb'
+          ? '¡Transferencia enviada!'
+          : '¡Transacción exitosa!'
+    const estado =
+      kind === 'efecty'
+        ? 'Disponible para reclamar'
+        : kind === 'breb'
+          ? 'Completada'
+          : pending
+            ? 'Pendiente'
+            : 'Aprobada'
     return (
       <Screen>
         <Receipt
-          title="¡Transacción exitosa!"
+          title={title}
+          subtitle={
+            kind === 'efecty' && receipt?.message ? (
+              <p>{receipt.message}</p>
+            ) : undefined
+          }
           rows={receiptRows(order, {
-            label: 'Aprobada',
-            tone: 'success'
+            label: estado,
+            tone: pending ? undefined : 'success'
           })}
         >
+          {kind === 'efecty' && receipt?.instructions ? (
+            <div className="w-full rounded-2xl border border-brand-soft-active bg-white p-4 text-sm leading-snug text-neutral-darker shadow-soft">
+              <p className="mb-1 font-semibold">Cómo reclamarlo</p>
+              <p className="[overflow-wrap:anywhere]">{receipt.instructions}</p>
+            </div>
+          ) : null}
           <SupportNote />
           <div className="flex flex-col gap-3">
-            {isFacturas ? (
+            {isFacturas && kind !== 'efecty' && kind !== 'breb' ? (
               <Link to="/facturas" className={LINK_CLASS}>
                 Ver mis facturas
               </Link>
@@ -219,11 +335,32 @@ export function Component() {
     return (
       <Screen>
         <Receipt
-          title="No pudimos pagar la factura. Tu dinero queda registrado para reintento/reembolso."
+          title={
+            kind === 'efecty'
+              ? 'No pudimos crear el giro. Tu dinero queda registrado para reintento/reembolso.'
+              : kind === 'breb'
+                ? 'No pudimos enviar la transferencia. Tu dinero queda registrado para reintento/reembolso.'
+                : 'No pudimos pagar la factura. Tu dinero queda registrado para reintento/reembolso.'
+          }
           tone="warning"
+          subtitle={
+            lastError ? <p role="alert">{lastError.message}</p> : undefined
+          }
           rows={receiptRows(order, { label: 'Pago recibido' })}
         >
           <SupportNote />
+          {kind === 'servicio' || kind === 'factura' ? null : (
+            <Actions>
+              <Button
+                type="button"
+                aria-label="Intentar de nuevo"
+                className="flex-1"
+                onClick={() => navigate(retry)}
+              >
+                Intentar de nuevo
+              </Button>
+            </Actions>
+          )}
           {homeLink}
           <BrandFooter />
         </Receipt>

@@ -23,19 +23,28 @@ import { resetToken } from '@/lib/stores/token-store.ts'
 import { setPaymentDraft } from '@/lib/stores/payment-draft-store.ts'
 import { confirmWalletSchema } from '@/lib/schemas.ts'
 import type {
-  OrderItemDetails,
+  BrebDetails,
+  EfectyDetails,
   OrderItemInput,
-  OrderItemKind
+  ServicioDetails
 } from '@/lib/api-types.ts'
 
-export interface ConfirmPanelProps {
+/** The kind decides the shape of the details. */
+export type ConfirmItem =
+  | { kind: 'servicio' | 'factura'; details: ServicioDetails }
+  | { kind: 'efecty'; details: EfectyDetails }
+  | { kind: 'breb'; details: BrebDetails }
+
+export type ConfirmPanelProps = ConfirmItem & ConfirmPanelBaseProps
+
+interface ConfirmPanelBaseProps {
   /** Rows of the "Confirma la transacción" summary. */
   rows: KvRow[]
   /** Whole COP units to charge. */
   amount: number
   productId: string
-  kind: OrderItemKind
-  details: OrderItemDetails
+  /** Value before fees; saved in the draft to rehydrate the form. Defaults to amount. */
+  baseAmount?: number
   /** Saved invoice being paid (facturas flow); the confirmation page marks it paid once SETTLED. */
   facturaId?: string
   /** "Confirmar" is clickable. */
@@ -50,20 +59,31 @@ export interface ConfirmPanelProps {
 const normalizeWallet = (url: string) =>
   url.trim().replace('$', 'https://').replace(/\/+$/, '').toLowerCase()
 
-const FIELD_KEYS = ['walletAddressUrl', 'amount', 'ref1', 'ref2', 'email']
+const FIELD_KEYS = [
+  'walletAddressUrl',
+  'amount',
+  'ref1',
+  'ref2',
+  'email',
+  'key',
+  'recipientDocument',
+  'recipientName',
+  'recipientPhone'
+]
 
-export function ConfirmPanel({
-  rows,
-  amount,
-  productId,
-  kind,
-  details,
-  facturaId,
-  enabled,
-  onInvalid,
-  onBack,
-  onCreated
-}: ConfirmPanelProps) {
+export function ConfirmPanel(props: ConfirmPanelProps) {
+  const {
+    rows,
+    amount,
+    productId,
+    baseAmount,
+    facturaId,
+    enabled,
+    onInvalid,
+    onBack,
+    onCreated
+  } = props
+  const { kind, details } = props
   const navigate = useNavigate()
   const location = useLocation()
   const token = useTokenStore()
@@ -88,11 +108,13 @@ export function ConfirmPanel({
   const writeDraft = () =>
     setPaymentDraft({
       productId,
-      ref1: details.ref1,
-      ref2: details.ref2 ?? '',
+      ref1: 'ref1' in details ? details.ref1 : '',
+      ref2: 'ref2' in details ? (details.ref2 ?? '') : '',
       amount,
+      baseAmount: baseAmount ?? amount,
       email: details.email ?? '',
       kind,
+      details: JSON.stringify(details),
       facturaId: facturaId ?? '',
       returnTo
     })
@@ -100,10 +122,10 @@ export function ConfirmPanel({
   const item: OrderItemInput = {
     productId,
     quantity: 1,
-    kind,
     amount,
+    kind,
     details
-  }
+  } as OrderItemInput
 
   const setApiErrors = (
     errors: Record<string, string> | undefined,

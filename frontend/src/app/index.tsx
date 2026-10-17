@@ -13,6 +13,8 @@ import { serviciosRoutes } from './servicios/routes.tsx'
 import { facturasRoutes } from './facturas/routes.tsx'
 import { checkoutRoutes } from './checkout/routes.tsx'
 import { cartRoutes } from './cart/routes.tsx'
+import { girosRoutes } from './giros/routes.tsx'
+import { brebRoutes } from './breb/routes.tsx'
 
 export const routes = [
   {
@@ -25,6 +27,14 @@ export const routes = [
       {
         path: '/servicios',
         children: serviciosRoutes
+      },
+      {
+        path: '/giros',
+        children: girosRoutes
+      },
+      {
+        path: '/breb',
+        children: brebRoutes
       },
       {
         path: '/facturas',

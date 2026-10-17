@@ -3,7 +3,7 @@ import { env } from '@/config/env'
 import { createApp, TestApp } from '@/tests/app'
 import { AwilixContainer } from 'awilix'
 import { truncateTables } from '@/tests/tables'
-import { seedCatalog } from '@/tests/helpers'
+import { seedCatalog, seedMoneyProducts } from '@/tests/helpers'
 import { createRequest, createResponse } from 'node-mocks-http'
 import { NextFunction, Request, Response } from 'express'
 import { IOrderController } from '@/order/controller'
@@ -66,6 +66,7 @@ describe('Order Controller', (): void => {
   beforeEach(async (): Promise<void> => {
     await truncateTables(app.knex)
     await seedCatalog(app.knex)
+    await seedMoneyProducts(app.knex)
     jest.spyOn(openPayments, 'preparePayment').mockResolvedValue({
       interact: { redirect: 'https://wallet.example/consent' }
     } as never)
@@ -185,6 +186,93 @@ describe('Order Controller', (): void => {
       expect(order.orderItems[0].details).toMatchObject({
         kind: 'factura',
         email: 'ana@example.com'
+      })
+    })
+  })
+
+  describe('create (money products)', (): void => {
+    it('creates an efecty order charging amount + fee', async (): Promise<void> => {
+      const res = await run(orderController.create, {
+        walletAddressUrl,
+        products: [
+          {
+            productId: (await productService.getBySlug('efecty')).id,
+            kind: 'efecty',
+            amount: 250000,
+            details: {
+              recipientDocument: '1.020.304.050',
+              recipientName: 'Ana Pérez'
+            }
+          }
+        ]
+      })
+      expect(res.statusCode).toBe(201)
+      const order = await orderService.get(res._getJSONData().result.orderId)
+      expect(order.total).toBe(250000)
+      expect(order.orderItems[0].details).toMatchObject({
+        kind: 'efecty',
+        recipientDocument: '1020304050',
+        recipientName: 'Ana Pérez',
+        fee: 0,
+        total: 250000
+      })
+    })
+
+    it('returns 400 with errors.amount when the giro exceeds the maximum', async (): Promise<void> => {
+      const res = await run(orderController.create, {
+        walletAddressUrl,
+        products: [
+          {
+            productId: (await productService.getBySlug('efecty')).id,
+            kind: 'efecty',
+            amount: 2000000,
+            details: {
+              recipientDocument: '1020304050',
+              recipientName: 'Ana Pérez'
+            }
+          }
+        ]
+      })
+      expect(res.statusCode).toBe(400)
+      expect(res._getJSONData().errors).toHaveProperty('amount')
+    })
+
+    it('returns 400 with errors.key for a Bre-B key that does not exist', async (): Promise<void> => {
+      const res = await run(orderController.create, {
+        walletAddressUrl,
+        products: [
+          {
+            productId: (await productService.getBySlug('breb')).id,
+            kind: 'breb',
+            amount: 5000,
+            details: { key: '3001234560' }
+          }
+        ]
+      })
+      expect(res.statusCode).toBe(400)
+      expect(res._getJSONData().errors).toHaveProperty('key')
+    })
+
+    it('creates a Bre-B order', async (): Promise<void> => {
+      const res = await run(orderController.create, {
+        walletAddressUrl,
+        products: [
+          {
+            productId: (await productService.getBySlug('breb')).id,
+            kind: 'breb',
+            amount: 5000,
+            details: { key: 'ana@correo.com', description: 'Arriendo' }
+          }
+        ]
+      })
+      expect(res.statusCode).toBe(201)
+      const order = await orderService.get(res._getJSONData().result.orderId)
+      expect(order.total).toBe(5000)
+      expect(order.orderItems[0].details).toMatchObject({
+        kind: 'breb',
+        key: 'ana@correo.com',
+        keyType: 'email',
+        description: 'Arriendo'
       })
     })
   })

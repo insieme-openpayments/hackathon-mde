@@ -1,4 +1,4 @@
-export type ProductType = 'servicio'
+export type ProductType = 'servicio' | 'giro' | 'transferencia'
 
 export interface Category {
   id: string
@@ -23,6 +23,7 @@ export interface CatalogProduct {
   /** Relative to GET /images/ */
   logo: string | null
   sortOrder: number
+  /** May carry { enabled?: boolean, provider?: string, active?: boolean } */
   metadata: Record<string, unknown> | null
 }
 
@@ -42,27 +43,109 @@ export interface BillLookupResult {
   minAmount: number
   maxAmount: number
   fixedAmount: number | null
-  holder: string
-  concept: string
+  /** Null when the bill comes from the real upstream (only the local simulation invents them). */
+  holder: string | null
+  concept: string | null
   dueDate: string | null
 }
 
-export type OrderItemKind = 'servicio' | 'factura'
+export type OrderItemKind = 'servicio' | 'factura' | 'efecty' | 'breb'
 
-export interface OrderItemDetailsInput {
+/** Details for kind servicio and factura */
+export interface ServicioDetails {
   ref1: string
   ref2?: string
   email?: string
   document?: string
 }
 
-export interface OrderItemInput {
-  productId: string
-  quantity?: 1
-  kind: OrderItemKind
-  /** Whole COP units */
-  amount?: number
-  details: OrderItemDetailsInput
+export interface EfectyDetails {
+  recipientDocument: string
+  recipientName: string
+  recipientPhone?: string
+  email?: string
+}
+
+export interface BrebDetails {
+  key: string
+  description?: string
+  email?: string
+}
+
+/** @deprecated alias of ServicioDetails (kept for backwards compatibility) */
+export type OrderItemDetailsInput = ServicioDetails
+
+export type OrderItemDetailsByKind =
+  | ServicioDetails
+  | EfectyDetails
+  | BrebDetails
+
+export type OrderItemInput =
+  | {
+      productId: string
+      quantity?: 1
+      kind: 'servicio'
+      /** Whole COP units */
+      amount?: number
+      details: ServicioDetails
+    }
+  | {
+      productId: string
+      quantity?: 1
+      kind: 'factura'
+      amount: number
+      details: ServicioDetails
+    }
+  | {
+      productId: string
+      quantity?: 1
+      kind: 'efecty'
+      amount: number
+      details: EfectyDetails
+    }
+  | {
+      productId: string
+      quantity?: 1
+      kind: 'breb'
+      amount: number
+      details: BrebDetails
+    }
+
+export interface EfectyQuote {
+  amount: number
+  fee: number
+  total: number
+  currency: string
+  minAmount: number
+  maxAmount: number
+  /** Normalized: digits only */
+  recipientDocument: string
+  recipientName: string
+  message: string
+  simulated: boolean
+}
+
+export type BrebKeyType = 'phone' | 'email' | 'document' | 'alphanumeric'
+
+export interface BrebKeyResolution {
+  key: string
+  keyType: BrebKeyType
+  exists: true
+  holderName: string
+  bank: string
+  message: string
+  simulated: boolean
+}
+
+export interface SettlementReceipt {
+  reference: string
+  status: string
+  message?: string
+  instructions?: string
+  expiresAt?: string | null
+  holderName?: string
+  bank?: string
+  network?: string
 }
 
 export type OrderStatus =
@@ -73,19 +156,27 @@ export type OrderStatus =
   | 'SETTLED'
   | 'SETTLEMENT_FAILED'
 
+export type OrderReceiptItemDetails = Partial<
+  ServicioDetails & EfectyDetails & BrebDetails
+> & {
+  kind: OrderItemKind
+  holder?: string | null
+  concept?: string | null
+  dueDate?: string | null
+  trace?: string | null
+  fee?: number
+  total?: number
+  keyType?: BrebKeyType
+  holderName?: string
+  bank?: string
+}
+
 export interface OrderReceiptItem {
   id: string
   productId: string
   quantity: number
   price: number
-  details:
-    | (OrderItemDetailsInput & {
-        kind: OrderItemKind
-        holder?: string
-        concept?: string
-        dueDate?: string | null
-      })
-    | null
+  details: OrderReceiptItemDetails | null
   product: CatalogProduct
 }
 
@@ -105,7 +196,12 @@ export interface OrderReceipt {
     createdAt: string
     updatedAt: string
   } | null
-  settlement: { authCode: string; paidAt: string; amount: number } | null
+  settlement: {
+    authCode: string
+    paidAt: string
+    amount: number
+    receipt: SettlementReceipt | null
+  } | null
   events: Array<{ at: string; message: string }>
 }
 

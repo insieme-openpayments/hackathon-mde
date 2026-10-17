@@ -62,6 +62,7 @@ export class App {
     const productController = this.container.resolve('productController')
     const orderController = this.container.resolve('orderController')
     const billController = this.container.resolve('billController')
+    const moneyController = this.container.resolve('moneyController')
     const catalogSync = this.container.resolve('catalogSyncService')
     const openPayments = this.container.resolve('openPayments')
     const frontendOrigin = new URL(env.FRONTEND_URL).origin
@@ -108,6 +109,8 @@ export class App {
     router.get('/products/:slug', productController.get)
 
     router.post('/bills/lookup', billController.lookup)
+    router.post('/efecty/quote', moneyController.quote)
+    router.post('/breb/resolve', moneyController.resolve)
 
     router.post('/orders', orderController.create)
     router.post('/orders/instant-buy', orderController.instantBuy)

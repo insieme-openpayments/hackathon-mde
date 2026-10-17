@@ -3,7 +3,7 @@ import { env } from '@/config/env'
 import { createApp, TestApp } from '@/tests/app'
 import { AwilixContainer } from 'awilix'
 import { truncateTables } from '@/tests/tables'
-import { seedCatalog } from '@/tests/helpers'
+import { seedCatalog, seedMoneyProducts } from '@/tests/helpers'
 import { CatalogSyncService } from '@/catalog/sync'
 import { Product } from '@/product/model'
 import { Category } from '@/category/model'
@@ -68,13 +68,15 @@ describe('Catalog sync', (): void => {
   beforeEach(async (): Promise<void> => {
     await truncateTables(app.knex)
     await seedCatalog(app.knex)
+    await seedMoneyProducts(app.knex)
   })
 
   it('upserts products and categories without deleting rows', async (): Promise<void> => {
-    const client: IIntegrationClient = {
+    const client = {
       getCatalog: jest.fn().mockResolvedValue(upstream()),
-      validateService: jest.fn()
-    }
+      validateService: jest.fn(),
+      getProducts: jest.fn().mockResolvedValue({ products: [] })
+    } as unknown as IIntegrationClient
     const service = new CatalogSyncService(logger, client)
     expect(service.getStatus()).toEqual({
       catalogSource: 'local',
@@ -107,7 +109,7 @@ describe('Catalog sync', (): void => {
       requiresManualAmount: true
     })
 
-    expect(await Product.query().resultSize()).toBe(37)
+    expect(await Product.query().resultSize()).toBe(39)
     expect(await Category.query().resultSize()).toBe(13)
     const gas = await Category.query().findById('gas')
     expect(gas).toMatchObject({
@@ -120,16 +122,64 @@ describe('Catalog sync', (): void => {
     expect(service.getStatus().lastSyncAt).toEqual(expect.any(String))
   })
 
+  it('marks products missing upstream as inactive and keeps the rows', async (): Promise<void> => {
+    const client = {
+      getCatalog: jest.fn().mockResolvedValue(upstream()),
+      validateService: jest.fn(),
+      getProducts: jest.fn().mockResolvedValue({ products: [] })
+    } as unknown as IIntegrationClient
+    await new CatalogSyncService(logger, client).sync()
+
+    const vanti = await Product.query().where('slug', 'vanti').first()
+    expect(vanti?.metadata?.active).toBe(true)
+    const absent = await Product.query().where('type', 'servicio')
+    const inactive = absent.filter((p) => p.metadata?.active === false)
+    expect(inactive.length).toBe(34)
+    const efecty = await Product.query().where('slug', 'efecty').first()
+    expect(efecty?.metadata?.active).toBeUndefined()
+
+    const listed = await container.resolve('productService').list()
+    expect(listed.some((p) => p.slug === 'vanti')).toBe(true)
+    expect(listed.some((p) => p.metadata?.active === false)).toBe(false)
+    expect(listed.some((p) => p.slug === 'efecty')).toBe(true)
+  })
+
+  it('syncs enabled/provider and limits of the money products', async (): Promise<void> => {
+    const client = {
+      getCatalog: jest.fn().mockResolvedValue(upstream()),
+      validateService: jest.fn(),
+      getProducts: jest.fn().mockResolvedValue({
+        products: [
+          { id: 'services', enabled: true, provider: 'dummy' },
+          {
+            id: 'efecty',
+            enabled: false,
+            provider: 'real',
+            min_amount: 20000,
+            max_amount: 900000
+          }
+        ]
+      })
+    } as unknown as IIntegrationClient
+    await new CatalogSyncService(logger, client).sync()
+
+    const efecty = await Product.query().where('slug', 'efecty').first()
+    expect(efecty).toMatchObject({ minAmount: 20000, maxAmount: 900000 })
+    expect(efecty?.metadata).toMatchObject({ enabled: false, provider: 'real' })
+    expect(await Product.query().where('slug', 'services')).toHaveLength(0)
+  })
+
   it('is a no-op when the client fails', async (): Promise<void> => {
-    const client: IIntegrationClient = {
+    const client = {
       getCatalog: jest.fn().mockRejectedValue(new Error('boom')),
-      validateService: jest.fn()
-    }
+      validateService: jest.fn(),
+      getProducts: jest.fn().mockResolvedValue({ products: [] })
+    } as unknown as IIntegrationClient
     const service = new CatalogSyncService(logger, client)
 
     await expect(service.sync()).resolves.toBe(false)
 
-    expect(await Product.query().resultSize()).toBe(36)
+    expect(await Product.query().resultSize()).toBe(38)
     expect((await Product.query().where('slug', 'vanti').first())?.name).toBe(
       'Vanti S.A. ESP'
     )

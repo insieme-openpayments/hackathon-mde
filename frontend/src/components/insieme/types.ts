@@ -1,11 +1,16 @@
 // Prop contracts of the Insieme design-system components (mirror of
-// `App.ui` in customer-frontend/js/core.js). Implemented by P1 (design-system).
+// `App.ui` in the retired prototype, ef76b86:customer-frontend/js/core.js). Implemented by P1 (design-system).
 import type {
   ButtonHTMLAttributes,
   InputHTMLAttributes,
   ReactNode
 } from 'react'
-import type { CatalogProduct, Category, OrderStatus } from '@/lib/api-types.ts'
+import type {
+  CatalogProduct,
+  Category,
+  OrderItemKind,
+  OrderStatus
+} from '@/lib/api-types.ts'
 
 export interface ClassNameProp {
   className?: string
@@ -146,6 +151,8 @@ export interface PasarelaProps extends ClassNameProp {
 
 export interface StatusTrackerProps extends ClassNameProp {
   status: OrderStatus
+  /** Defaults to servicio. */
+  kind?: OrderItemKind
   events: Array<{ at: string; message: string }>
 }
 

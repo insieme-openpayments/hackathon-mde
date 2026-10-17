@@ -133,15 +133,29 @@ export class PaymentService implements IPaymentService {
         .where({ status: PaymentStatus.PENDING })
         .whereNotNull('processAt')
         .andWhere('processAt', '<=', now)
+        .orderBy('processAt', 'asc')
         .withGraphFetched('order')
 
       if (!payment) return
 
-      const incomingPayment = await this.openPayments.getIncomingPayment(
-        payment.incomingPaymentUrl
-      )
+      let incomingPayment: IncomingPayment | undefined
+      try {
+        incomingPayment = await this.openPayments.getIncomingPayment(
+          payment.incomingPaymentUrl
+        )
+      } catch {
+        // A payment that cannot be fetched must not block the queue: count
+        // the attempt and move it to the back instead of rolling back.
+        this.logger.warn(
+          `Could not check incoming payment of order ${payment.orderId}; retrying later`
+        )
+        incomingPayment = undefined
+      }
 
-      if (this.ensurePaymentIsCompleted(incomingPayment, payment.order.total)) {
+      if (
+        incomingPayment &&
+        this.ensurePaymentIsCompleted(incomingPayment, payment.order.total)
+      ) {
         await Promise.all([
           this.complete(payment, trx),
           payment.$query(trx).patch({ processAt: null })

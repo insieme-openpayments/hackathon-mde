@@ -8,7 +8,7 @@ describe('simulateBill', (): void => {
   })
 
   it('matches the prototype formula', (): void => {
-    // Reference value computed with billFor() from customer-frontend
+    // Reference value computed with billFor() from the retired customer-frontend prototype (ef76b86)
     const s = 'vanti' + '123456'
     let h = 7
     for (let i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) % 100003

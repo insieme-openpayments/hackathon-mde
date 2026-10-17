@@ -37,7 +37,7 @@ const CONCEPTS = [
 const BASE_DUE_DATE = Date.UTC(2026, 10, 1)
 const DAY_MS = 24 * 60 * 60 * 1000
 
-/** Same rolling hash as `billFor` in customer-frontend/js/screens/servicios.js */
+/** Same rolling hash as `billFor` in the retired customer-frontend prototype (git show ef76b86:customer-frontend/js/screens/servicios.js) */
 export function hashOf(slug: string, ref1: string): number {
   const s = String(slug) + String(ref1 || '')
   let h = 7

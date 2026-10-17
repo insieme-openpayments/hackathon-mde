@@ -239,26 +239,34 @@ export function Component() {
 
         {step2 ? (
           <>
-            <dl className="flex w-full flex-col gap-2 rounded-2xl border border-brand-soft-active bg-white p-4 text-sm">
-              <div className="flex justify-between gap-3">
-                <dt className="shrink-0 text-neutral-normal">Titular</dt>
-                <dd className="min-w-0 text-right font-semibold text-neutral-darker [overflow-wrap:anywhere]">
-                  {bill.holder}
-                </dd>
-              </div>
-              <div className="flex justify-between gap-3">
-                <dt className="shrink-0 text-neutral-normal">Concepto</dt>
-                <dd className="min-w-0 text-right font-semibold text-neutral-darker [overflow-wrap:anywhere]">
-                  {bill.concept}
-                </dd>
-              </div>
-              <div className="flex justify-between gap-3">
-                <dt className="shrink-0 text-neutral-normal">Vence</dt>
-                <dd className="min-w-0 text-right font-semibold text-neutral-darker">
-                  {formatDue(bill.dueDate)}
-                </dd>
-              </div>
-            </dl>
+            {bill.holder || bill.concept || bill.dueDate ? (
+              <dl className="flex w-full flex-col gap-2 rounded-2xl border border-brand-soft-active bg-white p-4 text-sm">
+                {bill.holder ? (
+                  <div className="flex justify-between gap-3">
+                    <dt className="shrink-0 text-neutral-normal">Titular</dt>
+                    <dd className="min-w-0 text-right font-semibold text-neutral-darker [overflow-wrap:anywhere]">
+                      {bill.holder}
+                    </dd>
+                  </div>
+                ) : null}
+                {bill.concept ? (
+                  <div className="flex justify-between gap-3">
+                    <dt className="shrink-0 text-neutral-normal">Concepto</dt>
+                    <dd className="min-w-0 text-right font-semibold text-neutral-darker [overflow-wrap:anywhere]">
+                      {bill.concept}
+                    </dd>
+                  </div>
+                ) : null}
+                {bill.dueDate ? (
+                  <div className="flex justify-between gap-3">
+                    <dt className="shrink-0 text-neutral-normal">Vence</dt>
+                    <dd className="min-w-0 text-right font-semibold text-neutral-darker">
+                      {formatDue(bill.dueDate)}
+                    </dd>
+                  </div>
+                ) : null}
+              </dl>
+            ) : null}
 
             <div className="relative w-full">
               <MoneyInput

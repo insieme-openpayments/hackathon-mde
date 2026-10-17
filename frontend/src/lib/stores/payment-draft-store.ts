@@ -12,6 +12,10 @@ export interface PaymentDraftState {
   amount: number | null
   email: string
   kind: OrderItemKind
+  /** JSON of the item details (any kind). */
+  details: string
+  /** Amount before fees (efecty: the value of the giro; `amount` is the total). */
+  baseAmount: number | null
   facturaId: string
   /** Route to go back to after the one-click setup round trip. */
   returnTo: string
@@ -24,6 +28,8 @@ const defaults: PaymentDraftState = {
   amount: null,
   email: '',
   kind: 'servicio',
+  details: '',
+  baseAmount: null,
   facturaId: '',
   returnTo: ''
 }
@@ -36,7 +42,9 @@ loadGuard(
     ref2: z.string(),
     amount: z.number().nullable(),
     email: z.string(),
-    kind: z.enum(['servicio', 'factura']),
+    kind: z.enum(['servicio', 'factura', 'efecty', 'breb']),
+    details: z.string(),
+    baseAmount: z.number().nullable(),
     facturaId: z.string(),
     returnTo: z.string()
   })

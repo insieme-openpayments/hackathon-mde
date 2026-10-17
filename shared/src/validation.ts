@@ -17,7 +17,7 @@ export const billLookupSchema = z.object({
 })
 
 export const catalogQuerySchema = z.object({
-  type: z.enum(['servicio']).optional(),
+  type: z.enum(['servicio', 'giro', 'transferencia']).optional(),
   category: z.string().min(1).optional()
 })
 
@@ -50,13 +50,87 @@ export const orderDetailsSchema = z.object({
     .optional()
 })
 
-export const orderItemSchema = z.object({
-  productId: z.string().uuid(),
-  quantity: z.literal(1).optional(),
-  kind: z.enum(['servicio', 'factura']),
-  amount: z.number().int().positive().optional(),
-  details: orderDetailsSchema
+export const efectyQuoteSchema = z.object({
+  recipientDocument: z
+    .string()
+    .transform((v) => v.replace(/[.\s]/g, ''))
+    .pipe(
+      z.string().regex(/^\d{6,15}$/, {
+        message: 'La cédula debe tener entre 6 y 15 dígitos'
+      })
+    ),
+  recipientName: z
+    .string()
+    .trim()
+    .min(1, { message: 'Ingresa el nombre del beneficiario' })
+    .max(80)
+    .refine(noControlChars, CONTROL_MSG),
+  recipientPhone: z
+    .string()
+    .trim()
+    .regex(/^\d{10,15}$/, {
+      message: 'El celular debe tener entre 10 y 15 dígitos'
+    })
+    .optional(),
+  amount: z.number().int().positive()
 })
+
+export const brebResolveSchema = z.object({
+  key: z
+    .string()
+    .trim()
+    .min(1, { message: 'Ingresa la llave Bre-B' })
+    .max(64)
+    .refine(noControlChars, CONTROL_MSG)
+})
+
+const emailSchema = z
+  .string()
+  .trim()
+  .refine(noControlChars, CONTROL_MSG)
+  .pipe(z.string().email({ message: 'Correo inválido' }))
+
+const itemBase = {
+  productId: z.string().uuid(),
+  quantity: z.literal(1).optional()
+}
+
+export const orderItemSchema = z.discriminatedUnion('kind', [
+  z.object({
+    ...itemBase,
+    kind: z.literal('servicio'),
+    amount: z.number().int().positive().optional(),
+    details: orderDetailsSchema
+  }),
+  z.object({
+    ...itemBase,
+    kind: z.literal('factura'),
+    amount: z.number().int().positive(),
+    details: orderDetailsSchema
+  }),
+  z.object({
+    ...itemBase,
+    kind: z.literal('efecty'),
+    amount: z.number().int().positive(),
+    details: efectyQuoteSchema.omit({ amount: true }).extend({
+      email: emailSchema.optional()
+    })
+  }),
+  z.object({
+    ...itemBase,
+    kind: z.literal('breb'),
+    amount: z.number().int().positive(),
+    details: brebResolveSchema.extend({
+      description: z
+        .string()
+        .trim()
+        .max(100)
+        .refine(noControlChars, CONTROL_MSG)
+        .optional(),
+      email: emailSchema.optional()
+    })
+  })
+])
 
 export const createOrderSchema = z.object({
   walletAddressUrl: walletAddressUrlSchema,

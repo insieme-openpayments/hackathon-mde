@@ -4,8 +4,9 @@ import { createApp, TestApp } from '@/tests/app'
 import { AwilixContainer } from 'awilix'
 import { truncateTables } from '@/tests/tables'
 import { seedCatalog } from '@/tests/helpers'
+import { MoneyService } from '@/money/service'
 import { BillService, snapshotKey } from '@/bill/service'
-import { simulateBill, simulateInvoiceDetails } from '@/bill/simulate'
+import { simulateBill } from '@/bill/simulate'
 import {
   HttpError,
   IntegrationUnavailable,
@@ -47,20 +48,27 @@ describe('Bill Service', (): void => {
   let client: IIntegrationClient
 
   const build = (withClient: IIntegrationClient | null = client) =>
-    new BillService(logger, productService, withClient, cache)
+    new BillService(
+      logger,
+      productService,
+      withClient,
+      cache,
+      new MoneyService(logger, productService, withClient)
+    )
 
   const productId = async (slug: string) =>
     (await productService.getBySlug(slug)).id
 
   const item = async (
     slug: string,
-    overrides: Partial<OrderItemInput> = {}
-  ): Promise<OrderItemInput> => ({
-    productId: await productId(slug),
-    kind: 'servicio',
-    details: { ref1: '123456' },
-    ...overrides
-  })
+    overrides: Record<string, unknown> = {}
+  ): Promise<OrderItemInput> =>
+    ({
+      productId: await productId(slug),
+      kind: 'servicio',
+      details: { ref1: '123456' },
+      ...overrides
+    }) as OrderItemInput
 
   beforeAll(async (): Promise<void> => {
     container = await createContainer(env)
@@ -82,7 +90,7 @@ describe('Bill Service', (): void => {
     client = {
       getCatalog: jest.fn(),
       validateService
-    }
+    } as unknown as IIntegrationClient
   })
 
   afterEach((): void => {
@@ -110,15 +118,16 @@ describe('Bill Service', (): void => {
         fixedAmount: null,
         dueDate: '2026-11-03'
       })
-      expect(result.holder).toBe(
-        simulateInvoiceDetails('vanti', '123456').holder
-      )
+      // A real upstream bill carries no invented holder or concept.
+      expect(result.holder).toBeNull()
+      expect(result.concept).toBeNull()
       await expect(cache.get(snapshotKey(id, '123456'))).resolves.toMatchObject(
         {
           amount: 214300,
           partial: true,
-          holder: result.holder,
-          concept: result.concept
+          holder: null,
+          concept: null,
+          source: 'integration-backend'
         }
       )
     })
@@ -216,8 +225,8 @@ describe('Bill Service', (): void => {
       expect(priced.details).toMatchObject({
         ref1: '123456',
         kind: 'servicio',
-        holder: simulateInvoiceDetails('enel', '123456').holder,
-        concept: simulateInvoiceDetails('enel', '123456').concept,
+        holder: null,
+        concept: null,
         dueDate: '2026-11-03'
       })
     })
@@ -342,6 +351,34 @@ describe('Bill Service', (): void => {
         kind: 'factura'
       })
       expect(validateService).not.toHaveBeenCalled()
+    })
+  })
+  describe('trace and requires_amount', (): void => {
+    it('keeps the trace in the snapshot and in the order details', async (): Promise<void> => {
+      validateService.mockResolvedValueOnce(
+        validation({
+          trace: 'trace-123',
+          requires_amount: true,
+          partial_allowed: false,
+          amount: 0,
+          max_amount: 0,
+          due_date: null
+        })
+      )
+      const service = build()
+      const id = await productId('vanti')
+      const lookup = await service.lookup(id, '123456')
+      expect(lookup.partial).toBe(true)
+      expect(lookup.maxAmount).toBe(5_000_000)
+      await expect(cache.get(snapshotKey(id, '123456'))).resolves.toMatchObject(
+        { trace: 'trace-123', requiresAmount: true }
+      )
+
+      const priced = await service.priceOrderItem(
+        await item('vanti', { amount: 25000 })
+      )
+      expect(priced.price).toBe(25000)
+      expect(priced.details).toMatchObject({ trace: 'trace-123' })
     })
   })
 })
