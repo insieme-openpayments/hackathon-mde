@@ -1,4 +1,5 @@
 import { AppShell } from '@/components/layouts/app-shell.tsx'
+import { RouteError } from '@/components/layouts/route-error.tsx'
 import {
   Navigate,
   RouterProvider,
@@ -19,6 +20,7 @@ import { brebRoutes } from './breb/routes.tsx'
 export const routes = [
   {
     element: <AppShell />,
+    errorElement: <RouteError />,
     children: [
       {
         path: '/',
