@@ -22,7 +22,7 @@ module.exports = async () => {
   process.env.DATABASE_URL = `postgresql://postgres:${POSTGRES_PASSWORD}@localhost:${container.getMappedPort(
     POSTGRES_PORT
   )}/${POSTGRES_DB}`
-  process.env.PAYMENT_POINTER = 'https://ilp.interledger-test.dev/boutique'
+  process.env.PAYMENT_POINTER = 'https://ilp.interledger-test.dev/insieme'
   process.env.KEY_ID = 'test-key-id'
   process.env.PRIVATE_KEY = Buffer.from(
     generateKeyPairSync('ed25519')

@@ -10,21 +10,21 @@ declare global {
 
 const windowEnv = typeof window !== 'undefined' ? window.__env__ : undefined
 
-// Resolve the boutique API base URL at runtime based on the current hostname.
+// Resolve the insieme API base URL at runtime based on the current hostname.
 // In the local HTTPS environment the frontend is served behind Traefik at
-// "boutique.test", so we route API calls to its TLS-proxied backend.
+// "insieme.test", so we route API calls to its TLS-proxied backend.
 // Outside that environment (plain localhost dev) we still fall back to the
 // local backend port.
 const getDefaultApiBaseUrl = () => {
   if (typeof window !== 'undefined') {
-    if (window.location.hostname === 'boutique.test') {
-      return 'https://api.boutique.test'
+    if (window.location.hostname === 'insieme.test') {
+      return 'https://api.insieme.test'
     }
   }
 
   console.warn(
-    'Boutique API: falling back to http://localhost:3004. ' +
-      'Set API_BASE_URL (runtime) or VITE_API_BASE_URL (build-time), or access via boutique.test.'
+    'Insieme API: falling back to http://localhost:3004. ' +
+      'Set API_BASE_URL (runtime) or VITE_API_BASE_URL (build-time), or access via insieme.test.'
   )
   return 'http://localhost:3004'
 }

@@ -3,7 +3,7 @@ import { SuccessResponse } from '@/lib/types.ts'
 import { UseMutationOptions } from '@tanstack/react-query'
 import { z } from 'zod'
 import { useCustomMutation } from './use-custom-mutation.ts'
-import { finishOrderSchema } from '@boutique/shared'
+import { finishOrderSchema } from '@insieme/shared'
 
 type FinishCheckoutMutationParams = z.infer<typeof finishOrderSchema>
 

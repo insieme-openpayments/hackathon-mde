@@ -22,7 +22,7 @@ async function loadShopCurrency() {
     }
   } catch (err) {
     console.warn(
-      `Boutique: could not load shop currency (${err}), falling back to ${CURRENCY}`
+      `Insieme: could not load shop currency (${err}), falling back to ${CURRENCY}`
     )
   }
 }

@@ -25,7 +25,7 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml .npmrc .nvmrc tsconfig.base
 COPY backend ./backend
 COPY shared ./shared
 
-RUN pnpm boutique:backend build
+RUN pnpm insieme:backend build
 RUN rm -rf ./node_modules ./backend/node_modules ./shared/node_modules
 RUN --mount=type=cache,id=pnpm,target=/root/.local/share/pnpm/store pnpm install -r --frozen-lockfile --prod \
     | grep -v "cross-device link not permitted\|Falling back to copying packages from store"

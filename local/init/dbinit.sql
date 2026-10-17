@@ -1,3 +1,3 @@
-CREATE USER boutique_backend WITH PASSWORD 'boutique_backend';
-CREATE DATABASE boutique_backend;
-ALTER DATABASE boutique_backend OWNER TO boutique_backend;
+CREATE USER insieme_backend WITH PASSWORD 'insieme_backend';
+CREATE DATABASE insieme_backend;
+ALTER DATABASE insieme_backend OWNER TO insieme_backend;

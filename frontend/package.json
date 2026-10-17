@@ -1,14 +1,14 @@
 {
-  "name": "@boutique/frontend",
+  "name": "@insieme/frontend",
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build:deps": "pnpm --filter @boutique/shared build",
+    "build:deps": "pnpm --filter @insieme/shared build",
     "build": "pnpm build:deps && tsc && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
-    "@boutique/shared": "workspace:*",
+    "@insieme/shared": "workspace:*",
     "@hookform/resolvers": "^3.10.0",
     "@radix-ui/react-dialog": "^1.1.14",
     "@radix-ui/react-dropdown-menu": "^2.1.15",

@@ -8,9 +8,9 @@ module.exports = {
     client: 'postgresql',
     connection: {
       host: 'localhost',
-      database: 'boutique_backend',
-      user: 'boutique_backend',
-      password: 'boutique_backend',
+      database: 'insieme_backend',
+      user: 'insieme_backend',
+      password: 'insieme_backend',
       port: 5433
     },
     pool: {

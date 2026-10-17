@@ -1,4 +1,4 @@
-# Boutique (fork)
+# Insieme (fork)
 
 Standalone fork of the **Interledger Testnet Boutique**, an example e-commerce
 app that accepts payments through [Open Payments](https://openpayments.dev).
@@ -13,10 +13,10 @@ This first version is a 1:1 working copy. Branding / identity changes come later
 ## Layout
 
 ```
-backend/     Express + Objection/Knex API (@boutique/backend)
+backend/     Express + Objection/Knex API (@insieme/backend)
   src/lib/   upstream @shared/backend helpers (errors, BaseModel, logger, knex, cache)
-frontend/    React + Vite + Tailwind SPA (@boutique/frontend)
-shared/      zod schemas shared by both (@boutique/shared)
+frontend/    React + Vite + Tailwind SPA (@insieme/frontend)
+shared/      zod schemas shared by both (@insieme/shared)
 local/       docker compose files (Postgres; full stack)
 ```
 
@@ -87,11 +87,11 @@ talks to `http://localhost:3004`.
 
 ## Differences from upstream
 
-- Monorepo trimmed to the boutique packages; wallet, e2e, helm and Traefik removed.
+- Monorepo trimmed to the upstream packages; wallet, e2e, helm and Traefik removed.
 - Packages live at the repo root (`backend/`, `frontend/`, `shared/`) instead of `packages/`.
 - `@shared/backend` was folded into `backend/src/lib` (imported as `@/lib`); its
   unused Redis cache client was dropped.
-- `local/docker-compose.yml` only runs Postgres (the boutique does not use Redis).
+- `local/docker-compose.yml` only runs Postgres (Insieme does not use Redis).
 - URLs default to plain `http://localhost` instead of the `*.test` TLS hosts.
 - `engines.node` relaxed to `>=24`.
 - `testcontainers` added as a backend devDependency so `pnpm test` works.

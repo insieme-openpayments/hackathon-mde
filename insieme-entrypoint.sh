@@ -8,5 +8,5 @@ elif [ "$DEV_MODE" = "debug" ]; then
   exec node --inspect=0.0.0.0:${DEBUG_PORT} ./backend/dist/index.js
 else
   echo "DEV_MODE is hot-reload, running dev command with nodemon watcher and rebuild..."
-  exec pnpm boutique:backend dev
+  exec pnpm insieme:backend dev
 fi

@@ -1,8 +1,8 @@
 {
-  "name": "@boutique/backend",
+  "name": "@insieme/backend",
   "scripts": {
     "start": "sh -c 'set --; [ -f .env.local ] && set -- \"$@\" --env-file=.env.local; [ -f .env ] && set -- \"$@\" --env-file=.env; node \"$@\" dist/index.js'",
-    "build:deps": "pnpm --filter @boutique/shared build",
+    "build:deps": "pnpm --filter @insieme/shared build",
     "build": "pnpm build:deps && tsc --build tsconfig.build.json && tsc-alias -p tsconfig.build.json",
     "dev": "nodemon --watch ./src --watch ../shared/src --ext ts,json --delay 0.5 --exec \"sh -c 'set --; [ -f .env.local ] && set -- \\$@ --env-file=.env.local; [ -f .env ] && set -- \\$@ --env-file=.env; pnpm run build && node \\$@ ./dist/index.js'\"",
     "test": "pnpm build:deps && NODE_OPTIONS='--experimental-vm-modules' jest --passWithNoTests --maxWorkers=2"
@@ -10,7 +10,7 @@
   "dependencies": {
     "@google-cloud/logging-winston": "^6.0.1",
     "@interledger/open-payments": "^7.3.0",
-    "@boutique/shared": "workspace:*",
+    "@insieme/shared": "workspace:*",
     "awilix": "^12.0.5",
     "axios": "^1.12.2",
     "cors": "^2.8.5",

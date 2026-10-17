@@ -9,21 +9,21 @@ WORKDIR /app
 RUN corepack enable
 RUN corepack prepare pnpm@9.1.4 --activate
 
-COPY pnpm-lock.yaml .nvmrc .npmrc boutique-entrypoint.sh ./
+COPY pnpm-lock.yaml .nvmrc .npmrc insieme-entrypoint.sh ./
 
 RUN pnpm fetch
 
 ADD . ./
 
-RUN pnpm install --filter @boutique/backend... --offline
+RUN pnpm install --filter @insieme/backend... --offline
 
-RUN pnpm boutique:backend build
+RUN pnpm insieme:backend build
 
 EXPOSE ${DEBUG_PORT}
 
 ARG DEV_MODE
 ENV DEV_MODE=${DEV_MODE}
 
-RUN chmod +x /app/boutique-entrypoint.sh
+RUN chmod +x /app/insieme-entrypoint.sh
 
-ENTRYPOINT ["/app/boutique-entrypoint.sh"]
+ENTRYPOINT ["/app/insieme-entrypoint.sh"]

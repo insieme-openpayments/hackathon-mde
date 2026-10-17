@@ -20,7 +20,7 @@ import {
   finishOrderSchema,
   setupFinishSchema,
   oneClickSetupSchema
-} from '@boutique/shared'
+} from '@insieme/shared'
 import { OpenPaymentsClientError } from '@interledger/open-payments'
 
 interface GetParams {
