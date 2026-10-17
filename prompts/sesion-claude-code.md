@@ -155,6 +155,10 @@ requisitos técnicos, entregables y criterios de aceptación). Texto íntegro en
 
 ## 18. Chunk obsoleto tras un deploy (17 oct 2026)
 
-> durante tests, al visitar http://localhost:4004/pay/servicios/categoria/gas obtuve un error que requiere identificar la causa para hacer un fix: Unexpected Application Error! Failed to fetch dynamically imported module: http://localhost:4004/pay/assets/categoria-CeM0q_UA.js
+> durante tests, al visitar http://localhost:4004/pay/servicios/categoria/gas obtuve un error que requiere identificar la causa para hacer un fix:
+>
+> Unexpected Application Error!
+> Failed to fetch dynamically imported module: http://localhost:4004/pay/assets/categoria-CeM0q_UA.js
+> TypeError: Failed to fetch dynamically imported module: http://localhost:4004/pay/assets/categoria-CeM0q_UA.js
 
 Corregido en el commit `0a84884`: `errorElement` con recarga única y `Cache-Control: no-cache` para `index.html`, `immutable` para `/pay/assets/`.
