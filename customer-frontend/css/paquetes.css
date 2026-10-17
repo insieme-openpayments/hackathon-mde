@@ -1,0 +1,53 @@
+/* ===== Paquetes (2177:7079 · 2177:8202 · 2177:8409 · 2177:8602) ===== */
+
+/* Paso 2: título con tooltip flotante a la derecha (Tooltip 2177:7113) */
+.pq-step2 { width: 100%; height: 24px; }
+.pq-step2__tip { position: absolute; left: 174px; top: 5px; display: inline-flex; }
+.pq-step2__tip .tip__bubble { left: auto; right: 0; transform: none; }
+
+.pq-form { width: 100%; display: flex; flex-direction: column; gap: 24px; }
+.pq-packs { width: 100%; display: flex; flex-direction: column; gap: 16px; }
+.pq-list { width: 100%; display: flex; flex-direction: column; gap: 8px; animation: pq-page .2s ease-out; }
+@keyframes pq-page { from { opacity: 0; transform: translateX(10px); } to { opacity: 1; transform: none; } }
+
+/* Tarjeta de paquete (Paquetes 2177:7802) */
+.pq-card { width: 100%; display: flex; align-items: center; text-align: left; border-radius: 4px; transition: box-shadow .15s; }
+.pq-card__main {
+  flex: 1 0 0; min-width: 0; height: 80px; padding: 0 10px;
+  background: var(--blue-normal); border-radius: 4px 0 0 4px;
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px;
+  transition: background-color .15s;
+}
+.pq-card__icons { width: 100%; display: flex; align-items: center; justify-content: center; gap: 6px; }
+.pq-card__icons img { width: 16px; height: 16px; flex-shrink: 0; }
+.pq-card__name { width: 100%; font-size: 14px; line-height: 1.5; color: var(--white); text-align: center; overflow-wrap: break-word; }
+.pq-card__side {
+  width: 80px; height: 80px; flex-shrink: 0; padding: 10px;
+  background: var(--white); border: 1px solid var(--neutral-normal); border-radius: 0 4px 4px 0;
+  display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 4px;
+  font-size: 14px; color: var(--neutral-darker); transition: border-color .15s;
+}
+.pq-card__days { font-weight: 600; line-height: 1.2; white-space: nowrap; }
+.pq-card__price { line-height: 1.5; white-space: nowrap; }
+.pq-card:hover .pq-card__main { background: var(--blue-hover); }
+.pq-card:hover .pq-card__side { border-color: var(--blue-normal); }
+/* Seleccionado (2177:8426): borde azul en el bloque de precio */
+.pq-card.is-selected .pq-card__side { border-color: var(--blue-normal); }
+.pq-card.is-selected { box-shadow: var(--shadow-soft); }
+.pq-card:focus-visible { outline: 2px solid var(--blue-normal); outline-offset: 2px; }
+
+/* Slider (2177:8379) */
+.pq-slider { width: 100%; display: flex; align-items: center; justify-content: center; gap: 4px; }
+.pq-slider__arrow { width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; }
+.pq-slider__arrow img { width: 16px; height: 16px; }
+.pq-slider__arrow--prev img { transform: rotate(-90deg); }
+.pq-slider__arrow--next img { transform: rotate(90deg); }
+.pq-slider__arrow[aria-disabled="true"] { opacity: .3; cursor: default; }
+.pq-slider__dots { display: flex; align-items: center; gap: 4px; }
+.pq-dot { width: 10px; height: 10px; border-radius: 50%; border: 1px solid #5a6369; background: var(--white); transition: background-color .15s, border-color .15s; }
+.pq-dot.is-active { background: var(--blue-normal); border-color: var(--blue-normal); }
+
+/* Paso 3: número */
+.pq-num { width: 100%; display: flex; flex-direction: column; gap: 16px; }
+.pq-num .err { margin-top: -10px; }
+.pq-footer { margin-top: -8px; }

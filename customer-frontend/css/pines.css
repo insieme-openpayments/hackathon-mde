@@ -1,0 +1,133 @@
+/* ===== Pines y entretenimiento (prefijo pn-) ===== */
+
+/* Pestañas (Categories 2177:8853) */
+.pn-tabs { width: 100%; display: flex; align-items: flex-start; gap: 24px; }
+.pn-tab {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 12px; line-height: 1.1; color: #717c83; white-space: nowrap;
+  border-bottom: 2px solid transparent; padding-bottom: 0;
+}
+.pn-tab.is-active { color: var(--neutral-darker); font-weight: 500; border-bottom-color: var(--blue-normal); padding-bottom: 8px; }
+.pn-tab:not(.is-active):hover { color: var(--blue-normal); }
+.pn-ico { width: 14px; height: 14px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.pn-ico img { width: 14px; height: 14px; }
+.pn-ico--streaming { padding: 1px; }
+.pn-ico--streaming img { width: 13.254px; height: 13.254px; max-width: none; flex-shrink: 0; }
+.pn-ico--juegos { flex-direction: column; }
+.pn-ico__mask {
+  overflow: hidden;
+  width: 14px; height: 7.698px; display: block;
+}
+.pn-ico__mask img { width: 14px; height: 7.698px; }
+
+.pn-hint { width: 100%; text-align: center; font-size: 12px; line-height: 1.1; color: var(--neutral-darker); }
+
+/* Grilla de proveedores (Produc_card) */
+.pn-card { padding: 14px; } /* 10px de la tarjeta + 4px del contenedor interno */
+.pn-card__img { flex: 1 0 0; min-width: 0; height: 100%; display: flex; align-items: center; justify-content: center; }
+.pn-card__img img { max-width: none; }
+
+/* Ajuste de cada logo dentro de su caja (porcentajes del Figma) */
+.pn-fit--cover, .pn-fit--prime, .pn-fit--disney, .pn-fit--hbo, .pn-fit--paramount, .pn-fit--spotify,
+.pn-fit--win, .pn-fit--noggin, .pn-fit--crunchy, .pn-fit--netflix { position: relative; overflow: hidden; }
+.pn-card__img.pn-fit--win, .pn-card__img.pn-fit--spotify, .pn-card__img.pn-fit--prime { overflow: visible; }
+.pn-card__img > img, .pn-mini__box > img { position: absolute; top: 50%; transform: translateY(-50%); object-fit: cover; height: auto; }
+.pn-card__img.pn-fit--cover > img { inset: 0; transform: none; width: 100%; height: 100%; }
+.pn-fit--prime > img { left: 1.28%; right: 1.28%; width: 97.44%; aspect-ratio: 79.9 / 44.944; }
+.pn-fit--disney > img { left: 13.41%; width: 73.18%; aspect-ratio: 60 / 32.578; }
+.pn-fit--hbo > img { left: 13.41%; width: 73.18%; aspect-ratio: 60 / 33.75; }
+.pn-fit--paramount > img { left: 13.96%; width: 72.08%; aspect-ratio: 59.1 / 36.779; }
+.pn-fit--spotify > img { left: 14.67%; width: 70.66%; aspect-ratio: 1; }
+.pn-fit--win > img { left: -1.72%; width: 103.44%; aspect-ratio: 84.824 / 47.944; }
+.pn-fit--noggin > img { left: 3.19%; width: 93.62%; aspect-ratio: 76.763 / 28.944; }
+.pn-fit--crunchy > img { left: 0; width: 100%; aspect-ratio: 82 / 46.125; }
+.pn-card__img.pn-fit--hbo, .pn-card__img.pn-fit--win { height: 30px; flex-shrink: 0; }
+.pn-card__img.pn-fit--noggin { flex: 0 0 60px; }
+
+/* Círculo de proveedor (Proveedor 2177:9193): caja 30×29 en (4, 4.75) */
+.pn-mini {
+  position: relative; display: block; width: 40px; height: 40px; border-radius: 100px; overflow: hidden;
+  background: var(--white); border: 1px solid var(--neutral-light-active);
+}
+.pn-mini.is-selected { border: 2px solid var(--blue-normal); }
+.pn-mini__box { position: absolute; left: 4px; top: 4.75px; width: 30px; height: 29px; background: var(--white); }
+.pn-mini.is-selected .pn-mini__box { left: 3px; top: 3.75px; }
+/* Recortes tipo isologo (Isologo-crunchy 2177:9199 y Netflix "N") */
+.pn-mini__box.pn-fit--crunchy > img { transform: none; left: 0; top: -87.5%; width: 497.3%; height: 272.37%; aspect-ratio: auto; }
+.pn-mini__box.pn-fit--netflix > img { transform: none; left: 27.5%; top: -93.97%; width: 278.33%; height: 287.93%; aspect-ratio: auto; }
+/* Variante grande (Proveedor/Variant3 2177:9710): 60px, caja 44×42 en (7, 8) */
+.pn-mini--lg { width: 60px; height: 60px; }
+.pn-mini--lg .pn-mini__box { left: 7px; top: 8px; width: 44px; height: 42px; }
+
+/* Carrusel (Slider pines 2177:9259) */
+.pn-slider { width: 264px; display: flex; align-items: center; justify-content: center; gap: 4px; }
+.pn-slider__arrow { width: 32px; height: 32px; flex-shrink: 0; border-radius: 50%; transition: background-color .15s; }
+.pn-slider__arrow:hover { background: var(--blue-light-hover); }
+.pn-slider__arrow img { width: 32px; height: 32px; }
+.pn-slider__arrow--next img { transform: rotate(90deg); }
+.pn-slider__track { flex: 1 0 0; min-width: 0; display: flex; align-items: center; justify-content: center; gap: 16px; overflow: hidden; }
+.pn-slider__item { flex-shrink: 0; border-radius: 50%; animation: pn-pop .2s ease-out; }
+.pn-slider__item:hover .pn-mini:not(.is-selected) { border-color: var(--neutral-normal); }
+@keyframes pn-pop { from { opacity: .4; } }
+
+.pn-head { width: 100%; display: flex; flex-direction: column; gap: 4px; text-align: center; font-size: 12px; line-height: 1.1; }
+.pn-head__title { font-weight: 500; color: var(--blue-normal); }
+.pn-head__sub { color: var(--neutral-darker); }
+
+/* Lista de productos (Pines 2177:9612) */
+.pn-list { width: 100%; display: flex; flex-direction: column; gap: 8px; }
+.pn-pin {
+  width: 100%; height: 80px; padding: 8px 16px; display: flex; align-items: center; gap: 10px;
+  background: var(--white); border: 1px solid var(--blue-light-active); border-radius: 4px;
+  font-size: 18px; line-height: 1.5; color: var(--neutral-darker); white-space: nowrap;
+  transition: background-color .15s, color .15s, border-color .15s;
+}
+.pn-pin:hover { border-color: var(--blue-normal); }
+.pn-pin__name { flex: 1 0 0; min-width: 0; height: 100%; display: flex; align-items: center; justify-content: center; border-right: .5px solid #78848c; }
+.pn-pin__price { height: 100%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.pn-pin.is-selected { background: var(--blue-normal); border-color: var(--blue-normal); color: var(--white); }
+.pn-pin.is-selected .pn-pin__name { border-right-color: var(--white); }
+
+/* Estado vacío de Juegos / Licencias */
+.pn-empty { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 8px; padding: 24px 16px; text-align: center; border: 1px dashed var(--blue-light-active); border-radius: 8px; }
+.pn-empty__icon { width: 40px; height: 40px; border-radius: 100px; border: 1px solid var(--neutral-light-active); display: flex; align-items: center; justify-content: center; }
+.pn-empty__title { font-size: 14px; font-weight: 500; line-height: 1.2; color: var(--neutral-darker); }
+.pn-empty__text { font-size: 12px; line-height: 1.1; color: #717c83; }
+.pn-empty__link { font-size: 12px; color: var(--blue-normal); text-decoration: underline; }
+
+/* Descripción del pin (Description 2177:9729) */
+.pn-desc { position: relative; width: 264px; padding-top: 41px; }
+.pn-desc__card {
+  width: 100%; background: var(--white); border: 1px solid var(--neutral-light-active); border-radius: 8px;
+  padding: 32px 16px; display: flex; flex-direction: column; gap: 8px;
+}
+.pn-desc__head { display: flex; flex-direction: column; gap: 4px; font-size: 20px; line-height: 1.5; color: var(--neutral-darker); text-align: center; }
+.pn-desc__text { font-size: 12px; line-height: 1.1; color: var(--blue-darker); display: flex; flex-direction: column; gap: 13.2px; }
+.pn-desc__text a { color: inherit; text-decoration: underline; }
+.pn-desc .pn-mini--lg { position: absolute; top: 11px; left: 50%; transform: translateX(-50%); }
+
+/* Input-v2 con etiqueta flotante */
+.pn-input {
+  position: relative; width: 100%; height: 40px; display: flex; align-items: center; gap: 10px;
+  padding: 10px 16px; border: 1px solid var(--blue-light-active); border-radius: 6px; background: var(--white); cursor: text;
+  margin-top: 10px;
+}
+.pn-input__icon { width: 24px; height: 24px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; }
+.pn-input__icon img { width: 16px; height: 18px; }
+.pn-input input { flex: 1 0 0; min-width: 0; border: 0; outline: 0; padding: 0; background: transparent; font-size: 12px; line-height: 1.1; color: var(--neutral-darker); }
+.pn-input input::placeholder { color: #5a6369; opacity: 1; }
+.pn-input:focus-within { border-color: var(--blue-normal); }
+.pn-input.is-error { border-color: var(--primary); }
+.pn-input__label {
+  position: absolute; left: 19px; top: -10px; height: 16px; padding: 0 2px; background: var(--white);
+  display: flex; align-items: center; font-size: 12px; font-weight: 500; line-height: 1.1; color: var(--blue-darker); white-space: nowrap;
+}
+.pn-err { margin-top: -12px; }
+
+/* Comprobante */
+.pn-receipt { height: 434px; overflow-x: hidden; overflow-y: auto; scrollbar-width: none; }
+.pn-receipt::-webkit-scrollbar { display: none; }
+.kv.pn-ok .kv__v { color: #03815f; }
+.pn-receipt { justify-content: safe center; }
+/* "Crunchyroll Mega Fan" cabe en una línea como en Figma */
+.pn-screen .kv__k { width: auto; flex: 0 0 auto; }
