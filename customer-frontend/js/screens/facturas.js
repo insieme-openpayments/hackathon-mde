@@ -180,7 +180,7 @@
         <div class="fc-banco__col">
           <p class="fc-banco__b">Entidad financiera responsable</p>
           <div class="fc-banco__ent">
-            <span class="fc-banco__logo"><span><img src="${A}colpatria.png" alt="Scotiabank Colpatria"></span></span>
+            <span class="ilp-brand">Interledger Payments</span>
             <img class="fc-banco__union" src="${A}union.svg" alt="" width="8" height="8">
           </div>
         </div>

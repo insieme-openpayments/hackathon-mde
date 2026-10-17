@@ -269,7 +269,7 @@
     <div class="sv-bank sv-bank--open">
       <div class="sv-bank__head">
         <strong>Entidad financiera responsable:</strong>
-        <span class="sv-scotia"><span class="sv-scotia__box"><img src="${A}banco-scotia-colpatria.png" alt="Scotiabank Colpatria"></span></span>
+        <span class="ilp-brand">Interledger Payments</span>
         <button type="button" class="sv-union" data-action="toggleBank" aria-label="Ocultar entidad"><img src="${A}union-minus.svg" alt="" width="7.94" height="7.977"></button>
       </div>
       <p class="sv-bank__fine">Línea de atención personalizada en Bogotá: 3487881 Resto del país: 01 8000 960 505</p>
@@ -284,7 +284,7 @@
         <div class="sv-bank__col">
           <strong>Entidad financiera responsable</strong>
           <div class="sv-bank__ent">
-            <span class="sv-colpatria"><span class="sv-colpatria__box"><img src="${A}colpatria.png" alt="Scotiabank Colpatria"></span></span>
+            <span class="ilp-brand">Interledger Payments</span>
             <button type="button" class="sv-union" data-action="toggleBank" aria-label="Ver entidad"><img src="${A}union.svg" alt="" width="7.94" height="7.977"></button>
           </div>
         </div>
@@ -315,7 +315,7 @@
       if (e.status) return { error: e.detail || 'No pudimos validar la referencia, intenta de nuevo' };
       console.warn('Validación local (integration-backend no disponible):', e.message);
       if (/^0+$/.test(ref)) return { error: 'No encontramos una factura pendiente con esta referencia' };
-      return { amount: billFor(companyId, ref) };
+      return { amount: (800 + Math.floor(Math.random() * 2701)) * 100 }; // igual que el servidor: $80.000 – $350.000
     }
   };
 

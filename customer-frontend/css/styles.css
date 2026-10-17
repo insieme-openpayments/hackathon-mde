@@ -350,3 +350,6 @@ body.is-mobile .demo-nav { display: none; }
 .rc-footer { margin-top: -8px; }
 .step-title--full { width: 100%; }
 .receipt { gap: 16px; }
+
+/* Entidad financiera responsable: marca en texto (reemplaza el logo de Scotiabank Colpatria) */
+.ilp-brand { flex: 1 0 0; min-width: 0; font-size: 10px; font-weight: 700; line-height: 1.15; color: #1f6f6b; }
