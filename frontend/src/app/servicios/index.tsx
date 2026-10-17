@@ -98,7 +98,7 @@ export function Component() {
       </div>
 
       {isLoading ? (
-        <div className="grid grid-cols-2 gap-2.5">
+        <div className="grid grid-cols-1 gap-2.5 min-[360px]:grid-cols-2">
           {Array.from({ length: 12 }, (_, i) => (
             <Shimmer key={i} className="h-14 rounded-xl" />
           ))}

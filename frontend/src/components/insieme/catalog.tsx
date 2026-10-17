@@ -36,7 +36,7 @@ export function CategoryCard({
       ) : null}
       <span
         className={cn(
-          'min-w-0 text-sm font-medium leading-tight text-neutral-darker [overflow-wrap:anywhere]',
+          'min-w-0 break-words text-sm font-medium leading-tight text-neutral-darker',
           variant === 'plain' ? 'flex-none text-base font-semibold' : 'flex-1'
         )}
       >
@@ -86,7 +86,12 @@ export function CategoryGrid({
   className
 }: CategoryGridProps) {
   return (
-    <div className={cn('grid w-full grid-cols-2 gap-2.5', className)}>
+    <div
+      className={cn(
+        'grid w-full grid-cols-1 gap-2.5 min-[360px]:grid-cols-2',
+        className
+      )}
+    >
       {categories.map((category) => (
         <CategoryCard
           key={category.id}
